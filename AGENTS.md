@@ -27,16 +27,20 @@ intelligence platform for independent sellers and buyers.
 
 ## Git Worktree and Pull Request Workflow
 
-- Use the main worktree only for `git fetch` and `git pull`. Do not edit files,
-  implement features, or create commits in the main worktree.
-- Create a separate branch and worktree outside the main worktree for each
-  issue or feature, including documentation and repository instruction changes.
-- Before starting work, fetch the latest remote changes and create the worktree
-  from `origin/main`. For an existing issue or feature worktree, rebase its
-  branch onto the latest `origin/main` before continuing.
-- Complete and validate changes in the issue or feature worktree, then commit,
-  push the branch when authorized, and open a pull request for review and merge.
-- After rebasing an already-published issue or feature branch, update it with
-  `git push --force-with-lease`. Never force-push `main`.
-- Prefer squash merges to keep main history clean. Leave pull requests for
-  review; do not merge without explicit authorization.
+- Require a separate feature branch and dedicated Git worktree outside the
+  primary worktree for every issue or feature, including documentation and
+  repository instruction changes.
+- Reserve the primary worktree for maintaining the local `main` branch. Update
+  `main` using `git pull --ff-only` to ensure it remains aligned with
+  `origin/main` without introducing merge commits or rewriting local history.
+- Perform all development, commits, testing, and rebasing within the
+  corresponding feature worktree.
+- Use `git add` without requesting approval each time, provided the staged
+  changes are within the requested scope of the issue or feature.
+- Before opening or updating a pull request, run `git fetch origin` followed by
+  `git rebase origin/main` from the feature worktree.
+- If rebasing requires updating an already-published feature branch, use
+  `git push --force-with-lease` only after explicit approval.
+- Never force-push to `main`. All changes to `main` must go through reviewed
+  pull requests, with squash merges preferred. Do not merge, push, or rewrite
+  remote branch history without explicit approval.
