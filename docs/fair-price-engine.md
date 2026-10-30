@@ -99,7 +99,7 @@ decisions. Its endpoint does not persist submitted data or make payment transact
 Calculation output contains private seller economics; it must not be exposed
 as a public passport without a separate seller-approved disclosure policy.
 
-Authenticated product analysis routes now provide a separate, explicit save
+Authenticated, seller-authorized product analysis routes provide a separate, explicit save
 operation for private seller history. Saved records preserve validated inputs,
 calculated results, the calculation version, and product metadata at creation.
 Later product edits do not change those records. See the
@@ -107,9 +107,11 @@ Later product edits do not change those records. See the
 
 ## Backend priorities after this slice
 
-1. Seller identity and ownership, persisted products and analysis records: implemented
-   for local development, with frontend contract review pending. Hosted account
-   recovery, verification, abuse controls, and operations remain future work.
+1. General FairMade accounts default to buyer; seller access requires verification.
+   Pending seller applications, private products, and analysis history are implemented
+   for local development, with frontend contract review pending. Verification
+   decisions, admin provisioning/monitoring, hosted account recovery, abuse controls,
+   and operations remain future work.
 2. Quality requirements and comparable product evidence with standardized
    units, provenance, and freshness; then explainable recommendations.
 3. Seller-controlled Fair Price Passport disclosures and marketplace APIs.

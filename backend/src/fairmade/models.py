@@ -1,10 +1,10 @@
-"""Private seller data; analyses are append-only through the HTTP API."""
+"""General accounts, additive roles, and private seller data."""
 
 from datetime import datetime
 from uuid import uuid4
 
-from sqlalchemy import JSON, DateTime, ForeignKey, String, Text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import JSON, CheckConstraint, DateTime, ForeignKey, String, Text
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from fairmade.database import Base, utcnow
 
@@ -13,18 +13,45 @@ def new_id() -> str:
     return str(uuid4())
 
 
-class Seller(Base):
-    __tablename__ = "sellers"
+class Account(Base):
+    __tablename__ = "accounts"
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
     email: Mapped[str] = mapped_column(String(320), unique=True)
     password_hash: Mapped[str] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    role_grants: Mapped[list["AccountRole"]] = relationship(
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
+
+    @property
+    def roles(self) -> list[str]:
+        granted = {grant.role for grant in self.role_grants}
+        return [role for role in ("buyer", "seller", "admin") if role in granted]
+
+
+class AccountRole(Base):
+    __tablename__ = "account_roles"
+    __table_args__ = (
+        CheckConstraint("role IN ('buyer', 'seller', 'admin')", name="ck_account_roles_role"),
+    )
+    account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"), primary_key=True)
+    role: Mapped[str] = mapped_column(String(6), primary_key=True)
+
+
+class SellerApplication(Base):
+    __tablename__ = "seller_applications"
+    __table_args__ = (CheckConstraint("status = 'pending'", name="ck_seller_applications_status"),)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"), unique=True)
+    submitted_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    status: Mapped[str] = mapped_column(String(7), default="pending", server_default="pending")
 
 
 class LoginSession(Base):
     __tablename__ = "sessions"
     token_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
-    seller_id: Mapped[str] = mapped_column(ForeignKey("sellers.id"), index=True)
+    account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"), index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
     expires_at: Mapped[datetime] = mapped_column(DateTime)
 
@@ -32,7 +59,7 @@ class LoginSession(Base):
 class Product(Base):
     __tablename__ = "products"
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
-    seller_id: Mapped[str] = mapped_column(ForeignKey("sellers.id"), index=True)
+    account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"), index=True)
     name: Mapped[str] = mapped_column(String(200))
     product_type: Mapped[str] = mapped_column(String(20))
     selling_unit: Mapped[str] = mapped_column(String(200))
