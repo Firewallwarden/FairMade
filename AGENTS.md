@@ -23,7 +23,8 @@ intelligence platform for independent sellers and buyers.
 - Do not make major architectural changes without approval.
 - Keep code modular, maintainable, and testable.
 - Prefer incremental changes over large rewrites.
-- Do not push changes to GitHub without approval.
+- Follow the standing authorization and approval requirements in the Git
+  workflow below when publishing changes to GitHub.
 
 ## Git Worktree and Pull Request Workflow
 
@@ -35,12 +36,18 @@ intelligence platform for independent sellers and buyers.
   `origin/main` without introducing merge commits or rewriting local history.
 - Perform all development, commits, testing, and rebasing within the
   corresponding feature worktree.
-- Use `git add` without requesting approval each time, provided the staged
-  changes are within the requested scope of the issue or feature.
+- Standing approval covers `git add`, `git commit`, normal `git push` to the
+  corresponding feature or issue branch, and `gh pr create` / `gh pr edit`
+  from its dedicated worktree, provided all changes and PR operations remain
+  within the scope of the user's request. Automate these steps without asking
+  for repeated approval.
+- This authorization does not cover unrelated changes, direct pushes to
+  `main`, merging pull requests, or rewriting remote branch history.
 - Before opening or updating a pull request, run `git fetch origin` followed by
   `git rebase origin/main` from the feature worktree.
 - If rebasing requires updating an already-published feature branch, use
   `git push --force-with-lease` only after explicit approval.
 - Never force-push to `main`. All changes to `main` must go through reviewed
-  pull requests, with squash merges preferred. Do not merge, push, or rewrite
-  remote branch history without explicit approval.
+  pull requests, with squash merges preferred. Merging pull requests and
+  rewriting remote branch history require explicit approval; pushes outside
+  the standing authorization above also require explicit approval.
