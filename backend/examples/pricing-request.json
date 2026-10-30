@@ -1,0 +1,13 @@
+{
+  "currency": "USD",
+  "sellable_units": 10,
+  "costs": [
+    {"label": "Materials consumed", "category": "materials", "amount": "50.00"},
+    {"label": "Boxes", "category": "packaging", "amount": "10.00"},
+    {"label": "Allocated utilities", "category": "utilities", "amount": "10.00"}
+  ],
+  "labor": [{"label": "Production", "hours": "2", "hourly_rate": "15.00"}],
+  "payment_fees": {"rate": "0.03", "fixed_per_order": "0.50", "units_per_order": 2},
+  "target_margin": {"minimum": "0.20", "maximum": "0.30"},
+  "proposed_prices": ["10.00", "15.00"]
+}
