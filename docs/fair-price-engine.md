@@ -93,15 +93,23 @@ unverified inputs, missing market evaluation, missing quality evaluation,
 missing labor or overhead, and loss-making proposed prices. Absence of a
 missing-cost warning does not prove the input amounts are complete or correct.
 
-The API does not call an LLM, recommend lower-quality substitutions, retrieve
+The stateless calculator does not call an LLM, recommend lower-quality substitutions, retrieve
 competitor prices, publish a Fair Price Passport, or make autonomous business
-decisions. It does not persist submitted data or make payment transactions.
+decisions. Its endpoint does not persist submitted data or make payment transactions.
 Calculation output contains private seller economics; it must not be exposed
 as a public passport without a separate seller-approved disclosure policy.
 
+Authenticated product analysis routes now provide a separate, explicit save
+operation for private seller history. Saved records preserve validated inputs,
+calculated results, the calculation version, and product metadata at creation.
+Later product edits do not change those records. See the
+[shared API integration proposal](api-contract.md); frontend acceptance is pending.
+
 ## Backend priorities after this slice
 
-1. Seller identity and ownership, persisted products and production records.
+1. Seller identity and ownership, persisted products and analysis records: implemented
+   for local development, with frontend contract review pending. Hosted account
+   recovery, verification, abuse controls, and operations remain future work.
 2. Quality requirements and comparable product evidence with standardized
    units, provenance, and freshness; then explainable recommendations.
 3. Seller-controlled Fair Price Passport disclosures and marketplace APIs.
