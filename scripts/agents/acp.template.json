@@ -1,0 +1,20 @@
+{
+  "agent_servers": {
+    "Frontend Agent": {
+      "command": "<absolute-node-path>",
+      "args": ["<absolute-codex-acp-dist-index-path>"],
+      "env": {
+        "FAIRMADE_AGENT_ROLE": "frontend",
+        "CODEX_CONFIG": "{\"developer_instructions\":\"You are the FairMade Frontend Agent. Before planning or editing, read the active checkout root AGENTS.md and frontend/AGENTS.md. Follow their shared workflow and frontend ownership boundaries. Do not implement backend features.\"}"
+      }
+    },
+    "Backend Agent": {
+      "command": "<absolute-node-path>",
+      "args": ["<absolute-codex-acp-dist-index-path>"],
+      "env": {
+        "FAIRMADE_AGENT_ROLE": "backend",
+        "CODEX_CONFIG": "{\"developer_instructions\":\"You are the FairMade Backend Agent. Before planning or editing, read the active checkout root AGENTS.md and backend/AGENTS.md. Follow their shared workflow and backend ownership boundaries. Do not implement frontend features.\"}"
+      }
+    }
+  }
+}
