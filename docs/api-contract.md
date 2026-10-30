@@ -2,10 +2,16 @@
 
 ## Status and common conventions
 
-The account, product, and saved-analysis endpoints below are implemented by the
+The account, seller-application, product, and saved-analysis endpoints below are implemented by the
 backend for **local development**. Their shared integration contract is
 **proposed; frontend acceptance and browser integration are pending**. No frontend
 changes are included. The existing stateless calculator retains its #2 behavior.
+
+**Authorization change from #5:** registration now creates a buyer account.
+Private product/history endpoints require the seller role and return 403 until
+that access is granted after verification. Account responses add `roles`; the
+OpenAPI identity schema is now named `AccountResponse` rather than `SellerResponse`.
+Frontend integration must review these changes before relying on this proposal.
 
 Base URL for local development: `http://127.0.0.1:8000`. Send JSON bodies with
 `Content-Type: application/json`. UUIDs are JSON strings. Timestamps are UTC
@@ -22,15 +28,23 @@ if the unit is "dozen eggs", yield and prices must be expressed per dozen.
 
 | Method and path | JSON request | Success |
 | --- | --- | --- |
-| POST /api/v1/auth/register | `{email, password}` | 201: `{id, email}` |
+| POST /api/v1/auth/register | `{email, password}` | 201: `{id, email, roles}` |
 | POST /api/v1/auth/login | `{email, password}` | 200: `{access_token, token_type, expires_at}` |
 | POST /api/v1/auth/logout | No body; bearer required | 204, empty body |
-| GET /api/v1/auth/me | Bearer required | 200: `{id, email}` |
+| GET /api/v1/auth/me | Bearer required | 200: `{id, email, roles}` |
 
 Email is validated, outer whitespace removed, and the entire address case-folded
 for uniqueness and login. Passwords are 12-128 characters, used verbatim including
 leading/trailing spaces. Registration does not log in. Email verification,
 password recovery, account deletion, and email/password changes are deferred.
+
+These are general FairMade accounts. Every registration receives `["buyer"]`.
+Roles are additive and returned in buyer, seller, admin order. A verified seller
+retains buyer capabilities; an admin does not automatically receive seller access.
+Buying/checkout functionality itself remains future work. Clients cannot submit
+roles, verification status, or identity fields when registering. Server-side
+authorization reads persisted grants on each request rather than trusting the token
+to contain role claims. Role grants and admin provisioning are deferred.
 
 Successful login returns `token_type: "bearer"` and an opaque random token.
 Send `Authorization: Bearer <access_token>` on every private request. Sessions
@@ -53,10 +67,42 @@ Synthetic response shape; the token placeholder is not usable:
 Browser storage and a longer-lived "Remember me" experience are not part of this
 backend milestone. CORS is off unless exact development origins are configured.
 
+## Pending seller applications
+
+| Method and path | JSON request | Success |
+| --- | --- | --- |
+| POST /api/v1/seller-applications | `{}`; bearer required | 201: SellerApplication, or 200 for the existing request |
+| GET /api/v1/seller-applications/me | Bearer required | 200: SellerApplication |
+
+Synthetic SellerApplication response:
+
+```json
+{
+  "id": "8239b454-c4c6-40a6-87c2-2c855ad994a5",
+  "status": "pending",
+  "submitted_at": "2026-10-30T12:00:00Z"
+}
+```
+
+The POST body is a required empty object. A request records intent only and
+never verifies the applicant or grants the seller role. One application is
+stored per account. Repeating submission returns the same ID and timestamp,
+including concurrent retries. Existing sellers receive 409 `ALREADY_SELLER`.
+GET returns 404 when the current account has no application. Only the current
+account's application is accessible; there is no listing or ID-based lookup.
+
+Ownership and status are server-controlled. Evidence fields, approval/rejection,
+resubmission after a decision, privileged role grants, and admin application
+monitoring endpoints are deferred. There is currently no API path from pending
+to seller. Admin dashboards are a future frontend/backend integration.
+
 ## Private products
 
-All routes require bearer authentication. The server assigns ownership from the
-session; `seller_id` is not accepted in any request or returned in product data.
+All routes require bearer authentication and the seller role. Buyers, pending
+applicants, and accounts with only buyer/admin roles receive 403
+`SELLER_REQUIRED`. Seller authorization precedes resource ownership lookup.
+The server assigns ownership from the account; neither `seller_id` nor
+`account_id` is accepted in requests or returned in product data.
 
 | Method and path | Behavior | Success |
 | --- | --- | --- |
@@ -105,7 +151,7 @@ There is no total count; an empty items array indicates no records at that offse
 | GET /api/v1/products/{id}/analyses | Paginated summaries | 200: Page of AnalysisSummary |
 | GET /api/v1/products/{id}/analyses/{analysis_id} | Read complete immutable record | 200: Analysis |
 
-All require bearer authentication and ownership of the parent product.
+All require bearer authentication, the seller role, and ownership of the parent product.
 A mismatched product/analysis pair returns 404. Creation accepts the **direct**
 PricingRequest body, not an envelope; see the synthetic
 [request example](../backend/examples/pricing-request.json).
@@ -144,8 +190,10 @@ New application errors use:
 | --- | --- | --- |
 | 401 | UNAUTHORIZED | Missing, invalid, expired, or revoked bearer token |
 | 401 | INVALID_CREDENTIALS | Validly shaped login with unknown email or wrong password |
+| 403 | SELLER_REQUIRED | An authenticated account lacks verified seller access |
 | 404 | NOT_FOUND | Missing resource, another seller's resource, or mismatched parent |
 | 409 | EMAIL_EXISTS | Registration with an existing normalized email |
+| 409 | ALREADY_SELLER | A seller attempts to submit a seller application |
 | 422 | FastAPI field-error array in detail | Invalid fields, UUIDs, pagination, or malformed JSON |
 | 405 | Standard FastAPI detail string | Unsupported methods, including history edits |
 
@@ -160,10 +208,18 @@ compatible with #2. Its response is never automatically saved.
 
 ## Local integration checklist
 
-Use the [seller workflow](../backend/examples/seller-workflow.md) to register,
-log in, create a product, save/read analysis history, and log out. Migrate the
+Use the [account workflow](../backend/examples/seller-workflow.md) to register,
+log in, submit/read a pending seller application, and log out. Newly registered
+accounts cannot create private products or save history while verification is
+deferred; seller-feature tests use explicitly seeded grants. Migrate the
 database before testing. Use the same database URL and working directory for
 migrations and the server. Session revocation and saved data persist across restarts.
+
+Migration 0002 preserves IDs, credentials, sessions, products and analyses,
+renames the identity table to accounts, and assigns only buyer roles to existing
+accounts. Existing private seller data remains preserved but role-gated.
+Use SQLite 3.26+ for native table/column renames. Downgrading 0002 loses role/
+application data and restores the prior seller-only access model.
 
 Before frontend integration, jointly accept this proposal and agree on approved
 development origins and browser credential handling. Public deployment requires

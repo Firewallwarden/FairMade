@@ -1,4 +1,4 @@
-"""Local seller API and the backward-compatible stateless pricing endpoint."""
+"""General FairMade accounts and private seller production-economics APIs."""
 
 import os
 from contextlib import asynccontextmanager
@@ -15,6 +15,7 @@ from fairmade.database import database_url, make_engine
 from fairmade.pricing.schemas import PricingRequest, PricingResponse
 from fairmade.pricing.service import calculate
 from fairmade.products import router as product_router
+from fairmade.seller_applications import router as application_router
 
 
 def create_app(db_url: str | None = None) -> FastAPI:
@@ -26,7 +27,7 @@ def create_app(db_url: str | None = None) -> FastAPI:
         finally:
             application.state.engine.dispose()
 
-    application = FastAPI(title="FairMade API", version="0.2.0", lifespan=lifespan)
+    application = FastAPI(title="FairMade API", version="0.3.0", lifespan=lifespan)
     origins = [
         value.strip()
         for value in os.environ.get("FAIRMADE_CORS_ORIGINS", "").split(",")
@@ -64,6 +65,7 @@ def create_app(db_url: str | None = None) -> FastAPI:
         return calculate(request)
 
     application.include_router(auth_router)
+    application.include_router(application_router)
     application.include_router(product_router)
     return application
 

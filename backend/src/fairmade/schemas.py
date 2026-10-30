@@ -33,10 +33,11 @@ class Credentials(BaseModel):
         return value.casefold()
 
 
-class SellerResponse(BaseModel):
+class AccountResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: UUID
     email: str
+    roles: list[Literal["buyer", "seller", "admin"]]
 
 
 class TokenResponse(BaseModel):
@@ -69,11 +70,21 @@ class ProductUpdate(Contract):
 class UTCResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    @field_validator("created_at", "updated_at", check_fields=False)
+    @field_validator("created_at", "updated_at", "submitted_at", check_fields=False)
     @classmethod
     def utc_timestamp(cls, value: datetime) -> datetime:
         # SQLite stores UTC timestamps without timezone information.
         return value.replace(tzinfo=UTC) if value.tzinfo is None else value.astimezone(UTC)
+
+
+class SellerApplicationRequest(Contract):
+    """An application records intent only; verification fields are not accepted."""
+
+
+class SellerApplicationResponse(UTCResponse):
+    id: UUID
+    status: Literal["pending"]
+    submitted_at: datetime
 
 
 class ProductResponse(UTCResponse):
