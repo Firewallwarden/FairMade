@@ -3,7 +3,19 @@
 from datetime import date, datetime
 from uuid import uuid4
 
-from sqlalchemy import JSON, CheckConstraint, Date, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import (
+    JSON,
+    CheckConstraint,
+    Date,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+    text,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from fairmade.database import Base, utcnow
@@ -164,3 +176,42 @@ class SellerPricingReview(Base):
     request_snapshot: Mapped[dict] = mapped_column(JSON)
     evidence_snapshot: Mapped[dict] = mapped_column(JSON)
     result: Mapped[dict] = mapped_column(JSON)
+
+
+class PassportDraft(Base):
+    __tablename__ = "passport_drafts"
+    __table_args__ = (CheckConstraint("revision >= 1", name="ck_passport_drafts_revision"),)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    product_id: Mapped[str] = mapped_column(ForeignKey("products.id"), index=True)
+    revision: Mapped[int] = mapped_column(Integer)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, onupdate=utcnow)
+    content: Mapped[dict] = mapped_column(JSON)
+
+
+class PassportPublication(Base):
+    __tablename__ = "passport_publications"
+    __table_args__ = (
+        UniqueConstraint("draft_id", "draft_revision", name="uq_passport_draft_revision"),
+        CheckConstraint("draft_revision >= 1", name="ck_passport_publications_revision"),
+        CheckConstraint(
+            "state IN ('published', 'withdrawn', 'superseded')",
+            name="ck_passport_publications_state",
+        ),
+        Index(
+            "uq_passport_active_product",
+            "product_id",
+            unique=True,
+            sqlite_where=text("state = 'published'"),
+        ),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    product_id: Mapped[str] = mapped_column(ForeignKey("products.id"), index=True)
+    draft_id: Mapped[str] = mapped_column(ForeignKey("passport_drafts.id"), index=True)
+    approved_by_account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"))
+    draft_revision: Mapped[int] = mapped_column(Integer)
+    state: Mapped[str] = mapped_column(String(12))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    withdrawn_at: Mapped[datetime | None] = mapped_column(DateTime)
+    payload_hash: Mapped[str] = mapped_column(String(64))
+    payload: Mapped[dict] = mapped_column(JSON)

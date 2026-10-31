@@ -12,6 +12,8 @@ and normalize selected quotes to an explicit quantity, preserving source and
 quality limitations. They do not establish a fair price.
 Private seller pricing reviews assemble these saved records with deterministic
 explanations, explicit unit mappings, and visible evidence gaps.
+Seller-controlled Fair Price Passports provide private drafts, exact previews,
+explicit approval, public snapshots, and withdrawal with hidden-by-default disclosures.
 
 Use Python 3.11 or newer with SQLite 3.26+. From this feature's worktree root, create an isolated
 environment, install the backend, migrate the database, and start the API:
@@ -80,6 +82,37 @@ deletes only the two new comparison tables.
 
 Migration 0005 adds immutable seller pricing reviews. Existing source records
 are preserved. Downgrading 0005 deletes only review history.
+
+Migration 0006 adds Passport drafts and publication snapshots. It preserves private
+source evidence. Downgrading it deletes drafts and publication history.
+
+## Seller-approved Fair Price Passports
+
+Create a draft under `/api/v1/products/{id}/passports` using an owned pricing
+review, an explicit public title and USD price, and an optional disclosure policy.
+All cost, quality, and market disclosures default off. Public price is positive,
+expressed in decimal-string USD cents, per the saved analysis's selling unit.
+
+Load the private preview, then publish with its exact revision, preview hash,
+and `approved: true`. The server reconstructs and checks the allowlisted payload
+under a write transaction. A matching retry returns the existing publication;
+stale or mismatched approvals return 409. Publishing a replacement supersedes the
+previous public Passport for that product. Draft edits remain private.
+
+Anonymous `GET /api/v1/passports/{publication_id}` returns only the approved
+public DTO. Raw reviews, private source IDs, emails, cost-entry labels, labor
+hours/rates, quote identities/references/locations, and private explanations are
+never forwarded. Selected cost categories disclose per-unit totals only; labor,
+total unit cost, quality requirements/summary, and market summary have separate
+explicit switches. Server limitations and unverified labels cannot be removed.
+
+Owners can withdraw publications; inactive versions return 404 publicly, with
+no-store cache headers. Loss of seller access also hides public snapshots.
+Withdrawal cannot erase copies already received by a client. Re-publication of
+an inactive revision requires a new draft revision and fresh approval.
+
+See [the Passport workflow](examples/passports/README.md). Source data remains
+unverified; publishing does not certify quality or establish objective fairness.
 
 ## Explainable seller pricing reviews
 
