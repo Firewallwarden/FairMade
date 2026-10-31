@@ -28,5 +28,16 @@ def fingerprint(body: CartRequest) -> str:
     return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
 
 
-def effective_status(status: str, expires_at: datetime, now: datetime) -> str:
+def effective_status(
+    status: str,
+    expires_at: datetime,
+    now: datetime,
+    payment_state: str | None = None,
+) -> str:
+    if payment_state == "completed":
+        return "paid"
+    if payment_state == "needs_review":
+        return "payment_review"
+    if payment_state == "capture_pending":
+        return "capture_pending"
     return "expired" if status == "pending_payment" and expires_at <= now else status

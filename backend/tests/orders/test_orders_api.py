@@ -480,7 +480,7 @@ def test_migration_restart_and_openapi(
     for path in (ORDERS, ORDERS + "/preview", "/api/v1/seller/orders"):
         for endpoint in schema["paths"][path].values():
             assert endpoint["security"] == [{"HTTPBearer": []}]
-    assert not any("/capture" in path or "/paid" in path for path in schema["paths"])
+    assert not any("/paid" in path for path in schema["paths"])
 
 
 def test_concurrent_first_inventory_configuration_is_revision_safe(

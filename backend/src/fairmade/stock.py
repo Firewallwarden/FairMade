@@ -3,10 +3,10 @@
 from dataclasses import dataclass
 from datetime import datetime
 
-from sqlalchemy import func, select, update
+from sqlalchemy import func, or_, select, update
 from sqlalchemy.orm import Session
 
-from fairmade.models import MarketplaceListing, Order, OrderLine, SellableInventory
+from fairmade.models import MarketplaceListing, Order, OrderLine, PayPalCheckout, SellableInventory
 
 
 @dataclass(frozen=True)
@@ -44,10 +44,15 @@ def balance(db: Session, product_id: str, now: datetime) -> StockBalance:
     reserved = (
         select(func.coalesce(func.sum(OrderLine.quantity), 0))
         .join(Order, Order.id == OrderLine.order_id)
+        .outerjoin(PayPalCheckout, PayPalCheckout.order_id == Order.id)
         .where(
             OrderLine.product_id == product_id,
             Order.status == "pending_payment",
-            Order.expires_at > now,
+            or_(PayPalCheckout.state.is_(None), PayPalCheckout.state != "completed"),
+            or_(
+                Order.expires_at > now,
+                PayPalCheckout.state.in_(("capture_pending", "needs_review")),
+            ),
         )
         .scalar_subquery()
     )

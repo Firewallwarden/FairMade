@@ -159,13 +159,16 @@ approval, not source verification, certification, or an objective fairness verdi
    review. Seller listing drafts, explicit activation/deactivation, public browse,
    text/type/location filters, and public detail APIs are now implemented. Listing
    prices come from approved Passports; publication withdrawal/supersession or loss
-   of seller access hides linked listings. Availability and checkout remain deferred.
+   of seller access hides linked listings. Stock and checkout are handled separately.
 4. Orders, inventory reservation, and PayPal Sandbox checkout with verified,
    idempotent payment events and reconciled fees.
    Sellable-unit inventory, exact unpaid order snapshots, buyer/seller histories,
    cancellation, and expiring stock holds are now implemented for local development.
-   Checkout still requires payment/merchant and fulfillment decisions. No order
-   can be marked paid through these APIs.
+   A shared PayPal sandbox merchant is approved for development. Sandbox create,
+   verified capture, reconciliation, payment records and atomic stock consumption
+   are now implemented, opt-in and pending real sandbox/browser integration testing.
+   Production requires seller-connected merchant accounts; fulfillment, shipping,
+   taxes, refunds and hosted operations remain future work.
 5. Supplier intelligence and expanded business/shopping assistants.
 
 Each milestone is a separate issue or feature worktree and reviewed PR.

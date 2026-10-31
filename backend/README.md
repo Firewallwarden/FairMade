@@ -4,7 +4,8 @@ The Fair Price Engine calculates batch and unit costs, fee-aware break-even
 prices, seller-selected margin ranges, and profit simulations. The stateless
 calculator remains available. Anyone can register a FairMade account and log in.
 Accounts default to buyer; only accounts with verified seller access can manage
-private products and save immutable analysis history. No AI or payment service is called.
+private products and save immutable analysis history. AI services are not called.
+PayPal sandbox calls are opt-in and disabled by default.
 Sellers can also define mandatory Quality Locks and save deterministic checks of
 seller-entered alternatives. A passing check is not a quality certification.
 Finished-product comparison endpoints store manually entered price observations
@@ -18,9 +19,13 @@ Marketplace listing drafts add explicit activation/deactivation and anonymous
 browse/detail APIs; approved Passports supply the public product identity and price.
 See the [synthetic listing workflow](examples/marketplace/README.md).
 Sellable inventory and unpaid buyer orders now support exact merchandise subtotals,
-15-minute reservations, cancellation, and private buyer/seller history. PayPal
-capture, tax, shipping, fulfillment, and stock deduction after payment remain deferred.
+15-minute reservations, cancellation, and private buyer/seller history. Shared-merchant
+PayPal sandbox checkout now adds verified capture, recovery, payment records, and
+stock deduction after confirmation. Tax, shipping and fulfillment remain deferred.
 See the [synthetic inventory/order workflow](examples/orders/README.md).
+See [sandbox setup and payment integration](examples/paypal/README.md). Live
+production will require seller-connected merchant accounts through a separately
+approved integration; this adapter cannot call live PayPal.
 
 Use Python 3.11 or newer with SQLite 3.26+. From this feature's worktree root, create an isolated
 environment, install the backend, migrate the database, and start the API:
@@ -98,6 +103,10 @@ indexes. Existing data is preserved; downgrade deletes listings only.
 
 Migration 0008 adds sellable inventory, unpaid order snapshots, and order lines.
 It preserves earlier data; downgrade deletes stock and orders only.
+
+Migration 0009 adds durable PayPal request IDs, operation leases and sanitized
+capture records. It preserves existing orders and inventory. Downgrade is blocked
+if any payment records exist to avoid losing payment/retry history.
 
 ## Seller-approved Fair Price Passports
 
