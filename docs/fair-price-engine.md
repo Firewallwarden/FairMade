@@ -123,6 +123,14 @@ market sample or an objectively fair price. They do not verify quality equivalen
 or feed automatically into production-economics calculations. Existing pricing
 warnings about missing market and quality evaluation remain unchanged.
 
+Seller pricing reviews now assemble an explicitly selected saved production
+analysis, quality evaluations, and optional price-comparison report. They preserve
+source snapshots and explain limitations deterministically. New reviews reassess
+quote freshness and flag outdated quality checks. Cross-basis price assessments
+require a seller-declared quantity for one production unit, with compatible units.
+Review relations describe six-decimal displayed quote ranges, not a recommended
+price. Review payloads remain private; all sources and claims remain unverified.
+
 ## Backend priorities after this slice
 
 1. General FairMade accounts default to buyer; seller access requires verification.
@@ -135,7 +143,10 @@ warnings about missing market and quality evaluation remain unchanged.
    price evidence, limited exact quantity conversions, explicit provenance and
    freshness reporting are also implemented. Source verification, quality-aware
    benchmark selection, broader unit support, and explainable recommendations
-   remain future work.
+   remain future work. Deterministic seller pricing reviews now connect saved
+   economics, selected quality evidence, and price context with explicit unit
+   mappings and evidence-gap explanations; they do not set prices or establish
+   objective fairness.
 3. Seller-controlled Fair Price Passport disclosures and marketplace APIs.
 4. Orders, inventory reservation, and PayPal Sandbox checkout with verified,
    idempotent payment events and reconciled fees.

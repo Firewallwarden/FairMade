@@ -10,6 +10,8 @@ seller-entered alternatives. A passing check is not a quality certification.
 Finished-product comparison endpoints store manually entered price observations
 and normalize selected quotes to an explicit quantity, preserving source and
 quality limitations. They do not establish a fair price.
+Private seller pricing reviews assemble these saved records with deterministic
+explanations, explicit unit mappings, and visible evidence gaps.
 
 Use Python 3.11 or newer with SQLite 3.26+. From this feature's worktree root, create an isolated
 environment, install the backend, migrate the database, and start the API:
@@ -75,6 +77,36 @@ tables. Run the same documented `upgrade head` command before using quality rout
 Migration 0004 adds immutable price observations and comparison reports. It leaves
 existing identity, pricing, and Quality Lock data unchanged. Downgrading 0004
 deletes only the two new comparison tables.
+
+Migration 0005 adds immutable seller pricing reviews. Existing source records
+are preserved. Downgrading 0005 deletes only review history.
+
+## Explainable seller pricing reviews
+
+`POST /api/v1/products/{id}/pricing-reviews` accepts a saved pricing-analysis
+ID, optional comparison-report ID, and optional selected quality-evaluation IDs.
+Every selected record must belong to the same owned product. No result, role,
+verification basis, or other computed facts can be submitted by the client.
+
+The review preserves the selected records, captured product/Quality Lock state,
+and deterministic explanations. Quality failures, unknowns, and evaluations of
+older requirements remain explicit. New reviews reassess quote age at the review
+date using the earlier report's captured freshness cutoff; old reports and old
+reviews never change. No LLM or external service is called.
+
+Provide `production_unit_quantity` to declare the quantity represented by one
+unit in the selected production analysis. Without it, the review shows comparison
+context on its own basis but makes no cross-basis price assessment. There is no
+parsing of the product's free-text selling_unit. Quantity conversions reuse the
+comparison module; declarations such as a loaf's weight remain unverified.
+
+Reviews provide list/detail reads and no edit/delete routes. They require seller
+access and product ownership. Source versions unsupported by this review version
+return 409. These are private seller payloads containing full costs and claims,
+not buyer-facing Passport disclosures. They neither set prices nor establish
+fairness, certify quality, or recommend lower-quality savings.
+
+See the [synthetic review request and workflow](examples/reviews/README.md).
 
 ## Finished-product price evidence
 
