@@ -11,12 +11,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from fairmade.auth import router as auth_router
+from fairmade.commerce_errors import CommerceError
+from fairmade.commerce_http import commerce_error_handler
 from fairmade.comparisons.routes import router as comparison_router
 from fairmade.database import database_url, make_engine
+from fairmade.inventory.routes import router as inventory_router
 from fairmade.marketplace.errors import ListingError
 from fairmade.marketplace.routes import listing_error_handler
 from fairmade.marketplace.routes import public_router as marketplace_public_router
 from fairmade.marketplace.routes import router as marketplace_router
+from fairmade.orders.routes import router as order_router
+from fairmade.orders.routes import seller_router as seller_order_router
 from fairmade.passports.errors import PassportError
 from fairmade.passports.routes import (
     passport_error_handler,
@@ -27,6 +32,12 @@ from fairmade.passports.routes import (
 from fairmade.passports.routes import (
     router as passport_router,
 )
+from fairmade.payments.errors import PaymentError
+from fairmade.payments.gateway import Gateway, configured_gateway
+from fairmade.payments.routes import payment_error_handler
+from fairmade.payments.routes import public_router as paypal_config_router
+from fairmade.payments.routes import router as payment_router
+from fairmade.payments.routes import seller_router as seller_payment_router
 from fairmade.pricing.schemas import PricingRequest, PricingResponse
 from fairmade.pricing.service import calculate
 from fairmade.products import router as product_router
@@ -35,16 +46,20 @@ from fairmade.reviews.routes import router as review_router
 from fairmade.seller_applications import router as application_router
 
 
-def create_app(db_url: str | None = None) -> FastAPI:
+def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = None) -> FastAPI:
     @asynccontextmanager
     async def lifespan(application: FastAPI):
-        application.state.engine = make_engine(db_url or database_url())
-        try:
-            yield
-        finally:
-            application.state.engine.dispose()
+        with configured_gateway(paypal_gateway) as gateway:
+            application.state.paypal_gateway = gateway
+            application.state.engine = make_engine(db_url or database_url())
+            try:
+                yield
+            finally:
+                application.state.engine.dispose()
 
-    application = FastAPI(title="FairMade API", version="0.8.0", lifespan=lifespan)
+    application = FastAPI(title="FairMade API", version="0.10.0", lifespan=lifespan)
+    application.add_exception_handler(PaymentError, payment_error_handler)
+    application.add_exception_handler(CommerceError, commerce_error_handler)
     application.add_exception_handler(PassportError, passport_error_handler)
     application.add_exception_handler(ListingError, listing_error_handler)
     origins = [
@@ -59,12 +74,12 @@ def create_app(db_url: str | None = None) -> FastAPI:
             CORSMiddleware,
             allow_origins=origins,
             allow_methods=["GET", "POST", "PATCH", "PUT"],
-            allow_headers=["Authorization", "Content-Type"],
+            allow_headers=["Authorization", "Content-Type", "Idempotency-Key"],
         )
 
     @application.exception_handler(RequestValidationError)
     async def safe_validation(request: Request, exc: RequestValidationError):
-        if request.url.path.startswith("/api/v1/auth/"):
+        if request.url.path.startswith("/api/v1/auth/") or "/paypal-checkout" in request.url.path:
             # Validation errors may otherwise echo the raw password or entire body.
             errors = [{key: error[key] for key in ("loc", "msg", "type")} for error in exc.errors()]
             return JSONResponse(status_code=422, content={"detail": jsonable_encoder(errors)})
@@ -93,6 +108,12 @@ def create_app(db_url: str | None = None) -> FastAPI:
     application.include_router(public_passport_router)
     application.include_router(marketplace_router)
     application.include_router(marketplace_public_router)
+    application.include_router(inventory_router)
+    application.include_router(order_router)
+    application.include_router(seller_order_router)
+    application.include_router(payment_router)
+    application.include_router(seller_payment_router)
+    application.include_router(paypal_config_router)
     return application
 
 

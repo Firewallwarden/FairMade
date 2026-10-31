@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from fairmade.main import create_app
 from fairmade.models import AccountRole
 
-BACKEND = Path(__file__).parents[2]
+BACKEND = Path(__file__).parents[1]
 
 
 @pytest.fixture

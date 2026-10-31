@@ -27,8 +27,9 @@ breaking changes.
    there and use `git pull --ff-only`; develop and test in a dedicated branch
    and worktree outside it.
 2. Start independent work from `origin/main`. A dependent feature may start
-   from an unmerged parent feature branch in its own worktree; target that parent
-   in a stacked PR and identify the dependency.
+   from an unmerged parent feature branch in its own worktree. Every PR must target
+   main, including dependent drafts. Never target a feature branch. Identify
+   prerequisites and any prerequisite changes included in the cumulative diff.
 3. Explain the focused scope and material design choices. Ask for missing product
    decisions; do not introduce paid services, new infrastructure, or major
    architectural changes without approval.
@@ -36,7 +37,12 @@ breaking changes.
    PR, fetch and rebase onto its current base (`origin/main` or the parent
    feature branch). Coordinate conflicts rather than overwriting another
    contributor's work. Review stacked branch history and base after a parent
-   merges.
+   merges. The PR destination always remains main. Before marking a PR ready, run
+   `scripts/Test-PullRequestReadiness.ps1 -PullRequest <number> -Mode Review`
+   from its clean feature worktree. Promote dependent work only after the parent
+   merge is verified on fetched main. If squash history requires an unauthorized
+   remote rewrite, create a new main-based replacement branch/PR with only the
+   remaining changes; keep the old PR draft and identify its replacement.
 5. Use descriptive commits. The standing authorization covers in-scope staging,
    commits, normal pushes to the feature branch, and PR creation/updates. Merging,
    direct pushes to `main`, out-of-scope edits, and rewriting published history
@@ -46,6 +52,9 @@ breaking changes.
 Describe the problem and resulting behavior in each PR. Include relevant API and
 migration changes, validation results, known limitations, and stacked dependencies.
 Keep features independently reviewable. Squash merges are preferred once approved.
+After merging, run the guard with `-Mode Integrated` to verify the merge commit
+is on main. A PR merged into another feature branch is not sufficient. See the
+[incident report and guard usage](docs/stacked-pr-integration.md).
 
 ## Design and readability
 
