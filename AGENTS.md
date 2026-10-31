@@ -52,6 +52,9 @@ These development rules apply to both frontend and backend work.
 
 ## Engineering and Safety Principles
 
+- Consider application security throughout design, implementation, and review for both backend and frontend. Apply least privilege, backend authorization and ownership checks, bounded input validation, safe output handling, and privacy-preserving response schemas. Protect secrets and session tokens; use secure framework patterns and test relevant abuse/failure cases. Keep controls proportionate to the feature and distinguish local MVP limitations from hosted readiness.
+- Follow the coding standards and contribution workflow in [CONTRIBUTING.md](CONTRIBUTING.md), together with the applicable specialist instructions and checked-in tool configuration. Use established Python and React/TypeScript conventions, useful types, and existing formatters/linters; update the guide as agreed practices evolve rather than introducing competing conventions.
+
 - Prefer incremental, modular, maintainable, testable changes over large rewrites.
 - Inspect relevant existing instructions and code before making changes. Explain intended scope and material decisions before large modifications.
 - Do not introduce paid APIs or services, major architectural changes, or new infrastructure without approval.
