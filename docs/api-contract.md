@@ -2,7 +2,7 @@
 
 ## Status and common conventions
 
-The account, seller-application, product, saved-analysis, quality, comparison, and review endpoints
+The account, seller-application, product, saved-analysis, quality, comparison, review, and Passport endpoints
 below are implemented by the backend for **local development**. Their shared integration contract is
 **proposed; frontend acceptance and browser integration are pending**. No frontend
 changes are included. The existing stateless calculator retains its #2 behavior.
@@ -539,6 +539,107 @@ See the [synthetic review workflow](../backend/examples/reviews/README.md). Thes
 endpoints are implemented backend-side; shared frontend acceptance is pending.
 Publishing any review data requires a separate seller-approved disclosure feature.
 
+## Seller-controlled Fair Price Passports
+
+Passports project an owned saved pricing review into an explicit public schema.
+Raw reviews are private and are never public Passport payloads.
+
+| Method and path | Behavior |
+| --- | --- |
+| POST /api/v1/products/{id}/passports | Create a private draft (201) |
+| GET /api/v1/products/{id}/passports | Paginate owned drafts |
+| GET /api/v1/products/{id}/passports/{draft_id} | Read owned draft |
+| PUT /api/v1/products/{id}/passports/{draft_id} | Replace complete content with expected_revision |
+| GET /api/v1/products/{id}/passports/{draft_id}/preview | Inspect exact allowlisted payload and hash |
+| POST /api/v1/products/{id}/passports/{draft_id}/publish | Approve current preview (201, matching retry 200) |
+| GET /api/v1/products/{id}/passports/{draft_id}/publications | Paginate private publication history |
+| POST /api/v1/products/{id}/passports/{draft_id}/publications/{publication_id}/withdraw | Withdraw owned version (204, idempotent) |
+| GET /api/v1/passports/{publication_id} | Anonymous read of active approved snapshot |
+
+Private endpoints require seller access and product ownership. Missing or
+cross-product drafts/reviews/publications return 404; buyers, pending sellers
+and admin-only accounts receive 403. Public reads expose neither drafts nor
+withdrawn/superseded versions, and also hide publications when their owner loses
+seller access. They return the same 404 for inactive and unknown IDs.
+
+Creation accepts review_id (UUID from the same owned product), title (trimmed
+nonblank, at most 200 characters), price (positive USD decimal string, at most
+1,000,000,000 with at most two fractional places), optional public_description
+(up to 2,000 characters or null), and disclosures (defaults all off).
+The public selling_unit and product_type come from the saved pricing analysis,
+not inferred current metadata or arbitrary client unit substitutions.
+
+Disclosure policy fields:
+
+- cost_categories: up to eight unique CostCategory values, default empty.
+  Publish only selected enum-category per-production-unit totals.
+- include_labor: publish only per-unit labor total, never hours/rates/names.
+- include_unit_cost: separately authorize total production cost per unit.
+- include_quality_requirements: disclose the captured seller-defined rules.
+- include_quality_summary: disclose status and aggregate failure/unknown/outdated
+  counts, never candidate names, IDs, or raw claims.
+- include_market_context: disclose only status, explicit quantity, included count
+  and historical normalized range; no raw quote names, IDs, references or locations.
+
+All switches are strict JSON booleans and default false. Unknown fields, duplicate
+categories, unsupported price precision, and invalid IDs return 422. Raw cost-entry
+labels, private review/product/account/source IDs, emails, margins, break-even,
+scenarios, free-text private explanations, and full evidence dictionaries are not
+available as disclosure switches.
+
+A draft contains id, product_id, revision, created_at, updated_at and content.
+It starts at revision 1. PUT requires the complete creation fields plus a strict
+positive expected_revision (at most 2,147,483,646); stale edits return 409.
+Edits affect the draft only, never an existing approved snapshot.
+
+Preview returns draft_id, revision, preview_hash, and payload. The payload has
+passport_version fair-price-passport-v1, basis seller_reported_unverified,
+reviewed_on, product (explicit public title/description and saved type/unit),
+price (USD amount), optional disclosed sections, and mandatory server notices.
+Hidden sections and optional values are omitted rather than filled from private
+data. Category/labor costs are descriptive per-unit amounts rounded half-up to six
+decimal places. Public price is represented in cents. User-written descriptions
+and rule labels are unverified text; clients must render them as text.
+
+Publication requires:
+
+```json
+{
+  "expected_revision": 1,
+  "preview_hash": "<64 lowercase hexadecimal characters from preview>",
+  "approved": true
+}
+```
+
+The placeholder is not a usable digest. The backend reserves the write
+transaction, verifies the current revision, rebuilds the allowlisted preview and
+checks its canonical SHA-256 hash. Stale revisions, mismatched hashes and unknown
+review versions return 409 (REVISION_CONFLICT, PREVIEW_MISMATCH,
+UNSUPPORTED_REVIEW_VERSION). Empty or false approval is not accepted.
+
+One public version is active per product, enforced by a database index.
+Publishing a new revision/draft supersedes the prior active snapshot atomically.
+An identical active-version retry returns the same publication with 200. Retrying
+an inactive revision returns 409 PUBLICATION_INACTIVE; edit to a new revision and
+approve its new preview. Supersession/withdrawal never changes the stored payload.
+
+Private publication history contains id, draft_revision, state
+(published/withdrawn/superseded), created_at, optional withdrawn_at, payload_hash
+and the approved payload. The approving account is stored internally for audit,
+not returned publicly. Anonymous read returns only id, created_at, payload_hash
+and payload. Public success and inactive-error responses use Cache-Control:
+no-store. Withdrawal removes API access; copies already received by a client
+cannot be recalled.
+
+Server notices always identify unverified/historical data, possible undisclosed
+details, and absence of certification or an objective fairness verdict. Opting
+into quality/market sections adds their limitations. A seller cannot remove these
+notices or mark evidence verified. Public prices do not perform checkout or
+promise inventory availability.
+
+See [the draft/preview/approval workflow](../backend/examples/passports/README.md).
+The new contract is implemented backend-side and remains pending frontend review.
+
 ## Errors and existing endpoints
 
 New application errors use:
@@ -557,6 +658,7 @@ New application errors use:
 | 409 | ALREADY_SELLER | A seller attempts to submit a seller application |
 | 409 | REVISION_CONFLICT | Stale Quality Lock replacement or evaluation request |
 | 409 | UNSUPPORTED_EVIDENCE_VERSION | A pricing review selects an unsupported source version |
+| 409 | PREVIEW_MISMATCH / PUBLICATION_INACTIVE / UNSUPPORTED_REVIEW_VERSION | Passport approval conflicts |
 | 422 | FastAPI field-error array in detail | Invalid fields, UUIDs, pagination, or malformed JSON |
 | 405 | Standard FastAPI detail string | Unsupported methods, including history edits |
 
@@ -593,6 +695,9 @@ existing data. Downgrading it deletes only those two tables and their records.
 
 Migration 0005 adds immutable seller pricing reviews without changing the source
 records. Downgrading 0005 deletes review history only.
+
+Migration 0006 adds Passport drafts/publication history and one-active-version
+constraints. It leaves source evidence unchanged; downgrade deletes Passports only.
 
 Before frontend integration, jointly accept this proposal and agree on approved
 development origins and browser credential handling. Public deployment requires

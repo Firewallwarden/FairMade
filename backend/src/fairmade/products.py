@@ -1,13 +1,14 @@
 """Seller-authorized product management and append-only pricing history."""
 
-from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter
 from sqlalchemy import select
 
 from fairmade.auth import AUTH_ERRORS, DB, VerifiedSeller, api_error
 from fairmade.models import Analysis, Product
+from fairmade.ownership import require_owned_product
+from fairmade.pagination import Limit, Offset
 from fairmade.pricing.schemas import PricingRequest
 from fairmade.pricing.service import calculate
 from fairmade.schemas import (
@@ -25,20 +26,10 @@ router = APIRouter(
     tags=["products"],
     responses={**AUTH_ERRORS, 403: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
 )
-Limit = Annotated[int, Query(ge=1, le=100)]
-Offset = Annotated[int, Query(ge=0)]
 
 
 def owned_product(db: DB, seller: VerifiedSeller, product_id: UUID) -> Product:
-    product = db.scalar(
-        select(Product).where(
-            Product.id == str(product_id),
-            Product.account_id == seller.id,
-        )
-    )
-    if product is None:
-        raise api_error(404, "NOT_FOUND", "Resource not found.")
-    return product
+    return require_owned_product(db, seller.id, product_id)
 
 
 @router.post("", response_model=ProductResponse, status_code=201)
