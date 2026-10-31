@@ -48,7 +48,9 @@ class CartPreview(Contract):
 
 class OrderResponse(UTCResponse):
     id: UUID
-    status: Literal["pending_payment", "cancelled", "expired"]
+    status: Literal[
+        "pending_payment", "cancelled", "expired", "capture_pending", "payment_review", "paid"
+    ]
     created_at: datetime
     expires_at: datetime
     snapshot: CartPreview

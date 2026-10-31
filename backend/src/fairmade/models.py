@@ -1,5 +1,7 @@
 """General accounts, additive roles, and private seller data."""
 
+from __future__ import annotations
+
 from datetime import date, datetime
 from uuid import uuid4
 
@@ -31,7 +33,7 @@ class Account(Base):
     email: Mapped[str] = mapped_column(String(320), unique=True)
     password_hash: Mapped[str] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
-    role_grants: Mapped[list["AccountRole"]] = relationship(
+    role_grants: Mapped[list[AccountRole]] = relationship(
         cascade="all, delete-orphan",
         lazy="selectin",
     )
@@ -298,6 +300,7 @@ class Order(Base):
     expires_at: Mapped[datetime] = mapped_column(DateTime)
     subtotal_minor: Mapped[int] = mapped_column(Integer)
     snapshot: Mapped[dict] = mapped_column(JSON)
+    checkout: Mapped[PayPalCheckout | None] = relationship(uselist=False)
 
 
 class OrderLine(Base):
@@ -319,3 +322,43 @@ class OrderLine(Base):
     quantity: Mapped[int] = mapped_column(Integer)
     unit_price_minor: Mapped[int] = mapped_column(Integer)
     subtotal_minor: Mapped[int] = mapped_column(Integer)
+
+
+class PayPalCheckout(Base):
+    __tablename__ = "paypal_checkouts"
+    __table_args__ = (
+        CheckConstraint(
+            "state IN ('creating', 'ready', 'capture_pending', "
+            "'completed', 'failed', 'needs_review')",
+            name="ck_paypal_checkout_state",
+        ),
+        CheckConstraint(
+            "amount_minor > 0 AND amount_minor <= 100000000000",
+            name="ck_paypal_checkout_amount",
+        ),
+        CheckConstraint(
+            "(lease_token IS NULL AND lease_expires_at IS NULL) OR "
+            "(lease_token IS NOT NULL AND lease_expires_at IS NOT NULL)",
+            name="ck_paypal_checkout_lease",
+        ),
+        CheckConstraint(
+            "state != 'completed' OR (capture_id IS NOT NULL AND verified_at IS NOT NULL)",
+            name="ck_paypal_checkout_completed",
+        ),
+    )
+    order_id: Mapped[str] = mapped_column(ForeignKey("orders.id"), primary_key=True)
+    merchant_id: Mapped[str] = mapped_column(String(13))
+    amount_minor: Mapped[int] = mapped_column(Integer)
+    state: Mapped[str] = mapped_column(String(20))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    create_request_id: Mapped[str] = mapped_column(String(36), default=new_id, unique=True)
+    capture_request_id: Mapped[str] = mapped_column(String(36), default=new_id, unique=True)
+    provider_order_id: Mapped[str | None] = mapped_column(String(64), unique=True)
+    provider_status: Mapped[str | None] = mapped_column(String(32))
+    capture_started_at: Mapped[datetime | None] = mapped_column(DateTime)
+    capture_id: Mapped[str | None] = mapped_column(String(64), unique=True)
+    verified_at: Mapped[datetime | None] = mapped_column(DateTime)
+    fee_minor: Mapped[int | None] = mapped_column(Integer)
+    net_minor: Mapped[int | None] = mapped_column(Integer)
+    lease_token: Mapped[str | None] = mapped_column(String(36))
+    lease_expires_at: Mapped[datetime | None] = mapped_column(DateTime)

@@ -32,6 +32,12 @@ from fairmade.passports.routes import (
 from fairmade.passports.routes import (
     router as passport_router,
 )
+from fairmade.payments.errors import PaymentError
+from fairmade.payments.gateway import Gateway, configured_gateway
+from fairmade.payments.routes import payment_error_handler
+from fairmade.payments.routes import public_router as paypal_config_router
+from fairmade.payments.routes import router as payment_router
+from fairmade.payments.routes import seller_router as seller_payment_router
 from fairmade.pricing.schemas import PricingRequest, PricingResponse
 from fairmade.pricing.service import calculate
 from fairmade.products import router as product_router
@@ -40,16 +46,19 @@ from fairmade.reviews.routes import router as review_router
 from fairmade.seller_applications import router as application_router
 
 
-def create_app(db_url: str | None = None) -> FastAPI:
+def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = None) -> FastAPI:
     @asynccontextmanager
     async def lifespan(application: FastAPI):
-        application.state.engine = make_engine(db_url or database_url())
-        try:
-            yield
-        finally:
-            application.state.engine.dispose()
+        with configured_gateway(paypal_gateway) as gateway:
+            application.state.paypal_gateway = gateway
+            application.state.engine = make_engine(db_url or database_url())
+            try:
+                yield
+            finally:
+                application.state.engine.dispose()
 
-    application = FastAPI(title="FairMade API", version="0.9.0", lifespan=lifespan)
+    application = FastAPI(title="FairMade API", version="0.10.0", lifespan=lifespan)
+    application.add_exception_handler(PaymentError, payment_error_handler)
     application.add_exception_handler(CommerceError, commerce_error_handler)
     application.add_exception_handler(PassportError, passport_error_handler)
     application.add_exception_handler(ListingError, listing_error_handler)
@@ -65,12 +74,12 @@ def create_app(db_url: str | None = None) -> FastAPI:
             CORSMiddleware,
             allow_origins=origins,
             allow_methods=["GET", "POST", "PATCH", "PUT"],
-            allow_headers=["Authorization", "Content-Type"],
+            allow_headers=["Authorization", "Content-Type", "Idempotency-Key"],
         )
 
     @application.exception_handler(RequestValidationError)
     async def safe_validation(request: Request, exc: RequestValidationError):
-        if request.url.path.startswith("/api/v1/auth/"):
+        if request.url.path.startswith("/api/v1/auth/") or "/paypal-checkout" in request.url.path:
             # Validation errors may otherwise echo the raw password or entire body.
             errors = [{key: error[key] for key in ("loc", "msg", "type")} for error in exc.errors()]
             return JSONResponse(status_code=422, content={"detail": jsonable_encoder(errors)})
@@ -102,6 +111,9 @@ def create_app(db_url: str | None = None) -> FastAPI:
     application.include_router(inventory_router)
     application.include_router(order_router)
     application.include_router(seller_order_router)
+    application.include_router(payment_router)
+    application.include_router(seller_payment_router)
+    application.include_router(paypal_config_router)
     return application
 
 

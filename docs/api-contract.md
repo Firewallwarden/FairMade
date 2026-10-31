@@ -2,7 +2,7 @@
 
 ## Status and common conventions
 
-The account, seller-application, product, saved-analysis, quality, comparison, review, Passport, marketplace, inventory, and order endpoints
+The account, seller-application, product, saved-analysis, quality, comparison, review, Passport, marketplace, inventory, order, and sandbox-payment endpoints
 below are implemented by the backend for **local development**. Their shared integration contract is
 **proposed; frontend acceptance and browser integration are pending**. No frontend
 changes are included. The existing stateless calculator retains its #2 behavior.
@@ -848,12 +848,120 @@ offset >=0), newest created_at then UUID descending. Historical order snapshots
 remain visible to their participants if the listing/Passport is later hidden.
 They retain only already-approved catalog content, not the full private review or
 Passport costs. Revoked seller access denies seller views; a buyer can still read
-their own buyer history. There are no paid, capture, fulfillment, refund, shipment,
-or inventory-consumption endpoints in this slice.
+their own buyer history. Order creation never confirms payment. The sandbox
+payment slice below adds verified capture and stock consumption; fulfillment,
+refunds and shipment are still unimplemented.
 
 See [the synthetic order workflow](../backend/examples/orders/README.md). Rate
 limits, abuse monitoring and hosted operational controls remain part of hosted
 readiness; local order holds do not establish production checkout readiness.
+
+## Shared-merchant PayPal sandbox checkout
+
+Approved development mode uses one shared sandbox merchant. Production seller
+onboarding and seller-connected PayPal accounts are separate future work.
+The provider adapter fixes its host to https://api-m.sandbox.paypal.com; no live
+mode, arbitrary provider host, client merchant selection, or card-data endpoint exists.
+PayPal is disabled by default and credentials stay in server process configuration.
+
+| Method | Path | Access / behavior |
+| --- | --- | --- |
+| GET | /api/v1/paypal/config | Anonymous; enabled, sandbox environment, shared mode, USD, optional public client_id |
+| POST | /api/v1/orders/{order_id}/paypal-checkout | Buyer owner; create/read the one saved checkout, 200 |
+| GET | /api/v1/orders/{order_id}/paypal-checkout | Buyer owner; cached payment record, 200 |
+| POST | /api/v1/orders/{order_id}/paypal-checkout/capture | Buyer owner; verify approval, capture and re-read provider state |
+| POST | /api/v1/orders/{order_id}/paypal-checkout/reconcile | Buyer owner; server-fetch existing PayPal order, no capture POST |
+| GET | /api/v1/seller/orders/{order_id}/paypal-checkout | Verified receiving seller; cached payment record |
+| POST | /api/v1/seller/orders/{order_id}/paypal-checkout/reconcile | Verified receiving seller; recover/verify existing payment |
+
+Every POST requires exactly {}. Unknown fields are 422: clients cannot provide
+provider order/capture IDs, amounts, currency, merchant IDs, payment status,
+approval assertions, or credentials. Existing bearer authentication, seller gates
+and participant ownership checks apply. Cross-participant IDs return 404.
+All success/domain-error responses use no-store. Payment validation errors omit
+submitted input values, like auth errors.
+
+The frontend uses the public client_id for PayPal's supported sandbox SDK, asks
+this backend to create checkout, and returns provider_order_id to the SDK for
+buyer approval. After SDK approval it calls backend capture with {}. A frontend
+callback, redirect, or approval alone never marks an order paid. Browser work and
+joint frontend contract acceptance remain pending.
+
+The backend sends only the saved merchandise subtotal, USD, configured shared
+merchant, and internal order correlation identifiers to PayPal. It does not send
+seller costs, recipes, account emails, or private pricing evidence. This demo
+requests no shipping collection and performs no tax/shipping calculation. Amounts
+are sandbox merchandise payments, not production-ready checkout totals.
+
+### Verification, states and stock
+
+Checkout response fields: order_id, environment sandbox, merchant_mode shared,
+state, optional provider_order_id/provider_status/capture_id, amount (USD decimal
+string), optional sandbox_fee/sandbox_net and verified_at (UTC). Raw provider
+responses, payer information, OAuth tokens, server secrets, internal request IDs,
+leases and merchant ID are not returned. SDK client IDs are public identifiers.
+Fee/net fields are reported only when available and validated; they describe the
+shared sandbox merchant, not actual seller payouts or verified seller profit.
+
+Payment state is creating, ready, capture_pending, completed, failed or needs_review.
+An authenticated server GET must establish matching provider order ID, CAPTURE
+intent, one purchase unit, FairMade reference/custom/invoice IDs, configured
+merchant, USD currency and exact saved amount. Paid settlement additionally
+requires one full final COMPLETED capture and overall COMPLETED. Available fee/net
+data must use the same currency, remain within gross, and reconcile when both
+exist. Unsupported partial/refunded/mismatched data requires review.
+
+Order status adds capture_pending, payment_review and paid to the original
+pending_payment/cancelled/expired values. Frontends must handle these new states.
+The immutable order snapshot remains the original unpaid quote, including its
+historical notices; current order/payment status establishes the outcome.
+The underlying order reservation state remains separate from payment records.
+
+New checkout/capture requires an unexpired uncancelled order and unchanged visible
+approved listings, including current seller access. Before any outbound capture,
+the backend commits a durable capture intent. That order's stock remains held
+after the original 15-minute deadline while capture is pending or requires review.
+Cancellation is blocked for paid/pending/review payments with 409
+PAYMENT_REQUIRES_RECONCILIATION. Creating a PayPal order alone does not extend holds.
+
+Only a verified complete payment atomically deducts on_hand, increments stock
+revision, saves the unique capture receipt, and removes the reservation by marking
+payment completed. Repeats return the same receipt and never deduct stock twice.
+Verified failed/voided results cancel the order and release the hold without
+deducting stock. Unexpected completion without a recorded local capture intent
+requires review rather than silently consuming stock on a cancelled/expired order.
+
+### Retries and recovery
+
+Create and capture use distinct durable server-generated PayPal-Request-Id UUIDs.
+Checkout is unique per order. Calls use short committed database phases with a
+60-second operation lease; external HTTP requests do not hold a database write
+transaction. Concurrent operations receive 409 PAYPAL_OPERATION_IN_PROGRESS.
+After a crash, wait for lease expiry and reconcile rather than creating a new order.
+
+An uncertain create retries the same request ID and saved amount. Capture retries
+first fetch PayPal's state; an already completed payment settles without another
+POST. A capture timeout is not a decline: reconciliation can discover success.
+Capture POST retries are bounded to a conservative six-hour window; afterward
+only existing-payment reads/reconciliation are allowed. No webhook endpoint,
+scheduled reconciliation worker, refund processing, or automatic manual-review
+resolution is implemented. Never release uncertain holds simply because time passed.
+
+| Status | Code | Meaning |
+| --- | --- | --- |
+| 409 | ORDER_NOT_PAYABLE / ORDER_LISTING_CHANGED | Cancelled/expired order or changed/hidden listing |
+| 409 | CHECKOUT_NOT_READY / PAYPAL_APPROVAL_REQUIRED | Missing checkout or buyer approval |
+| 409 | PAYPAL_OPERATION_IN_PROGRESS | Active/superseding operation lease |
+| 409 | PAYPAL_RECONCILE_REQUIRED | Retry window elapsed or payment needs reconciliation |
+| 502 | PAYPAL_UNAVAILABLE | Provider result unavailable; retry/read/reconcile safely |
+| 502 | PAYPAL_VERIFICATION_FAILED | Response does not prove expected payment; review needed |
+| 503 | PAYPAL_DISABLED / PAYPAL_MERCHANT_CHANGED | Missing setup or merchant differs from saved checkout |
+
+Configure process variables using [the server-only template](../backend/.env.example)
+and [sandbox setup/recovery guide](../backend/examples/paypal/README.md).
+Automated tests use provider doubles/HTTP mock transports and make no real PayPal
+calls. A credentialed sandbox approval/capture and browser integration are separate
+manual checks; they have not been claimed as completed.
 
 ## Errors and existing endpoints
 
@@ -920,6 +1028,10 @@ It leaves prior data unchanged; downgrade deletes listings only.
 
 Migration 0008 adds sellable inventory, unpaid orders, and order-line reservations.
 It leaves earlier records unchanged; downgrade deletes these three new tables.
+
+Migration 0009 adds sanitized payment records, durable retry IDs and leases without
+changing historical snapshots. It refuses downgrade once payment records exist:
+dropping them could erase payment knowledge and allow an unsafe repeat payment.
 
 Before frontend integration, jointly accept this proposal and agree on approved
 development origins and browser credential handling. Public deployment requires
