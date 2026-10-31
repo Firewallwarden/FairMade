@@ -1,9 +1,9 @@
 """General accounts, additive roles, and private seller data."""
 
-from datetime import datetime
+from datetime import date, datetime
 from uuid import uuid4
 
-from sqlalchemy import JSON, CheckConstraint, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import JSON, CheckConstraint, Date, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from fairmade.database import Base, utcnow
@@ -111,3 +111,37 @@ class QualityEvaluation(Base):
     claims: Mapped[dict] = mapped_column(JSON)
     checks: Mapped[list] = mapped_column(JSON)
     status: Mapped[str] = mapped_column(String(20))
+
+
+class PriceObservation(Base):
+    __tablename__ = "price_observations"
+    __table_args__ = (
+        CheckConstraint(
+            "basis = 'seller_reported_unverified'",
+            name="ck_price_observations_basis",
+        ),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    product_id: Mapped[str] = mapped_column(ForeignKey("products.id"), index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    basis: Mapped[str] = mapped_column(String(40))
+    details: Mapped[dict] = mapped_column(JSON)
+
+
+class PriceComparison(Base):
+    __tablename__ = "price_comparisons"
+    __table_args__ = (
+        CheckConstraint(
+            "basis = 'seller_reported_unverified'",
+            name="ck_price_comparisons_basis",
+        ),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    product_id: Mapped[str] = mapped_column(ForeignKey("products.id"), index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    as_of_date: Mapped[date] = mapped_column(Date)
+    comparison_version: Mapped[str] = mapped_column(String(100))
+    basis: Mapped[str] = mapped_column(String(40))
+    request_snapshot: Mapped[dict] = mapped_column(JSON)
+    product_snapshot: Mapped[dict] = mapped_column(JSON)
+    result: Mapped[dict] = mapped_column(JSON)
