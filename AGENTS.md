@@ -39,6 +39,17 @@ FairMade/
 - Use mock frontend data for features whose backend endpoints are not ready; clearly identify mock/demo data.
 - Coordinate integration testing, especially for seller pricing analysis, buyer explanations, and PayPal checkout.
 
+## Design, Maintainability, and Readability
+
+These development rules apply to both frontend and backend work.
+
+- Build small, cohesive modules with clear responsibilities and explicit interfaces. Keep presentation, HTTP transport, business rules, persistence, and external integrations separate where applicable.
+- Keep features loosely coupled. Share reusable behavior through focused services, domain functions, or helpers rather than depending on another feature's route handlers or implementation details. Avoid circular dependencies and duplicated business rules.
+- Design for reasonable growth in data and usage through bounded inputs, pagination, and efficient data access where relevant. Do not introduce speculative abstractions, infrastructure, or major architectural changes without a demonstrated need and the required approval.
+- Prefer human-readable code: descriptive names, small focused functions, and straightforward control flow. Break complex decisions into named steps; avoid dense nested conditionals, clever one-liners, and functions that mix unrelated responsibilities.
+- Use comments and documentation to explain intent, invariants, and tradeoffs rather than restating the code. Keep public interfaces and important assumptions documented.
+- Apply these principles incrementally within the current task. Refactor existing code when needed to keep the change maintainable; do not turn a focused feature into an unrelated repository-wide rewrite.
+
 ## Engineering and Safety Principles
 
 - Prefer incremental, modular, maintainable, testable changes over large rewrites.
@@ -55,10 +66,10 @@ FairMade/
 
 1. Reserve the primary worktree for maintaining local `main`. Update it with `git pull --ff-only`; do not develop, test, commit, or rebase there.
 2. Create a **separate branch and worktree outside the main worktree for each issue or feature**, including documentation and repository-instruction changes.
-3. Before starting new work, fetch the latest remote changes in the main worktree and create the feature worktree from `origin/main`.
-4. For an existing feature worktree, rebase its branch onto the latest `origin/main` before continuing, coordinating if there are uncommitted changes or conflicts.
+3. Before starting new work, fetch the latest remote changes in the main worktree. Start independent features from `origin/main`. Do not wait for unrelated PRs to merge. When a feature depends on an unmerged PR, create its own branch and worktree from the relevant feature branch and open a stacked PR targeting that parent branch.
+4. For an existing feature worktree, rebase onto the latest `origin/main`, or the latest parent feature branch for an unmerged stacked dependency, before continuing. Coordinate uncommitted changes or conflicts and follow the explicit authorization requirement for any remote history rewrite.
 5. Complete and validate changes in the feature worktree. Describe changed files and verification results.
-6. Standing approval covers in-scope `git add`, `git commit`, normal `git push` to the corresponding feature/issue branch, and `gh pr create` / `gh pr edit` from its dedicated worktree. Automate these actions without repeated approval. Before opening or updating a PR, run `git fetch origin` followed by `git rebase origin/main` in that feature worktree. Merging, direct pushes to `main`, out-of-scope work, and rewriting remote history are not covered by standing approval.
+6. Standing approval covers in-scope `git add`, `git commit`, normal `git push` to the corresponding feature/issue branch, and `gh pr create` / `gh pr edit` from its dedicated worktree. Automate these actions without repeated approval. Before opening or updating a PR, run `git fetch origin` followed by a rebase onto its current base (`origin/main` or the parent feature branch) in that worktree. Document stacked dependencies and validate against the parent branch. When a parent merges, review the child's base and commit history before retargeting; do not rewrite a published branch without explicit authorization. Merging, direct pushes to `main`, out-of-scope work, and rewriting remote history are not covered by standing approval.
 7. After rebasing an already-published feature branch, update the remote branch with `git push --force-with-lease` **only when explicitly authorized**. Never force-push `main`.
 8. Prefer squash merges to keep `main` history clean. Never overwrite another developer's changes to resolve a conflict without reviewing them together.
 
