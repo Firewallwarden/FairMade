@@ -17,6 +17,10 @@ explicit approval, public snapshots, and withdrawal with hidden-by-default discl
 Marketplace listing drafts add explicit activation/deactivation and anonymous
 browse/detail APIs; approved Passports supply the public product identity and price.
 See the [synthetic listing workflow](examples/marketplace/README.md).
+Sellable inventory and unpaid buyer orders now support exact merchandise subtotals,
+15-minute reservations, cancellation, and private buyer/seller history. PayPal
+capture, tax, shipping, fulfillment, and stock deduction after payment remain deferred.
+See the [synthetic inventory/order workflow](examples/orders/README.md).
 
 Use Python 3.11 or newer with SQLite 3.26+. From this feature's worktree root, create an isolated
 environment, install the backend, migrate the database, and start the API:
@@ -91,6 +95,9 @@ source evidence. Downgrading it deletes drafts and publication history.
 
 Migration 0007 adds marketplace listings, approved public snapshots, and browse
 indexes. Existing data is preserved; downgrade deletes listings only.
+
+Migration 0008 adds sellable inventory, unpaid order snapshots, and order lines.
+It preserves earlier data; downgrade deletes stock and orders only.
 
 ## Seller-approved Fair Price Passports
 

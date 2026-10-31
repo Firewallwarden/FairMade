@@ -2,7 +2,7 @@
 
 ## Status and common conventions
 
-The account, seller-application, product, saved-analysis, quality, comparison, review, Passport, and marketplace endpoints
+The account, seller-application, product, saved-analysis, quality, comparison, review, Passport, marketplace, inventory, and order endpoints
 below are implemented by the backend for **local development**. Their shared integration contract is
 **proposed; frontend acceptance and browser integration are pending**. No frontend
 changes are included. The existing stateless calculator retains its #2 behavior.
@@ -734,6 +734,127 @@ and explicitly avoid promises of inventory, delivery, fulfillment, or checkout.
 
 See [the synthetic marketplace workflow](../backend/examples/marketplace/README.md).
 
+## Sellable inventory and unpaid orders
+
+Implemented for local development; frontend acceptance is pending. This slice
+creates unpaid order drafts and stock holds, not PayPal orders or paid purchases.
+Amounts are merchandise subtotals, not final payable totals. Shipping, tax,
+fulfillment, refunds, and verified payment processing remain separate work.
+
+| Method | Path | Access / result |
+| --- | --- | --- |
+| GET / PUT | /api/v1/products/{product_id}/inventory | Seller owner; current/replace stock |
+| POST | /api/v1/orders/preview | Authenticated account; current cart subtotal, no stock hold |
+| POST | /api/v1/orders | Authenticated account; atomic stock hold, 201 new / 200 retry |
+| GET | /api/v1/orders | Authenticated account; own buyer history, Page |
+| GET | /api/v1/orders/{order_id} | Authenticated account; own buyer detail |
+| POST | /api/v1/orders/{order_id}/cancel | Authenticated account; cancel own unpaid order, 200 |
+| GET | /api/v1/seller/orders | Verified seller; own received orders, Page |
+| GET | /api/v1/seller/orders/{order_id} | Verified seller; own received detail |
+| POST | /api/v1/seller/orders/{order_id}/cancel | Verified seller; cancel own received unpaid order, 200 |
+
+All use existing bearer authentication. Seller accounts retain buying capabilities.
+Buyer access does not require seller verification; admin alone grants no seller
+rights. Cross-owner order/product IDs return 404, buyer access to seller routes 403.
+Success and domain-error responses use Cache-Control: no-store.
+
+### Stock quantities and revisions
+
+GET returns product_id, configured, revision, nullable selling_unit, on_hand,
+reserved and available. Unconfigured inventory is revision 0, configured false,
+null unit and zero counts. PUT takes complete content:
+
+```json
+{"expected_revision":0,"selling_unit":"loaf","on_hand":20}
+```
+
+Quantities are strict whole sellable units (0..1,000,000), not grams or raw materials.
+The unit is explicit seller text and must match the approved listing's selling_unit
+exactly at ordering time; no unit conversions are inferred. Revision is a strict
+integer 0..2,147,483,646 on input, incremented on every successful replacement.
+Stale writes return 409 REVISION_CONFLICT. On-hand cannot be below active reserved
+quantity (STOCK_RESERVED). To change the unit basis, first empty the existing stock
+and allow/cancel any active holds (INVENTORY_UNIT_LOCKED otherwise).
+
+reserved is derived from pending orders whose deadline is strictly later than
+server time. available = on_hand - reserved. Order creation, cancellation and
+expiration do not deduct on_hand. A later verified payment integration must
+atomically consume stock and complete the order; no such endpoint exists yet.
+Existing marketplace browse results do not promise availability.
+
+### Cart requests and exact snapshots
+
+Preview and creation accept the same strict body:
+
+```json
+{
+  "items": [{
+    "listing_id": "70000000-0000-4000-8000-000000000001",
+    "expected_listing_revision": 1,
+    "quantity": 2
+  }]
+}
+```
+
+The illustrative listing UUID must be replaced. A cart contains 1..20 unique
+listing IDs with strict integer quantities 1..10,000 and a positive strict
+expected_listing_revision (the approved published_revision, not a private draft
+revision). All items must currently be publicly visible and belong to one seller.
+Different sellers require separate orders (MULTIPLE_SELLERS); self-purchase is
+rejected (SELF_PURCHASE). Missing/unpublished/withdrawn listings return 404.
+
+The server reads authoritative approved integer-cent prices. A changed public
+revision returns 409 LISTING_CHANGED; private listing edits do not change the
+approved revision. Missing inventory, mismatched unit basis, and insufficient
+available quantities return INVENTORY_NOT_CONFIGURED, INVENTORY_UNIT_MISMATCH,
+or INSUFFICIENT_STOCK (409). Merchandise subtotal is capped at USD 1,000,000,000;
+exceeding it returns 409 ORDER_AMOUNT_LIMIT. Client prices, totals, seller IDs and
+order/payment state fields are rejected as unknown fields (422).
+
+Preview has order_version unpaid-order-v1, items, subtotal (USD decimal-string
+amount), and mandatory notices. Each item contains listing_id, published_revision,
+quantity, unit_price, subtotal, and listing (the allowlisted approved catalog
+content). Item ordering is canonical by listing UUID. All calculations use integer
+cents; decimal strings preserve cents. Preview does not reserve stock and can
+become stale before creation.
+
+Creation requires an Idempotency-Key header containing a UUID. The key is scoped
+to the buyer account. An identical cart with that key returns the original order
+with 200, even if subsequently cancelled/expired or its listing is no longer
+visible. Reordering items does not change retry identity. A different body using
+the key returns 409 IDEMPOTENCY_CONFLICT. New keys create distinct order attempts;
+reuse the original key after an uncertain network result.
+
+Creation reserves all quantities and saves its snapshot in one transaction.
+Insufficient stock or any other item failure leaves no partial order/hold.
+SQLite serialized writes prevent competing buyers from reserving the same stock.
+No new cache, background worker, or external provider is introduced.
+
+### Order lifecycle and history
+
+Order response fields are id, status, created_at, expires_at (UTC), and snapshot
+(the exact saved preview content). No private product/account IDs, account email,
+source evidence, or undisclosed costs are included.
+
+Orders start pending_payment and expire exactly 15 minutes after creation.
+Effective status is expired at or after expires_at. Expiry is derived on reads and
+availability calculations, so no scheduled cleanup is required for stock release.
+The database retains the historical deadline; expiry never means payment succeeded.
+Cancellation returns cancelled and releases the hold immediately. Repetition is
+idempotent; an expired order remains expired. Snapshots and amounts are unchanged.
+
+Buyer and seller history use limit/offset (defaults 20/0, limit 1..100,
+offset >=0), newest created_at then UUID descending. Historical order snapshots
+remain visible to their participants if the listing/Passport is later hidden.
+They retain only already-approved catalog content, not the full private review or
+Passport costs. Revoked seller access denies seller views; a buyer can still read
+their own buyer history. There are no paid, capture, fulfillment, refund, shipment,
+or inventory-consumption endpoints in this slice.
+
+See [the synthetic order workflow](../backend/examples/orders/README.md). Rate
+limits, abuse monitoring and hosted operational controls remain part of hosted
+readiness; local order holds do not establish production checkout readiness.
+
 ## Errors and existing endpoints
 
 New application errors use:
@@ -796,6 +917,9 @@ constraints. It leaves source evidence unchanged; downgrade deletes Passports on
 
 Migration 0007 adds listing drafts, approved catalog snapshots, and browse indexes.
 It leaves prior data unchanged; downgrade deletes listings only.
+
+Migration 0008 adds sellable inventory, unpaid orders, and order-line reservations.
+It leaves earlier records unchanged; downgrade deletes these three new tables.
 
 Before frontend integration, jointly accept this proposal and agree on approved
 development origins and browser credential handling. Public deployment requires
