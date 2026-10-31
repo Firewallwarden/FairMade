@@ -70,7 +70,7 @@ class ProductUpdate(Contract):
 class UTCResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    @field_validator("created_at", "updated_at", "submitted_at", check_fields=False)
+    @field_validator("created_at", "updated_at", "submitted_at", "published_at", check_fields=False)
     @classmethod
     def utc_timestamp(cls, value: datetime) -> datetime:
         # SQLite stores UTC timestamps without timezone information.

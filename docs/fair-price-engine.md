@@ -131,6 +131,13 @@ require a seller-declared quantity for one production unit, with compatible unit
 Review relations describe six-decimal displayed quote ranges, not a recommended
 price. Review payloads remain private; all sources and claims remain unverified.
 
+Fair Price Passports now provide seller-controlled disclosure projections from
+private pricing reviews. Drafts and previews require seller ownership, and public
+publication requires approval of an exact revision/hash. Costs and evidence
+sections are hidden by default. Published payloads never forward raw reviews or
+private source identifiers and can be withdrawn. Publication is disclosure
+approval, not source verification, certification, or an objective fairness verdict.
+
 ## Backend priorities after this slice
 
 1. General FairMade accounts default to buyer; seller access requires verification.
@@ -147,7 +154,12 @@ price. Review payloads remain private; all sources and claims remain unverified.
    economics, selected quality evidence, and price context with explicit unit
    mappings and evidence-gap explanations; they do not set prices or establish
    objective fairness.
-3. Seller-controlled Fair Price Passport disclosures and marketplace APIs.
+3. Seller-controlled Fair Price Passport drafts, previews, approved publication,
+   and withdrawal: implemented for local development, pending frontend contract
+   review. Seller listing drafts, explicit activation/deactivation, public browse,
+   text/type/location filters, and public detail APIs are now implemented. Listing
+   prices come from approved Passports; publication withdrawal/supersession or loss
+   of seller access hides linked listings. Availability and checkout remain deferred.
 4. Orders, inventory reservation, and PayPal Sandbox checkout with verified,
    idempotent payment events and reconciled fees.
 5. Supplier intelligence and expanded business/shopping assistants.
