@@ -11,6 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from fairmade.auth import router as auth_router
+from fairmade.comparisons.routes import router as comparison_router
 from fairmade.database import database_url, make_engine
 from fairmade.pricing.schemas import PricingRequest, PricingResponse
 from fairmade.pricing.service import calculate
@@ -28,7 +29,7 @@ def create_app(db_url: str | None = None) -> FastAPI:
         finally:
             application.state.engine.dispose()
 
-    application = FastAPI(title="FairMade API", version="0.4.0", lifespan=lifespan)
+    application = FastAPI(title="FairMade API", version="0.5.0", lifespan=lifespan)
     origins = [
         value.strip()
         for value in os.environ.get("FAIRMADE_CORS_ORIGINS", "").split(",")
@@ -69,6 +70,7 @@ def create_app(db_url: str | None = None) -> FastAPI:
     application.include_router(application_router)
     application.include_router(product_router)
     application.include_router(quality_router)
+    application.include_router(comparison_router)
     return application
 
 

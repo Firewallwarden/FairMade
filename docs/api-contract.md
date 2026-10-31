@@ -2,7 +2,7 @@
 
 ## Status and common conventions
 
-The account, seller-application, product, saved-analysis, and quality endpoints
+The account, seller-application, product, saved-analysis, quality, and comparison endpoints
 below are implemented by the backend for **local development**. Their shared integration contract is
 **proposed; frontend acceptance and browser integration are pending**. No frontend
 changes are included. The existing stateless calculator retains its #2 behavior.
@@ -296,6 +296,151 @@ quality-not-evaluated warning and do not automatically consume these checks.
 See the [synthetic sourdough and egg examples](../backend/examples/quality/README.md)
 for integration calls and deliberately failed welfare claims.
 
+## Finished-product price observations and comparisons
+
+These private endpoints provide quantitative context from manually entered
+finished-product quotes. They do not compare ingredient/supplier input costs.
+All require bearer authentication, seller access, and ownership of the parent
+product. Existing 401/403/404 conventions apply; admin alone does not grant access.
+
+| Method and path | Behavior | Success |
+| --- | --- | --- |
+| POST /api/v1/products/{id}/price-observations | Save a manually entered observation | 201: Observation |
+| GET /api/v1/products/{id}/price-observations | Paginate observation records | 200: Page of Observation |
+| GET /api/v1/products/{id}/price-observations/{observation_id} | Read owned observation | 200: Observation |
+| POST /api/v1/products/{id}/price-comparisons | Normalize explicitly selected evidence and save a report | 201: Report |
+| GET /api/v1/products/{id}/price-comparisons | Paginate report summaries | 200: Page of ReportSummary |
+| GET /api/v1/products/{id}/price-comparisons/{report_id} | Read complete stored report | 200: Report |
+
+Observation creation accepts:
+
+| Field | Requirement |
+| --- | --- |
+| label | Required trimmed nonblank string, at most 200 characters |
+| product_type | Required source product type: sourdough, eggs, or other |
+| currency | Required USD |
+| price | Required nonnegative decimal JSON string |
+| quantity | Required `{value, unit}`, with positive decimal-string value |
+| source | Required `{name, kind, reference}` |
+| location | Required seller-entered location label; not geocoded or verified |
+| observed_on | Required date, not later than the current UTC calendar date |
+| quality_notes | Optional string or null, up to 2,000 characters |
+| price_notes | Optional string or null, up to 2,000 characters |
+
+Source name and location are trimmed nonblank strings up to 200 characters.
+Source kind is website, in_person, document, or other. Reference is a required
+trimmed nonblank string up to 2,000 characters: for example a URL, receipt
+reference, or observation description. References are **plain text**; the backend
+does not fetch them, follow URLs, or verify any claims. Clients should not treat
+these strings as trusted HTML or links.
+
+Price and quantity must be finite decimal strings bounded at 1,000,000,000 with
+up to six decimal places (disregarding trailing zeros). Price may be zero;
+quantity must be positive. JSON numbers/booleans, negatives, nonfinite values,
+unsupported currencies/units, unknown fields, and client-supplied verification
+or ownership fields return 422.
+
+Quantity units and exact conversion families:
+
+| Family | Units and factors |
+| --- | --- |
+| Mass | g = 1 g; kg = 1,000 g |
+| Egg count | egg = 1 egg; dozen = 12 eggs |
+| Loaf count | loaf only |
+| Generic item count | item only |
+
+Count quantities must resolve to whole base counts: half a dozen is valid, half
+an egg/loaf/item is not. Egg/dozen units require source product_type eggs; loaf
+requires sourdough. Mass and generic item counts may be used for any declared
+product type. There are no automatic aliases, weight-per-loaf assumptions,
+density conversions, or equivalences between item, egg, and loaf. Equal counts
+do not establish equal sizes or quality.
+
+Observation returns `id`, `product_id`, UTC `created_at`,
+`basis: "seller_reported_unverified"`, and `details` containing the
+validated creation inputs, including defaulted null notes. Records have no
+edit/delete routes. Use a new observation for a correction. Listings use standard
+limit/offset pagination and creation-time-descending, UUID-descending ordering.
+
+Report creation accepts:
+
+```json
+{
+  "observation_ids": ["<UUID returned by observation creation>"],
+  "target_quantity": {"value": "100", "unit": "g"},
+  "max_age_days": 30
+}
+```
+
+The placeholder is not a usable UUID. Select 1-100 unique observation IDs from
+the same owned product; a missing, cross-product, or other seller's ID returns 404,
+without identifying which resource exists elsewhere. The order is preserved.
+The target quantity follows the same unit/value rules, including named unit
+checks against the target product type. The free-text product selling_unit is
+never parsed to infer a target weight, count, or package size.
+
+max_age_days is a strict integer 0-365, default 30. The report captures the server's
+current UTC date as as_of_date. Age equals as_of_date minus observed_on in calendar
+days; an observation is stale only when age exceeds the cutoff. Thus a quote
+exactly 30 days old is included at cutoff 30. A cutoff of zero means same-day
+observations only. This is a configurable heuristic, not an assurance of current
+availability or price accuracy.
+
+For compatible families and matching source/target product types:
+
+```text
+normalized price = quoted price * target base quantity / quoted base quantity
+```
+
+Calculations use isolated Decimal precision of 60; only displayed output rounds
+half-up to six decimal places. This is descriptive precision, not provider
+settlement rounding or an executable offer; tiny positive amounts may round to
+zero. There is no fee, tax, shipping, discount, or currency reconciliation.
+
+Each result row contains the observation ID, full details, age_days, stale,
+included_in_range, normalized_price, and exclusion_reasons:
+
+- STALE_OBSERVATION: price remains normalized for inspection but is excluded.
+- INCOMPATIBLE_UNITS: no conversion or normalized price is produced.
+- PRODUCT_TYPE_MISMATCH: no normalized price is produced for a different type.
+- FUTURE_OBSERVATION: defensively excluded if an imported record or clock change
+  makes its date later than the comparison date; normal creation rejects it.
+
+Multiple reasons may appear. The selected_price_range includes included_count,
+excluded_count, and minimum/maximum normalized prices from only the selected,
+fresh, same-type, quantity-compatible observations. If none qualify, bounds are
+null and a no-comparable-observations warning is added. There is no average,
+quality-weighted score, inferred local-market distribution, or fair-price verdict.
+
+ReportSummary contains id, created_at, as_of_date, and comparison_version.
+Report adds product_id, basis, request_snapshot, product_snapshot, and result.
+The version is finished-product-comparison-v1. Results preserve the target
+quantity, cutoff, comparison date, rows, range, and warning codes:
+
+- UNVERIFIED_INPUTS
+- QUALITY_NOT_EVALUATED
+- LOCATION_NOT_VERIFIED
+- TAX_SHIPPING_DISCOUNTS_NOT_NORMALIZED
+- SELECTED_OBSERVATIONS_NOT_A_MARKET_SAMPLE
+- PRICE_RANGE_IS_NOT_A_FAIRNESS_OR_SAVINGS_RECOMMENDATION
+- NO_FRESH_QUANTITY_COMPARABLE_OBSERVATIONS, when applicable
+
+Quality and price notes are preserved, not independently assessed. Reports do not
+apply Quality Locks or certify an alternative. Inclusion in the range means only
+date/type/quantity compatibility; even matching product types can differ in
+quality, size, package conditions, geography, and availability. A cheaper quote
+is not an acceptable-savings recommendation.
+
+Reports are immutable and read from stored JSON without re-normalizing or aging
+their observations on later reads. New evidence, a different cutoff, or a changed
+comparison basis requires a new report. Repeating a successful POST creates
+another record. Previous pricing and Quality Lock APIs remain unchanged, including
+their market/quality-not-evaluated warnings.
+
+See the [synthetic bread and egg examples](../backend/examples/comparisons/README.md).
+The new endpoints are implemented by the backend; frontend contract acceptance
+is pending.
+
 ## Errors and existing endpoints
 
 New application errors use:
@@ -343,6 +488,9 @@ application data and restores the prior seller-only access model.
 Migration 0003 adds the current rule-set and evaluation-history tables without
 changing existing rows or initializing quality requirements. Downgrading 0003
 discards Quality Locks and quality history while retaining earlier application data.
+
+Migration 0004 adds price observations and comparison reports without modifying
+existing data. Downgrading it deletes only those two tables and their records.
 
 Before frontend integration, jointly accept this proposal and agree on approved
 development origins and browser credential handling. Public deployment requires

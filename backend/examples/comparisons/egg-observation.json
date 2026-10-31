@@ -1,0 +1,16 @@
+{
+  "label": "Synthetic finished egg carton quote",
+  "product_type": "eggs",
+  "currency": "USD",
+  "price": "6.00",
+  "quantity": {"value": "1", "unit": "dozen"},
+  "source": {
+    "name": "Fictional egg seller for development",
+    "kind": "in_person",
+    "reference": "Synthetic manual observation; not a real quote"
+  },
+  "location": "Fictional development location",
+  "observed_on": "2026-01-01",
+  "quality_notes": "Fictional claim: large eggs. Welfare and size equivalence not verified.",
+  "price_notes": "Synthetic amount only; tax, delivery, and discounts not established."
+}

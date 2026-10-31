@@ -115,6 +115,14 @@ evaluation preserves its rule revision and inputs, with
 quality, or establish an acceptable cost saving. Pricing analysis still does not
 evaluate quality and retains its existing warning.
 
+Finished-product price observations and comparison reports are a separate private
+API. Sellers enter source, location, date, quoted quantity/price, and quality notes;
+the backend normalizes selected compatible quantities and flags stale/incompatible
+evidence. Report ranges describe selected nominal quotes, not a representative
+market sample or an objectively fair price. They do not verify quality equivalence
+or feed automatically into production-economics calculations. Existing pricing
+warnings about missing market and quality evaluation remain unchanged.
+
 ## Backend priorities after this slice
 
 1. General FairMade accounts default to buyer; seller access requires verification.
@@ -123,9 +131,11 @@ evaluate quality and retains its existing warning.
    decisions, admin provisioning/monitoring, hosted account recovery, abuse controls,
    and operations remain future work.
 2. Quality Locks and immutable claim-check history: implemented for local
-   development, pending frontend contract review. Comparable price evidence,
-   standardized unit conversions, provenance/freshness checks, and explainable
-   recommendations remain future work.
+   development, pending frontend contract review. Manually entered finished-product
+   price evidence, limited exact quantity conversions, explicit provenance and
+   freshness reporting are also implemented. Source verification, quality-aware
+   benchmark selection, broader unit support, and explainable recommendations
+   remain future work.
 3. Seller-controlled Fair Price Passport disclosures and marketplace APIs.
 4. Orders, inventory reservation, and PayPal Sandbox checkout with verified,
    idempotent payment events and reconciled fees.

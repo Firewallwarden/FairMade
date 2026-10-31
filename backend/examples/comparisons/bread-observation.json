@@ -1,0 +1,16 @@
+{
+  "label": "Synthetic finished sourdough loaf quote",
+  "product_type": "sourdough",
+  "currency": "USD",
+  "price": "8.00",
+  "quantity": {"value": "500", "unit": "g"},
+  "source": {
+    "name": "Fictional bakery for development",
+    "kind": "document",
+    "reference": "Synthetic sample quote; not a real source"
+  },
+  "location": "Fictional development location",
+  "observed_on": "2026-01-01",
+  "quality_notes": "Fictional claim: naturally leavened; equivalence not verified.",
+  "price_notes": "Synthetic amount only; tax, delivery, and discounts not established."
+}

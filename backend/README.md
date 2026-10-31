@@ -7,6 +7,9 @@ Accounts default to buyer; only accounts with verified seller access can manage
 private products and save immutable analysis history. No AI or payment service is called.
 Sellers can also define mandatory Quality Locks and save deterministic checks of
 seller-entered alternatives. A passing check is not a quality certification.
+Finished-product comparison endpoints store manually entered price observations
+and normalize selected quotes to an explicit quantity, preserving source and
+quality limitations. They do not establish a fair price.
 
 Use Python 3.11 or newer with SQLite 3.26+. From this feature's worktree root, create an isolated
 environment, install the backend, migrate the database, and start the API:
@@ -68,6 +71,41 @@ access model. Use it only for deliberate local rollback.
 Migration 0003 adds current Quality Locks and immutable evaluation records without
 changing existing data. Downgrading it deletes only the Quality Lock and evaluation
 tables. Run the same documented `upgrade head` command before using quality routes.
+
+Migration 0004 adds immutable price observations and comparison reports. It leaves
+existing identity, pricing, and Quality Lock data unchanged. Downgrading 0004
+deletes only the two new comparison tables.
+
+## Finished-product price evidence
+
+Create observations through `POST /api/v1/products/{id}/price-observations`.
+Supply a finished-product label/type, USD price and quantity, source name/kind/
+reference, location, observation date, and optional quality/price notes.
+All evidence is `seller_reported_unverified`; source references are stored as
+plain text and never fetched. Future observation dates are rejected.
+
+Use `POST /api/v1/products/{id}/price-comparisons` with explicit observation
+IDs and a target quantity to save a comparison report. Supported units are g, kg,
+egg, dozen, loaf, and item. Conversion is limited to compatible families (g/kg
+and egg/dozen); loaf and generic item counts remain distinct, with no inferred
+weights, sizes, or density. Decimal-string arithmetic rounds descriptive output
+to six decimal places.
+
+Reports capture the UTC comparison date and a configurable freshness cutoff
+(0-365 days, default 30). Only selected, fresh, same-type, quantity-compatible
+observations enter the range. Excluded quotes and their reasons remain visible.
+Quality notes, locations, taxes/shipping/discount qualifications, and all source
+inputs remain unverified; they are not normalized into equivalence.
+
+Both observations and reports support paginated listing and detail reads, with
+seller-role and product-ownership checks. There are no edit/delete routes.
+Corrections require a new observation, followed by explicitly selecting the
+appropriate IDs for a new report. Historical reports do not change as time passes.
+
+See [synthetic finished-product examples](examples/comparisons/README.md).
+This feature does not change pricing formulas or Quality Lock evaluation, certify
+alternatives, recommend savings, or publish private seller data. Verification and
+seller-role provisioning remain deferred.
 
 ## Quality Locks and evaluation history
 
