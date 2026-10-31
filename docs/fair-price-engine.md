@@ -162,6 +162,10 @@ approval, not source verification, certification, or an objective fairness verdi
    of seller access hides linked listings. Availability and checkout remain deferred.
 4. Orders, inventory reservation, and PayPal Sandbox checkout with verified,
    idempotent payment events and reconciled fees.
+   Sellable-unit inventory, exact unpaid order snapshots, buyer/seller histories,
+   cancellation, and expiring stock holds are now implemented for local development.
+   Checkout still requires payment/merchant and fulfillment decisions. No order
+   can be marked paid through these APIs.
 5. Supplier intelligence and expanded business/shopping assistants.
 
 Each milestone is a separate issue or feature worktree and reviewed PR.

@@ -255,3 +255,67 @@ class MarketplaceListing(Base):
     search_text: Mapped[str | None] = mapped_column(Text)
     location_key: Mapped[str | None] = mapped_column(String(200))
     price_minor: Mapped[int | None] = mapped_column(Integer)
+
+
+class SellableInventory(Base):
+    __tablename__ = "sellable_inventory"
+    __table_args__ = (
+        CheckConstraint(
+            "on_hand >= 0 AND on_hand <= 1000000", name="ck_sellable_inventory_quantity"
+        ),
+        CheckConstraint("revision >= 1", name="ck_sellable_inventory_revision"),
+    )
+    product_id: Mapped[str] = mapped_column(ForeignKey("products.id"), primary_key=True)
+    revision: Mapped[int] = mapped_column(Integer)
+    selling_unit: Mapped[str] = mapped_column(String(200))
+    on_hand: Mapped[int] = mapped_column(Integer)
+
+
+class Order(Base):
+    __tablename__ = "orders"
+    __table_args__ = (
+        UniqueConstraint("buyer_account_id", "idempotency_key", name="uq_order_buyer_key"),
+        CheckConstraint("status IN ('pending_payment', 'cancelled')", name="ck_orders_status"),
+        CheckConstraint(
+            "subtotal_minor > 0 AND subtotal_minor <= 100000000000",
+            name="ck_orders_subtotal",
+        ),
+        CheckConstraint("expires_at > created_at", name="ck_orders_deadline"),
+        CheckConstraint(
+            "buyer_account_id != seller_account_id", name="ck_orders_different_accounts"
+        ),
+        Index("ix_order_buyer_created", "buyer_account_id", "created_at"),
+        Index("ix_order_seller_created", "seller_account_id", "created_at"),
+        Index("ix_order_reservations", "status", "expires_at"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    buyer_account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"))
+    seller_account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"))
+    idempotency_key: Mapped[str] = mapped_column(String(36))
+    request_hash: Mapped[str] = mapped_column(String(64))
+    status: Mapped[str] = mapped_column(String(20))
+    created_at: Mapped[datetime] = mapped_column(DateTime)
+    expires_at: Mapped[datetime] = mapped_column(DateTime)
+    subtotal_minor: Mapped[int] = mapped_column(Integer)
+    snapshot: Mapped[dict] = mapped_column(JSON)
+
+
+class OrderLine(Base):
+    __tablename__ = "order_lines"
+    __table_args__ = (
+        UniqueConstraint("order_id", "listing_id", name="uq_order_line_listing"),
+        CheckConstraint("quantity >= 1 AND quantity <= 10000", name="ck_order_line_quantity"),
+        CheckConstraint("unit_price_minor > 0", name="ck_order_line_price"),
+        CheckConstraint(
+            "subtotal_minor = unit_price_minor * quantity",
+            name="ck_order_line_subtotal",
+        ),
+        Index("ix_order_line_stock", "product_id", "order_id"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    order_id: Mapped[str] = mapped_column(ForeignKey("orders.id"))
+    listing_id: Mapped[str] = mapped_column(ForeignKey("marketplace_listings.id"))
+    product_id: Mapped[str] = mapped_column(ForeignKey("products.id"))
+    quantity: Mapped[int] = mapped_column(Integer)
+    unit_price_minor: Mapped[int] = mapped_column(Integer)
+    subtotal_minor: Mapped[int] = mapped_column(Integer)

@@ -11,12 +11,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from fairmade.auth import router as auth_router
+from fairmade.commerce_errors import CommerceError
+from fairmade.commerce_http import commerce_error_handler
 from fairmade.comparisons.routes import router as comparison_router
 from fairmade.database import database_url, make_engine
+from fairmade.inventory.routes import router as inventory_router
 from fairmade.marketplace.errors import ListingError
 from fairmade.marketplace.routes import listing_error_handler
 from fairmade.marketplace.routes import public_router as marketplace_public_router
 from fairmade.marketplace.routes import router as marketplace_router
+from fairmade.orders.routes import router as order_router
+from fairmade.orders.routes import seller_router as seller_order_router
 from fairmade.passports.errors import PassportError
 from fairmade.passports.routes import (
     passport_error_handler,
@@ -44,7 +49,8 @@ def create_app(db_url: str | None = None) -> FastAPI:
         finally:
             application.state.engine.dispose()
 
-    application = FastAPI(title="FairMade API", version="0.8.0", lifespan=lifespan)
+    application = FastAPI(title="FairMade API", version="0.9.0", lifespan=lifespan)
+    application.add_exception_handler(CommerceError, commerce_error_handler)
     application.add_exception_handler(PassportError, passport_error_handler)
     application.add_exception_handler(ListingError, listing_error_handler)
     origins = [
@@ -93,6 +99,9 @@ def create_app(db_url: str | None = None) -> FastAPI:
     application.include_router(public_passport_router)
     application.include_router(marketplace_router)
     application.include_router(marketplace_public_router)
+    application.include_router(inventory_router)
+    application.include_router(order_router)
+    application.include_router(seller_order_router)
     return application
 
 
