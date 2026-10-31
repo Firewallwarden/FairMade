@@ -105,6 +105,16 @@ calculated results, the calculation version, and product metadata at creation.
 Later product edits do not change those records. See the
 [shared API integration proposal](api-contract.md); frontend acceptance is pending.
 
+Product Quality Locks and saved quality evaluations are separate from pricing
+analysis. Sellers can define mandatory boolean, allowed-choice, or numeric
+requirements and check supplied alternative claims deterministically. Missing
+claims and incompatible units/types remain unknown; a failed requirement fails
+the check. No configured rules produces not_evaluated, not a pass. Every saved
+evaluation preserves its rule revision and inputs, with
+`seller_reported_unverified` basis. A pass does not verify the claims, certify
+quality, or establish an acceptable cost saving. Pricing analysis still does not
+evaluate quality and retains its existing warning.
+
 ## Backend priorities after this slice
 
 1. General FairMade accounts default to buyer; seller access requires verification.
@@ -112,8 +122,10 @@ Later product edits do not change those records. See the
    for local development, with frontend contract review pending. Verification
    decisions, admin provisioning/monitoring, hosted account recovery, abuse controls,
    and operations remain future work.
-2. Quality requirements and comparable product evidence with standardized
-   units, provenance, and freshness; then explainable recommendations.
+2. Quality Locks and immutable claim-check history: implemented for local
+   development, pending frontend contract review. Comparable price evidence,
+   standardized unit conversions, provenance/freshness checks, and explainable
+   recommendations remain future work.
 3. Seller-controlled Fair Price Passport disclosures and marketplace APIs.
 4. Orders, inventory reservation, and PayPal Sandbox checkout with verified,
    idempotent payment events and reconciled fees.

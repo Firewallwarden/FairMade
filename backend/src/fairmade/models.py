@@ -3,7 +3,7 @@
 from datetime import datetime
 from uuid import uuid4
 
-from sqlalchemy import JSON, CheckConstraint, DateTime, ForeignKey, String, Text
+from sqlalchemy import JSON, CheckConstraint, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from fairmade.database import Base, utcnow
@@ -77,3 +77,37 @@ class Analysis(Base):
     product_snapshot: Mapped[dict] = mapped_column(JSON)
     inputs: Mapped[dict] = mapped_column(JSON)
     result: Mapped[dict] = mapped_column(JSON)
+
+
+class QualityLockSet(Base):
+    __tablename__ = "quality_lock_sets"
+    __table_args__ = (CheckConstraint("revision >= 0", name="ck_quality_lock_sets_revision"),)
+    product_id: Mapped[str] = mapped_column(ForeignKey("products.id"), primary_key=True)
+    revision: Mapped[int] = mapped_column(Integer)
+    rules: Mapped[list] = mapped_column(JSON)
+
+
+class QualityEvaluation(Base):
+    __tablename__ = "quality_evaluations"
+    __table_args__ = (
+        CheckConstraint("rule_revision >= 0", name="ck_quality_evaluations_revision"),
+        CheckConstraint(
+            "status IN ('passed', 'failed', 'unknown', 'not_evaluated')",
+            name="ck_quality_evaluations_status",
+        ),
+        CheckConstraint(
+            "basis = 'seller_reported_unverified'",
+            name="ck_quality_evaluations_basis",
+        ),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    product_id: Mapped[str] = mapped_column(ForeignKey("products.id"), index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    candidate_label: Mapped[str] = mapped_column(String(200))
+    rule_revision: Mapped[int] = mapped_column(Integer)
+    evaluation_version: Mapped[str] = mapped_column(String(100))
+    basis: Mapped[str] = mapped_column(String(40))
+    rules_snapshot: Mapped[list] = mapped_column(JSON)
+    claims: Mapped[dict] = mapped_column(JSON)
+    checks: Mapped[list] = mapped_column(JSON)
+    status: Mapped[str] = mapped_column(String(20))
