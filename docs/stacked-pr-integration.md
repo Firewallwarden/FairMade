@@ -70,4 +70,4 @@ dependencies remain unresolved.
 
 References:
 [GitHub draft PR behavior](https://docs.github.com/en/pull-requests/reference/pull-requests#draft-pull-requests)
-and [GitHub squash-merge ancestry](https://docs.github.com/en/pull-requests/merging-pull-requests/about-pull-request-merges#squashing-and-merging-your-pull-request-commits).
+and [GitHub squash-merge ancestry](https://docs.github.com/en/pull-requests/reference/pull-request-merges#squash-and-merge-your-commits).

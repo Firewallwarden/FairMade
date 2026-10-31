@@ -6,6 +6,9 @@ $global:FairMadePrGuardScenario = @{}
 $script:passed = 0
 
 function gh {
+    if (($args -join ' ') -ne 'api repos/{owner}/{repo}/pulls/42') {
+        throw 'The guard must use the REST endpoint supported by the installed GitHub CLI.'
+    }
     $global:LASTEXITCODE = $global:FairMadePrGuardScenario.GhExit
     if ($global:LASTEXITCODE -eq 0) {
         $metadata = $global:FairMadePrGuardScenario.Pr
