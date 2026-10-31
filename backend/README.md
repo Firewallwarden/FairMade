@@ -14,6 +14,9 @@ Private seller pricing reviews assemble these saved records with deterministic
 explanations, explicit unit mappings, and visible evidence gaps.
 Seller-controlled Fair Price Passports provide private drafts, exact previews,
 explicit approval, public snapshots, and withdrawal with hidden-by-default disclosures.
+Marketplace listing drafts add explicit activation/deactivation and anonymous
+browse/detail APIs; approved Passports supply the public product identity and price.
+See the [synthetic listing workflow](examples/marketplace/README.md).
 
 Use Python 3.11 or newer with SQLite 3.26+. From this feature's worktree root, create an isolated
 environment, install the backend, migrate the database, and start the API:
@@ -85,6 +88,9 @@ are preserved. Downgrading 0005 deletes only review history.
 
 Migration 0006 adds Passport drafts and publication snapshots. It preserves private
 source evidence. Downgrading it deletes drafts and publication history.
+
+Migration 0007 adds marketplace listings, approved public snapshots, and browse
+indexes. Existing data is preserved; downgrade deletes listings only.
 
 ## Seller-approved Fair Price Passports
 
