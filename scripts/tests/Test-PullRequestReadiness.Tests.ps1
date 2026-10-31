@@ -7,7 +7,17 @@ $script:passed = 0
 
 function gh {
     $global:LASTEXITCODE = $global:FairMadePrGuardScenario.GhExit
-    if ($global:LASTEXITCODE -eq 0) { $global:FairMadePrGuardScenario.Pr | ConvertTo-Json -Depth 5 }
+    if ($global:LASTEXITCODE -eq 0) {
+        $metadata = $global:FairMadePrGuardScenario.Pr
+        @{
+            state = if ($metadata.state -eq 'MERGED') { 'closed' } else { $metadata.state.ToLowerInvariant() }
+            merged = $metadata.state -eq 'MERGED'
+            draft = $metadata.isDraft
+            base = @{ref = $metadata.baseRefName}
+            head = @{ref = $metadata.headRefName; sha = $metadata.headRefOid}
+            merge_commit_sha = if ($metadata.mergeCommit) { $metadata.mergeCommit.oid } else { $null }
+        } | ConvertTo-Json -Depth 5
+    }
 }
 
 function git {
@@ -65,4 +75,5 @@ Test-Scenario 'merged-main' Integrated @{state = 'MERGED'} $true
 Test-Scenario 'merged-feature-is-not-integration' Integrated @{state = 'MERGED'; baseRefName = 'feature-parent'} $false
 Test-Scenario 'merge-absent-from-main' Integrated @{state = 'MERGED'; MergeExit = 1} $false
 Test-Scenario 'still-open-is-not-integrated' Integrated @{} $false
+Test-Scenario 'missing-merge-sha' Integrated @{state = 'MERGED'; mergeCommit = $null} $false
 Write-Output "$($script:passed) PR readiness scenarios passed."
