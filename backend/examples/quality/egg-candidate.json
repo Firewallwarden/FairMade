@@ -1,0 +1,8 @@
+{
+  "candidate_label": "Synthetic alternative B, unverified seller claims",
+  "expected_revision": 1,
+  "claims": {
+    "pasture_raised": {"type": "boolean", "value": false},
+    "egg_size": {"type": "choice", "value": "large"}
+  }
+}

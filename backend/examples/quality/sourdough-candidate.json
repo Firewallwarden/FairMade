@@ -1,0 +1,9 @@
+{
+  "candidate_label": "Synthetic alternative A, unverified seller claims",
+  "expected_revision": 1,
+  "claims": {
+    "organic_flour": {"type": "boolean", "value": true},
+    "process": {"type": "choice", "value": "naturally_leavened"},
+    "fermentation": {"type": "numeric", "value": "24.000001", "unit": "hour"}
+  }
+}

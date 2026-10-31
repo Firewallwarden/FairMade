@@ -1,0 +1,8 @@
+{
+  "expected_revision": 0,
+  "rules": [
+    {"key": "organic_flour", "label": "Demo seller requires organic flour", "type": "boolean", "expected": true},
+    {"key": "process", "label": "Demo seller's allowed process", "type": "choice", "allowed_values": ["naturally_leavened"]},
+    {"key": "fermentation", "label": "Demo seller's chosen fermentation duration", "type": "numeric", "minimum": "24", "maximum": "48", "unit": "hour"}
+  ]
+}

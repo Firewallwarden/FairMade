@@ -5,6 +5,8 @@ prices, seller-selected margin ranges, and profit simulations. The stateless
 calculator remains available. Anyone can register a FairMade account and log in.
 Accounts default to buyer; only accounts with verified seller access can manage
 private products and save immutable analysis history. No AI or payment service is called.
+Sellers can also define mandatory Quality Locks and save deterministic checks of
+seller-entered alternatives. A passing check is not a quality certification.
 
 Use Python 3.11 or newer with SQLite 3.26+. From this feature's worktree root, create an isolated
 environment, install the backend, migrate the database, and start the API:
@@ -62,6 +64,33 @@ but inaccessible until seller access is granted after future verification.
 
 Downgrading 0002 discards roles/applications and restores the old seller-only
 access model. Use it only for deliberate local rollback.
+
+Migration 0003 adds current Quality Locks and immutable evaluation records without
+changing existing data. Downgrading it deletes only the Quality Lock and evaluation
+tables. Run the same documented `upgrade head` command before using quality routes.
+
+## Quality Locks and evaluation history
+
+Use `GET /api/v1/products/{id}/quality-locks` to load a product's current
+revision and rules. PUT replaces the complete mandatory rule set and requires
+`expected_revision`; stale edits return 409 instead of silently overwriting
+another edit. Empty rules explicitly clear the set and still increment revision.
+
+Evaluate an alternative through
+`POST /api/v1/products/{id}/quality-evaluations` using a candidate label,
+`expected_revision`, and typed claims. The backend saves the rules, claims,
+checks, and status at that moment. Missing claims and incompatible types/units
+are unknown; any failed mandatory rule fails the overall check. An empty rule
+set is not evaluated, never an implicit pass.
+
+These routes require seller access and product ownership, like pricing history.
+Buyers, pending applicants, and admin-only accounts receive 403. Verification and
+role grants remain deferred; automated tests use explicit synthetic seller grants.
+
+See the [synthetic quality examples and workflow](examples/quality/README.md).
+All claims remain `seller_reported_unverified`. No unit conversions, source
+verification, price comparisons, or savings recommendations are made. Existing
+pricing calculations retain their `QUALITY_NOT_EVALUATED` warning.
 
 ## Buyer defaults and seller applications
 

@@ -1,0 +1,7 @@
+{
+  "expected_revision": 0,
+  "rules": [
+    {"key": "pasture_raised", "label": "Demo seller requires pasture-raised hens", "type": "boolean", "expected": true},
+    {"key": "egg_size", "label": "Demo seller's allowed egg sizes", "type": "choice", "allowed_values": ["large", "extra_large"]}
+  ]
+}
