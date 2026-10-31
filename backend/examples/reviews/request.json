@@ -1,0 +1,6 @@
+{
+  "pricing_analysis_id": "00000000-0000-0000-0000-000000000001",
+  "comparison_report_id": "00000000-0000-0000-0000-000000000002",
+  "quality_evaluation_ids": ["00000000-0000-0000-0000-000000000003"],
+  "production_unit_quantity": {"value": "500", "unit": "g"}
+}

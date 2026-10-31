@@ -145,3 +145,22 @@ class PriceComparison(Base):
     request_snapshot: Mapped[dict] = mapped_column(JSON)
     product_snapshot: Mapped[dict] = mapped_column(JSON)
     result: Mapped[dict] = mapped_column(JSON)
+
+
+class SellerPricingReview(Base):
+    __tablename__ = "seller_pricing_reviews"
+    __table_args__ = (
+        CheckConstraint(
+            "basis = 'seller_reported_unverified'",
+            name="ck_seller_pricing_reviews_basis",
+        ),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    product_id: Mapped[str] = mapped_column(ForeignKey("products.id"), index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    reviewed_on: Mapped[date] = mapped_column(Date)
+    review_version: Mapped[str] = mapped_column(String(100))
+    basis: Mapped[str] = mapped_column(String(40))
+    request_snapshot: Mapped[dict] = mapped_column(JSON)
+    evidence_snapshot: Mapped[dict] = mapped_column(JSON)
+    result: Mapped[dict] = mapped_column(JSON)

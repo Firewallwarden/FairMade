@@ -2,7 +2,7 @@
 
 ## Status and common conventions
 
-The account, seller-application, product, saved-analysis, quality, and comparison endpoints
+The account, seller-application, product, saved-analysis, quality, comparison, and review endpoints
 below are implemented by the backend for **local development**. Their shared integration contract is
 **proposed; frontend acceptance and browser integration are pending**. No frontend
 changes are included. The existing stateless calculator retains its #2 behavior.
@@ -441,6 +441,104 @@ See the [synthetic bread and egg examples](../backend/examples/comparisons/READM
 The new endpoints are implemented by the backend; frontend contract acceptance
 is pending.
 
+## Explainable seller pricing reviews
+
+These private reviews assemble explicitly selected saved evidence. They are not
+public Fair Price Passports and contain seller cost details and claims.
+
+| Method and path | Behavior | Success |
+| --- | --- | --- |
+| POST /api/v1/products/{id}/pricing-reviews | Assemble selected evidence and explanations | 201: Review |
+| GET /api/v1/products/{id}/pricing-reviews | Standard paginated history summaries | 200: Page of ReviewSummary |
+| GET /api/v1/products/{id}/pricing-reviews/{review_id} | Read complete stored review | 200: Review |
+
+All routes require bearer authentication, seller access, and ownership of the
+product. Every selected source record must also belong to that same product.
+Missing, cross-product, and other sellers' evidence returns generic 404, with no
+partial review saved. Existing 401/403 behavior applies.
+
+Creation fields:
+
+| Field | Required | Meaning |
+| --- | --- | --- |
+| pricing_analysis_id | Yes | UUID of one saved production-economics analysis |
+| comparison_report_id | No | UUID of one saved finished-product comparison; defaults null |
+| quality_evaluation_ids | No | Up to 100 unique selected UUIDs; defaults empty |
+| production_unit_quantity | No | Explicit quantity represented by one production unit; defaults null |
+
+A quantity uses the existing comparison `{value, unit}` contract. It requires a
+comparison report, and named egg/dozen/loaf units must match the **saved pricing**
+product type. Unknown fields, duplicate quality IDs, invalid IDs/quantities,
+client-supplied results, and unsupported ownership/verification fields return 422.
+
+The unit declaration is a seller-supplied assertion, not a verified measurement.
+For example, declaring one production unit as 500 g lets the review normalize
+selected 100 g quote evidence onto that basis. The backend never parses
+selling_unit or infers a loaf weight, package size, or count equivalence.
+Without a declaration, comparison context stays on its original basis and
+there are **no** price relations against production-unit prices.
+
+Review v1 supports production-economics-v1, quality-evaluation-v1, and
+finished-product-comparison-v1 source records. Unknown versions return 409
+`UNSUPPORTED_EVIDENCE_VERSION`. No new source analysis/evaluation is created
+implicitly and no original calculation is overwritten.
+
+ReviewSummary contains id, created_at, reviewed_on, and review_version. Review
+adds product_id, basis, request_snapshot, evidence_snapshot, and result.
+The version is seller-pricing-review-v1; basis is seller_reported_unverified.
+The snapshot contains the selected saved pricing analysis, quality evaluations,
+optional comparison report, and the product/Quality Locks captured during assembly.
+Full cost inputs, source notes, original warnings, and unverified bases remain visible.
+
+The result contains:
+
+- economics: the selected saved pricing response, with costs, break-even,
+  seller-margin range, scenarios, assumptions, and warnings. It is not recalculated.
+- quality: captured rule revision and selected candidate checks. Overall status
+  is not_provided, needs_attention, or claims_match_unverified. Failed, unknown,
+  unevaluated, or outdated checks cannot be outweighed by other matching claims.
+  A check applies to the captured rules only when both revision and snapshot agree.
+- market_context: the selected comparison reassessed at reviewed_on, optional
+  price relations, and an evidence status.
+- explanations: deterministic `{code, message}` statements grounded in the
+  selected facts and limitations. No LLM or external provider is used.
+- warnings: stable codes identifying unverified inputs, missing evidence,
+  outdated/failed quality checks, changed product metadata, and other limits.
+
+Market-context statuses are not_provided, product_type_mismatch, basis_missing,
+no_comparable_evidence, or comparable. Product-type mismatches between saved pricing
+and comparison snapshots prevent numerical assessments. New reviews recheck quote
+age against reviewed_on (UTC date), using the captured comparison cutoff. They
+preserve quote notes/exclusions and do not modify the earlier report.
+
+With a valid quantity mapping and fresh compatible evidence, the review assesses
+break-even, seller-target range bounds, and proposed scenario prices as below,
+within, or above the **six-decimal displayed** selected quote range. Each entry
+contains metric, price, displayed_range_relation, and scenario_index (null except
+for scenario prices). These relations describe that range; they do not establish
+an optimal price, profit guarantee, affordability, or objective fairness.
+
+Quality candidate evidence is not automatically linked to the compared quote IDs.
+The review does not establish equivalent quote quality or filter those prices
+using unrelated candidate checks. Matching claims remain unverified. A failed
+mandatory candidate check is explicitly unsuitable as evidence of an acceptable
+saving. The seller retains pricing control and no price is changed automatically.
+
+Missing evidence is supported and explicitly flagged. A request containing only
+pricing_analysis_id yields an economics review with missing-quality and
+missing-comparison warnings. Saved source warnings, such as MARKET_NOT_EVALUATED
+inside the original economics calculation, remain unchanged even when the
+review adds a separate quantitative context section.
+
+Review reads return stored snapshots and explanations without reassessing age,
+quality revisions, or prices. There are no edit/delete routes; repeated successful
+POSTs create separate reviews. Use a new review for newly selected or updated
+evidence. History pagination and tie-breaking match existing APIs.
+
+See the [synthetic review workflow](../backend/examples/reviews/README.md). These
+endpoints are implemented backend-side; shared frontend acceptance is pending.
+Publishing any review data requires a separate seller-approved disclosure feature.
+
 ## Errors and existing endpoints
 
 New application errors use:
@@ -458,6 +556,7 @@ New application errors use:
 | 409 | EMAIL_EXISTS | Registration with an existing normalized email |
 | 409 | ALREADY_SELLER | A seller attempts to submit a seller application |
 | 409 | REVISION_CONFLICT | Stale Quality Lock replacement or evaluation request |
+| 409 | UNSUPPORTED_EVIDENCE_VERSION | A pricing review selects an unsupported source version |
 | 422 | FastAPI field-error array in detail | Invalid fields, UUIDs, pagination, or malformed JSON |
 | 405 | Standard FastAPI detail string | Unsupported methods, including history edits |
 
@@ -491,6 +590,9 @@ discards Quality Locks and quality history while retaining earlier application d
 
 Migration 0004 adds price observations and comparison reports without modifying
 existing data. Downgrading it deletes only those two tables and their records.
+
+Migration 0005 adds immutable seller pricing reviews without changing the source
+records. Downgrading 0005 deletes review history only.
 
 Before frontend integration, jointly accept this proposal and agree on approved
 development origins and browser credential handling. Public deployment requires
