@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 
 from fairmade.main import app
 
-pytest_plugins = ["marketplace_fixtures", "order_fixtures"]
+pytest_plugins = ["marketplace_fixtures", "order_fixtures", "payment_fixtures"]
 
 
 @pytest.fixture(autouse=True)

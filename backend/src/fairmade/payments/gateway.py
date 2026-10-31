@@ -120,6 +120,40 @@ class PayPalSandboxGateway:
             headers=self._headers(),
         )
 
+    def refund(
+        self,
+        capture_id: str,
+        refund_request_id: str,
+        amount_minor: int,
+        request_id: str,
+    ) -> str:
+        result = self._json(
+            "POST",
+            "/v2/payments/captures/" + provider_id(capture_id) + "/refund",
+            headers=self._headers(request_id),
+            json={
+                "amount": {"currency_code": "USD", "value": str(money(amount_minor).amount)},
+                "invoice_id": "fairmade-refund-" + refund_request_id,
+                "custom_id": refund_request_id,
+                "note_to_payer": "FairMade approved sandbox refund",
+            },
+        )
+        return provider_id(result.get("id"))
+
+    def fetch_capture(self, capture_id: str) -> dict:
+        return self._json(
+            "GET",
+            "/v2/payments/captures/" + provider_id(capture_id),
+            headers=self._headers(),
+        )
+
+    def fetch_refund(self, refund_id: str) -> dict:
+        return self._json(
+            "GET",
+            "/v2/payments/refunds/" + provider_id(refund_id),
+            headers=self._headers(),
+        )
+
 
 @contextmanager
 def configured_gateway(injected: Gateway | None = None) -> Iterator[Gateway | None]:

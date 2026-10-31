@@ -301,6 +301,7 @@ class Order(Base):
     subtotal_minor: Mapped[int] = mapped_column(Integer)
     snapshot: Mapped[dict] = mapped_column(JSON)
     checkout: Mapped[PayPalCheckout | None] = relationship(uselist=False)
+    refund_request: Mapped[RefundRequest | None] = relationship(uselist=False)
 
 
 class OrderLine(Base):
@@ -360,5 +361,67 @@ class PayPalCheckout(Base):
     verified_at: Mapped[datetime | None] = mapped_column(DateTime)
     fee_minor: Mapped[int | None] = mapped_column(Integer)
     net_minor: Mapped[int | None] = mapped_column(Integer)
+    lease_token: Mapped[str | None] = mapped_column(String(36))
+    lease_expires_at: Mapped[datetime | None] = mapped_column(DateTime)
+
+
+class RefundRequest(Base):
+    __tablename__ = "refund_requests"
+    __table_args__ = (
+        CheckConstraint(
+            "state IN ('requested', 'denied', 'refund_pending', "
+            "'refunded', 'failed', 'needs_review')",
+            name="ck_refund_request_state",
+        ),
+        CheckConstraint("revision >= 1", name="ck_refund_request_revision"),
+        CheckConstraint(
+            "amount_minor > 0 AND amount_minor <= 100000000000",
+            name="ck_refund_request_amount",
+        ),
+        CheckConstraint(
+            "(state = 'requested' AND decision IS NULL) OR "
+            "(state = 'denied' AND decision IS NOT NULL "
+            "AND decision = 'denied' AND decision_reason IS NOT NULL) OR "
+            "(state IN ('refund_pending', 'refunded', 'failed', 'needs_review') "
+            "AND decision IS NOT NULL AND decision = 'approved')",
+            name="ck_refund_request_decision_state",
+        ),
+        CheckConstraint(
+            "decision IS NULL OR (decided_at IS NOT NULL AND "
+            "decided_by_account_id IS NOT NULL AND decision_revision IS NOT NULL)",
+            name="ck_refund_request_decision_audit",
+        ),
+        CheckConstraint(
+            "state != 'refunded' OR (provider_refund_id IS NOT NULL AND verified_at IS NOT NULL)",
+            name="ck_refund_request_completed",
+        ),
+        CheckConstraint(
+            "(lease_token IS NULL AND lease_expires_at IS NULL) OR "
+            "(lease_token IS NOT NULL AND lease_expires_at IS NOT NULL)",
+            name="ck_refund_request_lease",
+        ),
+        Index("ix_refund_request_created", "created_at", "id"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    order_id: Mapped[str] = mapped_column(ForeignKey("orders.id"), unique=True)
+    requested_by_account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    reason: Mapped[str] = mapped_column(Text)
+    revision: Mapped[int] = mapped_column(Integer)
+    state: Mapped[str] = mapped_column(String(20))
+    decision: Mapped[str | None] = mapped_column(String(8))
+    decision_reason: Mapped[str | None] = mapped_column(Text)
+    decision_revision: Mapped[int | None] = mapped_column(Integer)
+    decided_by_account_id: Mapped[str | None] = mapped_column(ForeignKey("accounts.id"))
+    decided_at: Mapped[datetime | None] = mapped_column(DateTime)
+    amount_minor: Mapped[int] = mapped_column(Integer)
+    merchant_id: Mapped[str] = mapped_column(String(13))
+    capture_id: Mapped[str] = mapped_column(ForeignKey("paypal_checkouts.capture_id"))
+    provider_order_id: Mapped[str] = mapped_column(String(64))
+    provider_request_id: Mapped[str] = mapped_column(String(36), default=new_id, unique=True)
+    provider_refund_id: Mapped[str | None] = mapped_column(String(64), unique=True)
+    provider_status: Mapped[str | None] = mapped_column(String(20))
+    attempted_at: Mapped[datetime | None] = mapped_column(DateTime)
+    verified_at: Mapped[datetime | None] = mapped_column(DateTime)
     lease_token: Mapped[str | None] = mapped_column(String(36))
     lease_expires_at: Mapped[datetime | None] = mapped_column(DateTime)

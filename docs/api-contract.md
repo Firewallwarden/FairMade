@@ -2,7 +2,7 @@
 
 ## Status and common conventions
 
-The account, seller-application, product, saved-analysis, quality, comparison, review, Passport, marketplace, inventory, order, and sandbox-payment endpoints
+The account, seller-application, product, saved-analysis, quality, comparison, review, Passport, marketplace, inventory, order, sandbox-payment, and refund endpoints
 below are implemented by the backend for **local development**. Their shared integration contract is
 **proposed; frontend acceptance and browser integration are pending**. No frontend
 changes are included. The existing stateless calculator retains its #2 behavior.
@@ -739,7 +739,8 @@ See [the synthetic marketplace workflow](../backend/examples/marketplace/README.
 Implemented for local development; frontend acceptance is pending. This slice
 creates unpaid order drafts and stock holds, not PayPal orders or paid purchases.
 Amounts are merchandise subtotals, not final payable totals. Shipping, tax,
-fulfillment, refunds, and verified payment processing remain separate work.
+fulfillment remain separate work. Sandbox payments and seller-reviewed refunds
+are described in the following sections.
 
 | Method | Path | Access / result |
 | --- | --- | --- |
@@ -850,7 +851,7 @@ They retain only already-approved catalog content, not the full private review o
 Passport costs. Revoked seller access denies seller views; a buyer can still read
 their own buyer history. Order creation never confirms payment. The sandbox
 payment slice below adds verified capture and stock consumption; fulfillment,
-refunds and shipment are still unimplemented.
+shipment is still unimplemented. Seller-reviewed full refunds are described below.
 
 See [the synthetic order workflow](../backend/examples/orders/README.md). Rate
 limits, abuse monitoring and hosted operational controls remain part of hosted
@@ -944,7 +945,7 @@ first fetch PayPal's state; an already completed payment settles without another
 POST. A capture timeout is not a decline: reconciliation can discover success.
 Capture POST retries are bounded to a conservative six-hour window; afterward
 only existing-payment reads/reconciliation are allowed. No webhook endpoint,
-scheduled reconciliation worker, refund processing, or automatic manual-review
+scheduled reconciliation worker or automatic manual-review
 resolution is implemented. Never release uncertain holds simply because time passed.
 
 | Status | Code | Meaning |
@@ -962,6 +963,122 @@ and [sandbox setup/recovery guide](../backend/examples/paypal/README.md).
 Automated tests use provider doubles/HTTP mock transports and make no real PayPal
 calls. A credentialed sandbox approval/capture and browser integration are separate
 manual checks; they have not been claimed as completed.
+
+## Buyer refund requests and seller decisions
+
+Local development uses the approved shared PayPal sandbox merchant. This slice
+supports one immutable full-order request per verified paid order. Partial refunds,
+appeals/resubmission, policy deadlines, returns, and automatic restocking are not
+implemented. Seller approval authorizes refund execution; it does not itself prove
+that PayPal returned funds.
+
+| Method | Path | Access / result |
+| --- | --- | --- |
+| POST | /api/v1/orders/{order_id}/refund-request | Buyer owner; request, 201 new / 200 identical retry |
+| GET | /api/v1/orders/{order_id}/refund-request | Buyer owner; own request and decision |
+| GET | /api/v1/refund-requests | Buyer owner; own requests, Page |
+| POST | /api/v1/orders/{order_id}/refund-request/reconcile | Buyer owner; read existing approved refund status |
+| GET | /api/v1/seller/orders/{order_id}/refund-request | Verified receiving seller; review private request |
+| GET | /api/v1/seller/refund-requests | Verified seller; own received requests, Page |
+| POST | /api/v1/seller/orders/{order_id}/refund-request/approve | Verified receiving seller; approve and initiate/resume refund |
+| POST | /api/v1/seller/orders/{order_id}/refund-request/deny | Verified receiving seller; final denial with reason |
+| POST | /api/v1/seller/orders/{order_id}/refund-request/reconcile | Verified receiving seller; read existing approved refund status |
+
+All routes require existing bearer authentication and participant ownership;
+cross-order/account IDs return 404. Buyers, pending sellers and admin-only accounts
+cannot make seller decisions (403). There are no anonymous refund records.
+Buyer and seller reasons are private participant text; render them as text.
+Success/domain errors use no-store; validation errors omit submitted input values.
+List pagination uses limit 1..100 (default 20) and offset >=0 (default 0), ordered
+by created_at and UUID descending.
+
+### Request and decision bodies
+
+```json
+{"reason":"Synthetic reason for requesting a full refund."}
+```
+
+Request reason is required, trimmed text of 1..1000 characters. Amount, currency,
+provider IDs, seller IDs, restocking flags and state are server-controlled and
+rejected as extra fields (422). Eligibility requires a stored verified completed
+capture; unpaid/uncertain payments return 409 ORDER_NOT_PAID. Requesting does not
+call PayPal. An identical reason on an existing request returns it with 200;
+a different reason returns 409 REFUND_REQUEST_EXISTS.
+
+Seller approval takes:
+
+```json
+{"expected_revision":1}
+```
+
+Denial takes:
+
+```json
+{"expected_revision":1,"reason":"Synthetic explanation of the denial."}
+```
+
+expected_revision is a strict positive integer using the common revision bounds.
+The first decision must match the current request revision, otherwise 409
+REVISION_CONFLICT. The backend records the deciding account and timestamp.
+Decisions and reasons cannot be overwritten or reversed. A matching repeated
+decision returns its current result; conflicting decisions return 409
+REFUND_ALREADY_DECIDED. Denial performs no provider call.
+
+Approval commits a durable decision, operation lease and stable provider request
+UUID before any refund POST. Retries use the original decision's expected revision
+(returned as decision_expected_revision), not a later execution-state revision.
+The refund amount is always the complete saved USD capture amount. The private
+buyer/seller reasons are not sent to PayPal; a fixed sandbox note and request
+correlation identifiers are used instead.
+
+### Response and completion
+
+Response fields: id, order_id, revision, state, reason, created_at, nullable
+decision (approved/denied), decision_reason, decision_expected_revision, decided_at,
+amount (USD decimal-string value), environment sandbox, merchant_mode shared,
+nullable provider_refund_id/provider_status and verified_at. Internal participant
+IDs, merchant credentials, raw provider bodies, payer data, leases and retry UUIDs
+are not returned. Revision increments on decision/provider-state changes.
+
+States are requested, denied, refund_pending, refunded, failed, needs_review.
+Only a server-fetched refund with matching refund ID, invoice correlation, full
+amount/currency and original capture parent can become refunded. The original
+capture is also fetched and checked against the saved merchant, provider order,
+capture ID and gross amount. Provider COMPLETED confirms refund; PENDING does not.
+FAILED/CANCELLED becomes failed and never fabricates a completed refund.
+
+Order status adds refund_pending, refund_review and refunded. Requested/denied/
+failed refunds leave the order paid. The original capture receipt, order snapshot
+and capture fee history remain unchanged. Refunds do not alter on-hand stock,
+reservations or inventory revision; a refund does not prove physical goods returned.
+
+### Recovery and errors
+
+Both reconciliation endpoints require {} and perform provider GETs only. They
+cannot approve a request or initiate a refund. Before approval, they return the
+unchanged request. If a refund ID was durably saved, either participant can
+reconcile it after timeouts/restarts. If a POST result was lost before the refund
+ID was saved, the seller can retry the same approval/body/key within a conservative
+six-hour window. The server never substitutes a new provider key.
+
+A 60-second lease blocks concurrent refund operations. Provider calls do not hold
+database write transactions. Beyond the retry window, unknown results require
+manual review; known refund IDs can still be reconciled. A provider mismatch
+records needs_review rather than asserting refunded. There is no automatic
+manual-review resolution, webhook handling, fee-refund inference or partial refund.
+
+| Status | Code | Meaning |
+| --- | --- | --- |
+| 409 | ORDER_NOT_PAID / REFUND_REQUEST_EXISTS | Ineligible order or another immutable request reason |
+| 409 | REVISION_CONFLICT / REFUND_ALREADY_DECIDED | Stale or conflicting seller decision |
+| 409 | REFUND_OPERATION_IN_PROGRESS | Active/superseding operation lease |
+| 409 | REFUND_RESULT_UNKNOWN / REFUND_RETRY_WINDOW_ELAPSED / REFUND_REVIEW_REQUIRED | Seller retry, reconciliation or review needed |
+| 502 | REFUND_PROVIDER_UNAVAILABLE / REFUND_VERIFICATION_FAILED | Uncertain or mismatched provider result |
+| 503 | PAYPAL_DISABLED / REFUND_MERCHANT_CHANGED | Sandbox setup missing or merchant differs from saved payment |
+
+See [the synthetic buyer/seller refund workflow](../backend/examples/refunds/README.md).
+Tests use provider doubles and HTTP mock transports. Real credentialed sandbox
+refund and browser integration tests remain pending.
 
 ## Errors and existing endpoints
 
@@ -1032,6 +1149,10 @@ It leaves earlier records unchanged; downgrade deletes these three new tables.
 Migration 0009 adds sanitized payment records, durable retry IDs and leases without
 changing historical snapshots. It refuses downgrade once payment records exist:
 dropping them could erase payment knowledge and allow an unsafe repeat payment.
+
+Migration 0010 adds refund request/decision/receipt history without changing older
+records. It refuses downgrade if any payment or refund records exist, before DDL,
+so a wider SQLite downgrade cannot partly drop schema before reaching payment guards.
 
 Before frontend integration, jointly accept this proposal and agree on approved
 development origins and browser credential handling. Public deployment requires
