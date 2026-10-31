@@ -27,13 +27,29 @@ with attribution. Its backend/docs tree matches the merged marketplace branch;
 its root rules and CONTRIBUTING.md match the merged contribution branch.
 All 417 backend tests, lint, and formatting passed on the recovered tree.
 
+## Recurrence and stricter correction
+
+The next audit found #14 on main, but #15/#16 were merged into
+fix/integrate-approved-features and #17 into feat/orders-inventory. Drafts had been
+promoted and merged without first changing their destinations. Main still lacked
+the guard itself, inventory/orders and PayPal checkout.
+
+Keeping feature-targeted PRs draft was insufficient for this manual merge process.
+The correction removes feature-branch destinations entirely: EVERY newly created
+PR targets main, including dependent drafts. Branches may still depend on other
+branches, so development can continue. Dependent main PRs clearly disclose their
+cumulative changes and stay draft until their prerequisites are integrated.
+The readiness guard now rejects non-main bases in Draft mode too. Recovery replays
+the reviewed changes onto current main without force-pushes or agent merges.
+
 ## Required workflow
 
 - Continue independent/dependent development without waiting for unrelated merges.
-  Create PRs based on feature branches as drafts. Draft PRs cannot be merged.
+  Create every PR with main as its destination. Dependent PRs remain drafts with
+  explicit prerequisites and cumulative-diff disclosures.
 - Present only main-targeted PRs as merge-ready. After a parent merges, verify
   the actual merge commit on fetched main, reconcile the child's history/diff,
-  target main, revalidate, and run the Review guard before marking it ready.
+  retain main as the destination, revalidate, and run the Review guard before marking it ready.
 - Preserve the prohibition on unauthorized force-pushes. If a published child's
   squash history cannot be reconciled without rewriting it, use a fresh main-based
   worktree/branch and replay only its changes. Leave the original draft with a
@@ -48,7 +64,7 @@ From a feature worktree, with Git and authenticated GitHub CLI available:
 ```powershell
 # Before promoting a main-targeted draft or reporting a main PR ready:
 .\scripts\Test-PullRequestReadiness.ps1 -PullRequest 14 -Mode Review
-# While a dependent PR still targets its parent:
+# While a main-targeted draft waits for prerequisites:
 .\scripts\Test-PullRequestReadiness.ps1 -PullRequest 15 -Mode Draft
 # After a user reports merging a main-targeted PR:
 .\scripts\Test-PullRequestReadiness.ps1 -PullRequest 14 -Mode Integrated
@@ -56,7 +72,8 @@ From a feature worktree, with Git and authenticated GitHub CLI available:
 .\scripts\tests\Test-PullRequestReadiness.Tests.ps1
 ```
 
-Numbers above are illustrative except recovery PR #14. Review checks GitHub base,
+Numbers above are illustrative except recovery PR #14; historical #15 itself
+failed this stricter rule. Every mode requires main as the destination. Review checks GitHub base,
 open state, clean matching local branch/head, and ancestry of fetched main.
 Integrated checks MERGED, main destination, and merge-commit ancestry on main.
 The guard fails closed on metadata/fetch failures. It does not merge, change PR

@@ -25,17 +25,18 @@ $pr = [pscustomobject]@{
     mergeCommit = if ($raw.merge_commit_sha) { [pscustomobject]@{oid = $raw.merge_commit_sha} } else { $null }
 }
 
+if ($pr.baseRefName -ne 'main') {
+    throw "PR #$PullRequest targets '$($pr.baseRefName)', not main. Every PR, including drafts, must target main."
+}
+
 if ($Mode -eq 'Draft') {
     if ($pr.state -ne 'OPEN' -or -not $pr.isDraft) {
-        throw 'Dependent work must remain an OPEN draft PR until it targets main safely.'
+        throw 'Dependent work must remain an OPEN draft PR while prerequisites are unmerged.'
     }
     Write-Output "PR #$PullRequest is draft; base is $($pr.baseRefName). It is not merge-ready."
     return
 }
 
-if ($pr.baseRefName -ne 'main') {
-    throw "PR #$PullRequest targets '$($pr.baseRefName)', not main. Do not merge or report it as integrated."
-}
 & git fetch origin
 if ($LASTEXITCODE -ne 0) { throw 'Could not refresh origin refs.' }
 

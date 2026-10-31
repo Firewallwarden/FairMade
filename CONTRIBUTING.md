@@ -27,9 +27,9 @@ breaking changes.
    there and use `git pull --ff-only`; develop and test in a dedicated branch
    and worktree outside it.
 2. Start independent work from `origin/main`. A dependent feature may start
-   from an unmerged parent feature branch in its own worktree; target that parent
-   in a draft stacked PR and identify the dependency. PRs targeting feature
-   branches must remain draft and must not be merged into those branches.
+   from an unmerged parent feature branch in its own worktree. Every PR must target
+   main, including dependent drafts. Never target a feature branch. Identify
+   prerequisites and any prerequisite changes included in the cumulative diff.
 3. Explain the focused scope and material design choices. Ask for missing product
    decisions; do not introduce paid services, new infrastructure, or major
    architectural changes without approval.
@@ -37,7 +37,7 @@ breaking changes.
    PR, fetch and rebase onto its current base (`origin/main` or the parent
    feature branch). Coordinate conflicts rather than overwriting another
    contributor's work. Review stacked branch history and base after a parent
-   merges. Before marking a PR ready, target main and run
+   merges. The PR destination always remains main. Before marking a PR ready, run
    `scripts/Test-PullRequestReadiness.ps1 -PullRequest <number> -Mode Review`
    from its clean feature worktree. Promote dependent work only after the parent
    merge is verified on fetched main. If squash history requires an unauthorized

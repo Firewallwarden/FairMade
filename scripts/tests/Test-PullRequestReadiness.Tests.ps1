@@ -72,7 +72,8 @@ Test-Scenario 'stale-main' Review @{AncestorExit = 1} $false
 Test-Scenario 'github-unavailable' Review @{GhExit = 1} $false
 Test-Scenario 'fetch-unavailable' Review @{FetchExit = 1} $false
 Test-Scenario 'closed-review' Review @{state = 'CLOSED'} $false
-Test-Scenario 'dependent-draft' Draft @{isDraft = $true; baseRefName = 'feature-parent'} $true
+Test-Scenario 'main-dependent-draft' Draft @{isDraft = $true} $true
+Test-Scenario 'feature-base-draft-rejected' Draft @{isDraft = $true; baseRefName = 'feature-parent'} $false
 Test-Scenario 'dependent-ready-rejected' Draft @{baseRefName = 'feature-parent'} $false
 Test-Scenario 'merged-main' Integrated @{state = 'MERGED'} $true
 Test-Scenario 'merged-feature-is-not-integration' Integrated @{state = 'MERGED'; baseRefName = 'feature-parent'} $false
