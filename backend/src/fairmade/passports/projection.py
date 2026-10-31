@@ -1,7 +1,5 @@
 """Pure allowlist projection. Never forward private review dictionaries."""
 
-import hashlib
-import json
 from decimal import ROUND_HALF_UP, Decimal, localcontext
 
 from pydantic import TypeAdapter
@@ -15,6 +13,7 @@ from fairmade.passports.schemas import (
     PublicProduct,
     PublicQualitySummary,
 )
+from fairmade.publication import public_digest
 from fairmade.quality.schemas import Rule
 
 NOTICES = [
@@ -128,7 +127,4 @@ def payload_dict(payload: PublicPassport) -> dict:
 
 
 def digest(payload: PublicPassport) -> str:
-    encoded = json.dumps(
-        payload_dict(payload), sort_keys=True, separators=(",", ":"), ensure_ascii=False
-    )
-    return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+    return public_digest(payload)

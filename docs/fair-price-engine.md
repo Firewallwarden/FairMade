@@ -156,7 +156,10 @@ approval, not source verification, certification, or an objective fairness verdi
    objective fairness.
 3. Seller-controlled Fair Price Passport drafts, previews, approved publication,
    and withdrawal: implemented for local development, pending frontend contract
-   review. Marketplace listing and browse APIs are next.
+   review. Seller listing drafts, explicit activation/deactivation, public browse,
+   text/type/location filters, and public detail APIs are now implemented. Listing
+   prices come from approved Passports; publication withdrawal/supersession or loss
+   of seller access hides linked listings. Availability and checkout remain deferred.
 4. Orders, inventory reservation, and PayPal Sandbox checkout with verified,
    idempotent payment events and reconciled fees.
 5. Supplier intelligence and expanded business/shopping assistants.
