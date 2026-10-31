@@ -11,9 +11,19 @@ param(
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
-$prJson = & gh pr view $PullRequest --json number,state,isDraft,baseRefName,headRefName,headRefOid,mergeCommit
+$prJson = & gh api "repos/{owner}/{repo}/pulls/$PullRequest"
 if ($LASTEXITCODE -ne 0) { throw 'Could not load PR metadata from GitHub.' }
-$pr = ($prJson -join [Environment]::NewLine) | ConvertFrom-Json
+$raw = ($prJson -join [Environment]::NewLine) | ConvertFrom-Json
+# The REST fields also work with older installed gh versions that do not expose
+# headRefOid through 'gh pr view --json'.
+$pr = [pscustomobject]@{
+    state = if ($raw.merged) { 'MERGED' } else { $raw.state.ToUpperInvariant() }
+    isDraft = $raw.draft
+    baseRefName = $raw.base.ref
+    headRefName = $raw.head.ref
+    headRefOid = $raw.head.sha
+    mergeCommit = if ($raw.merge_commit_sha) { [pscustomobject]@{oid = $raw.merge_commit_sha} } else { $null }
+}
 
 if ($Mode -eq 'Draft') {
     if ($pr.state -ne 'OPEN' -or -not $pr.isDraft) {
