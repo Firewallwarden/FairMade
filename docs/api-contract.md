@@ -2,7 +2,7 @@
 
 ## Status and common conventions
 
-The account, seller-application, product, saved-analysis, quality, comparison, review, Passport, marketplace, inventory, order, sandbox-payment, and refund endpoints
+The account, seller-application, product, saved-analysis, quality, comparison, review, Passport, marketplace, inventory, order, sandbox-payment, refund, and supplier-sourcing endpoints
 below are implemented by the backend for **local development**. Their shared integration contract is
 **proposed; frontend acceptance and browser integration are pending**. No frontend
 changes are included. The existing stateless calculator retains its #2 behavior.
@@ -1080,6 +1080,179 @@ See [the synthetic buyer/seller refund workflow](../backend/examples/refunds/REA
 Tests use provider doubles and HTTP mock transports. Real credentialed sandbox
 refund and browser integration tests remain pending.
 
+## Private supplier sourcing and comparisons
+
+This additive local-development API uses manually entered, unverified quotes.
+Frontend acceptance and browser integration remain pending. No supplier discovery,
+scraping, external fetching or AI provider is called.
+
+Each product can have separate sourcing inputs, such as bread flour or egg cartons.
+Each input has its own mandatory requirements, independent of the finished
+product's Quality Locks. Reuse the boolean, choice and numeric rule formats above;
+passing input claims never establishes that the finished product passes its locks.
+Inputs start at rule revision 0 with no rules. No configured rules means
+not_evaluated, so no quote is eligible for the cost summary.
+
+All paths below are prefixed with
+`/api/v1/products/{product_id}/sourcing-inputs` and require verified seller
+access and product ownership. Foreign product, input, quote and report IDs return
+the same 404 NOT_FOUND. Buyers/pending sellers receive 403 SELLER_REQUIRED;
+unauthenticated requests receive 401.
+
+| Method and suffix | Body | Success |
+| --- | --- | --- |
+| POST (no suffix) | `{label}` | 201: sourcing input |
+| GET (no suffix) | None | 200: input page |
+| GET /{input_id} | None | 200: sourcing input |
+| PUT /{input_id}/quality-locks | `{expected_revision, rules}` | 200: updated sourcing input |
+| POST /{input_id}/supplier-quotes | Quote below | 201: immutable quote |
+| GET /{input_id}/supplier-quotes | None | 200: quote page |
+| GET /{input_id}/supplier-quotes/{quote_id} | None | 200: quote |
+| POST /{input_id}/supplier-comparisons | Comparison below | 201: immutable report |
+| GET /{input_id}/supplier-comparisons | None | 200: report summary page |
+| GET /{input_id}/supplier-comparisons/{report_id} | None | 200: report |
+
+Pages use `{items, limit, offset}`, with limit 1-100 (default 20), nonnegative
+offset (default 0), and newest-first ordering by created_at then ID. Report
+summaries contain id, created_at, as_of_date, rule_revision and comparison_version.
+Labels are trimmed, nonempty and at most 200 characters. Inputs return id,
+product_id, label, rule_revision, rules, created_at and updated_at. The label
+identifies one comparable ingredient/material; no ingredient equivalence is inferred.
+
+### Quote body and provenance
+
+Synthetic example only:
+
+```json
+{
+  "supplier_name": "Synthetic flour supplier",
+  "source": {
+    "name": "Synthetic written quote",
+    "kind": "document",
+    "reference": "Example only; not a real supplier offer"
+  },
+  "location": "Synthetic town",
+  "observed_on": "2026-01-31",
+  "valid_until": "2026-02-28",
+  "currency": "USD",
+  "package_price": "12.00",
+  "package_quantity": {"value": "5", "unit": "kg"},
+  "usable_fraction": "0.8",
+  "minimum_packages": 1,
+  "maximum_packages": 100,
+  "transport_cost": "4.00",
+  "availability": "available",
+  "claims": {"organic": {"type": "boolean", "value": true}},
+  "notes": "Synthetic single-input purchase; transport charged once."
+}
+```
+
+Money and numeric quantities/fractions must be decimal JSON strings, never
+numbers or booleans. Money is nonnegative USD with at most two decimal places;
+quantities are positive, fractions are greater than zero and at most one.
+These decimal inputs are bounded at 1,000,000,000 with at most six quantity or
+fraction decimal places. Units are g, kg, ml, l or item; item quantities are whole.
+Only exact mass-to-mass and volume-to-volume conversions are supported; items
+stay items. No density, item weight or product equivalence is inferred.
+
+minimum_packages is a strict integer 1-1,000,000, default 1.
+maximum_packages is optional/null or an integer in that range, at least the
+minimum; it is a seller-reported cap for this quote, not verified inventory.
+Each bulk tier is a separate quote with its own price and package limits.
+transport_cost is required: an explicit zero means no/allocated transport cost,
+and null means unknown. It is a flat cost charged once for this input's purchase,
+not a per-package charge or an automatic shared-basket allocation.
+
+availability is required and one of available, unavailable or unknown.
+observed_on cannot be in the future. valid_until is optional/null and cannot
+precede observed_on; its date is inclusive. Source format matches finished-product
+observations; references are plain text stored without fetching them. Claims use
+the existing typed claim formats, with at most 100 attribute keys. Extra claims
+may be recorded for future rules; only defined rules affect evaluation. Ambiguous
+keys after trimming are rejected. notes is optional/null and at most 2,000
+characters. Unknown fields and attempts to assign ownership/verification are 422.
+Validation responses omit the submitted values.
+
+Quote responses contain id, sourcing_input_id, created_at,
+basis=seller_reported_unverified and the exact validated details. Corrections
+create new quotes; there are no quote update/delete endpoints.
+
+### Report request, calculations and exclusions
+
+```json
+{
+  "quote_ids": ["00000000-0000-4000-8000-000000000001"],
+  "expected_rule_revision": 1,
+  "required_quantity": {"value": "9", "unit": "kg"},
+  "max_age_days": 30
+}
+```
+
+The synthetic UUID above must be replaced by an owned quote ID. Select 1-100
+distinct quotes from this exact input. The required quantity is the usable amount
+needed, using the same bounded quantity format. max_age_days is a strict integer
+0-365, default 30. The revision is required and uses the existing strict Quality
+Lock revision bounds. Rule replacements increment the input's revision; both
+replacement and report creation reject stale revisions with 409 REVISION_CONFLICT.
+They serialize writes so reports cannot silently evaluate a different revision.
+
+For each compatible quote with known transport cost, the backend calculates:
+
+- Usable quantity per package = quoted package quantity × usable fraction,
+  converted to the request's unit.
+- Packages to buy = max(minimum_packages, ceiling(required / usable per package)).
+- Merchandise cost = packages × package_price.
+- Purchase cost = merchandise cost + transport_cost.
+- Total usable quantity = packages × usable per package.
+- Surplus quantity = total usable quantity − required quantity.
+- Cost per usable unit = purchase cost / total usable quantity, in the request's
+  unit. This amortizes transport across the entire purchase, including surplus.
+
+Thus the example needs three packages: $36 merchandise plus $4 transport buys
+12 usable kg, leaving 3 kg surplus; cost per usable kg is $3.333333. Cash outlay
+and unit cost describe different tradeoffs. No savings relative to a baseline
+or supplier recommendation is inferred.
+
+Calculations use isolated Decimal precision 60. Cash amounts are two-decimal
+strings; unit costs, usable quantity and surplus are six-decimal strings, using
+ROUND_HALF_UP. Very small unit costs can display as zero after rounding; this does
+not mean a purchase is free. Summary minima use these displayed values.
+
+Rows retain every selected quote, quality checks, age_days, cost or null,
+eligible_for_cost_comparison, and exclusion_reasons. Costs can be shown for
+excluded quotes, but never contribute to summary minima. Missing transport or
+incompatible units produce null cost. Exclusion codes are:
+
+- FUTURE_QUOTE, STALE_QUOTE (age strictly greater than max_age_days), EXPIRED_QUOTE.
+- UNAVAILABLE, AVAILABILITY_UNKNOWN, TRANSPORT_COST_UNKNOWN, INCOMPATIBLE_UNITS.
+- QUALITY_FAILED, QUALITY_UNKNOWN, QUALITY_NOT_EVALUATED. A type/unit mismatch or
+  missing claim is unknown; a failed mandatory requirement always excludes.
+- INSUFFICIENT_AVAILABLE_PACKAGES or PURCHASE_LIMIT_EXCEEDED (over 1,000,000).
+
+Only fresh, available, quantity-compatible quotes with known transport, sufficient
+package capacity and all configured input requirements passed contribute to
+eligible_count, lowest_purchase_cost and lowest_cost_per_usable_unit. If none
+qualify, both minima are null and NO_ELIGIBLE_QUOTES is added. A passing claim
+check remains seller-reported and unverified.
+
+Reports contain id, sourcing_input_id, created_at, as_of_date, rule_revision,
+comparison_version=supplier-comparison-v1, basis=seller_reported_unverified,
+request_snapshot, sourcing_input_snapshot, product_snapshot and result. Result
+includes currency, required_quantity, rule_revision, quality_evaluation_version,
+rows, eligible_count, both minima, as_of_date and warnings.
+Snapshots retain exact selected quotes, current input requirements, product
+metadata and results. Later quote additions, product/rule edits and freshness
+changes do not change saved reports; create a new report for a current check.
+There are no report update/delete endpoints.
+
+Warnings identify unverified source/location/availability, limited input-only
+quality scope, rounding and unmodeled tax/discount/storage/financing costs.
+Failed requirements add SOME_QUOTES_FAIL_MANDATORY_REQUIREMENTS.
+The API does not fetch sources, verify certifications or stock, relax product
+Quality Locks, recommend substitutions, publish data, or modify recipes,
+production economics or Passports. Supplier ratings, nearby discovery, AI
+recommendations and production inventory integration remain future work.
+
 ## Errors and existing endpoints
 
 New application errors use:
@@ -1153,6 +1326,11 @@ dropping them could erase payment knowledge and allow an unsafe repeat payment.
 Migration 0010 adds refund request/decision/receipt history without changing older
 records. It refuses downgrade if any payment or refund records exist, before DDL,
 so a wider SQLite downgrade cannot partly drop schema before reaching payment guards.
+
+Migration 0011 adds sourcing inputs, supplier quotes and comparison history,
+without modifying existing records. It refuses downgrade before DDL if sourcing,
+payment or refund records exist. The financial preflight conservatively also
+protects an empty supplier schema from a partial wider SQLite downgrade.
 
 Before frontend integration, jointly accept this proposal and agree on approved
 development origins and browser credential handling. Public deployment requires

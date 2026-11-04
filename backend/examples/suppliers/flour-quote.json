@@ -1,0 +1,20 @@
+{
+  "supplier_name": "Synthetic flour supplier",
+  "source": {
+    "name": "Synthetic written quote",
+    "kind": "document",
+    "reference": "Example only; not a real supplier offer"
+  },
+  "location": "Synthetic town",
+  "observed_on": "2026-01-31",
+  "currency": "USD",
+  "package_price": "12.00",
+  "package_quantity": {"value": "5", "unit": "kg"},
+  "usable_fraction": "0.8",
+  "minimum_packages": 1,
+  "maximum_packages": 100,
+  "transport_cost": "4.00",
+  "availability": "available",
+  "claims": {"organic": {"type": "boolean", "value": true}},
+  "notes": "Synthetic single-input purchase; transport charged once."
+}
