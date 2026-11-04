@@ -2,7 +2,7 @@
 
 ## Status and common conventions
 
-The account, seller-application, product, saved-analysis, quality, comparison, review, Passport, marketplace, inventory, order, sandbox-payment, refund, supplier-sourcing, and seller-sales endpoints
+The account, seller-application, product, saved-analysis, quality, comparison, review, Passport, marketplace, inventory, order, sandbox-payment, refund, supplier-sourcing, seller-sales, and favorite endpoints
 below are implemented by the backend for **local development**. Their shared integration contract is
 **proposed; frontend acceptance and browser integration are pending**. No frontend
 changes are included. The existing stateless calculator retains its #2 behavior.
@@ -1403,6 +1403,52 @@ potentially incomplete costs, refund/fee limitations and unmodeled tax, shipping
 financing and other costs. Incomplete coverage adds PROFIT_COVERAGE_INCOMPLETE.
 Reports are current views of records; only the order cost snapshots are immutable.
 
+## Private favorites and saved products
+
+General authenticated FairMade accounts can save visible marketplace listings.
+Seller access is not required; verified sellers retain the same buying/bookmark
+capabilities. Frontend contract acceptance and browser integration are pending.
+
+| Method and path | Body/query | Success |
+| --- | --- | --- |
+| POST /api/v1/favorites | `{listing_id}` | 201: new favorite; 200: already saved |
+| GET /api/v1/favorites | limit, offset | 200: favorite page |
+| GET /api/v1/favorites/{favorite_id} | None | 200: owned favorite |
+| DELETE /api/v1/favorites/{favorite_id} | None | 204, empty body |
+
+All endpoints require bearer authentication; invalid/missing/revoked sessions
+receive 401. Ownership comes from the authenticated account, never the body.
+Missing/foreign favorite IDs return the same 404 NOT_FOUND for detail/removal.
+Other accounts' collections and public favorite counts are not exposed.
+Successful responses use Cache-Control: no-store.
+
+POST requires a listing UUID and rejects extra fields. Validation errors omit
+submitted inputs. Only an active listing with a visible approved Passport and
+seller access can be saved. Hidden, withdrawn, superseded, unpublished and
+nonexistent listings return 404 NOT_FOUND. A bookmark stores its owner, listing
+ID and creation time, not catalog content. Duplicate saves are atomic and retain
+the original favorite ID/time. Separate accounts can save the same listing.
+
+Responses contain id (favorite UUID), listing_id (public listing UUID), created_at
+(UTC), listing_visible (boolean) and listing (current CatalogCard or null).
+CatalogCard is the existing allowlisted public card, never a private product or
+draft. Visibility and ownership are evaluated together in one query on every read.
+
+If a saved listing becomes hidden, its bookmark retains the known listing ID/time,
+with listing_visible=false and listing=null. No old title, description, price
+or private data is returned. Owners can remove hidden favorites. POSTing the
+now-hidden listing returns 404 even if already saved. Reactivation restores the
+current approved card; new approved prices appear without changing saved time.
+Bookmarks do not reserve stock, hold prices or guarantee checkout availability.
+listing_visible means catalog visibility, not verified in-stock status.
+
+Pages use `{items, limit, offset}`, newest creation time then ID first. limit is
+1-100 (default 20). Shared pagination bounds offset to 0-9,223,372,036,854,775,807 (default 0),
+returning 422 before impractical values can overflow database bindings.
+Deleting a removed/foreign favorite returns 404. No favorite edit routes or
+checkout/inventory changes are introduced. CORS still requires exact configured
+origins and now permits DELETE for browser bookmark removal; wildcards are rejected.
+
 ## Errors and existing endpoints
 
 New application errors use:
@@ -1487,6 +1533,12 @@ and a capture-time index. It preserves earlier records without backfilling costs
 Downgrade refuses before DDL if cost selections/snapshots, payments, refunds or
 sourcing records exist, including unpaid orders with unknown cost snapshots.
 This protects history and prevents partial schema removal before earlier guards.
+
+Migration 0013 adds account-owned favorites with uniqueness and paging indexes,
+preserving earlier data. Downgrade refuses before DDL if favorites or earlier
+protected cost/financial/sourcing records exist. Owners can remove favorites
+through the API. Empty databases can downgrade/upgrade without altering earlier
+records. This follows 0012 in the migration chain.
 
 Before frontend integration, jointly accept this proposal and agree on approved
 development origins and browser credential handling. Public deployment requires

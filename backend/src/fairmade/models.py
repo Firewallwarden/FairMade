@@ -345,6 +345,18 @@ class MarketplaceListing(Base):
     price_minor: Mapped[int | None] = mapped_column(Integer)
 
 
+class Favorite(Base):
+    __tablename__ = "favorites"
+    __table_args__ = (
+        UniqueConstraint("account_id", "listing_id", name="uq_favorite_account_listing"),
+        Index("ix_favorite_account_created", "account_id", "created_at", "id"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"))
+    listing_id: Mapped[str] = mapped_column(ForeignKey("marketplace_listings.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
 class SellableInventory(Base):
     __tablename__ = "sellable_inventory"
     __table_args__ = (

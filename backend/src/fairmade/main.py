@@ -15,6 +15,7 @@ from fairmade.commerce_errors import CommerceError
 from fairmade.commerce_http import commerce_error_handler
 from fairmade.comparisons.routes import router as comparison_router
 from fairmade.database import database_url, make_engine
+from fairmade.favorites.routes import router as favorites_router
 from fairmade.inventory.routes import router as inventory_router
 from fairmade.marketplace.errors import ListingError
 from fairmade.marketplace.routes import listing_error_handler
@@ -64,7 +65,7 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
             finally:
                 application.state.engine.dispose()
 
-    application = FastAPI(title="FairMade API", version="0.13.0", lifespan=lifespan)
+    application = FastAPI(title="FairMade API", version="0.14.0", lifespan=lifespan)
     application.add_exception_handler(RefundError, refund_error_handler)
     application.add_exception_handler(PaymentError, payment_error_handler)
     application.add_exception_handler(CommerceError, commerce_error_handler)
@@ -81,7 +82,7 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
         application.add_middleware(
             CORSMiddleware,
             allow_origins=origins,
-            allow_methods=["GET", "POST", "PATCH", "PUT"],
+            allow_methods=["GET", "POST", "PATCH", "PUT", "DELETE"],
             allow_headers=["Authorization", "Content-Type", "Idempotency-Key"],
         )
 
@@ -94,6 +95,7 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
             or "/sourcing-inputs" in request.url.path
             or "/sales-cost-basis" in request.url.path
             or request.url.path.startswith("/api/v1/seller/sales")
+            or request.url.path.startswith("/api/v1/favorites")
         ):
             # Validation errors may otherwise echo the raw password or entire body.
             errors = [{key: error[key] for key in ("loc", "msg", "type")} for error in exc.errors()]
@@ -134,6 +136,7 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
     application.include_router(supplier_router)
     application.include_router(sales_cost_router)
     application.include_router(sales_router)
+    application.include_router(favorites_router)
     return application
 
 

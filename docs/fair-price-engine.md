@@ -160,6 +160,9 @@ approval, not source verification, certification, or an objective fairness verdi
    text/type/location filters, and public detail APIs are now implemented. Listing
    prices come from approved Passports; publication withdrawal/supersession or loss
    of seller access hides linked listings. Stock and checkout are handled separately.
+   Private account favorites now save visible listings without copying catalog
+   data. Hidden listings retain bookmarks but return no catalog payload; buyer
+   and seller accounts can manage their own saved products.
 4. Orders, inventory reservation, and PayPal Sandbox checkout with verified,
    idempotent payment events and reconciled fees.
    Sellable-unit inventory, exact unpaid order snapshots, buyer/seller histories,
