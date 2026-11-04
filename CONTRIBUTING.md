@@ -65,6 +65,34 @@ After merging, run the guard with `-Mode Integrated` to verify the merge commit
 is on main. A PR merged into another feature branch is not sufficient. See the
 [incident report and guard usage](docs/stacked-pr-integration.md).
 
+## Optional continuous feature cycle
+
+The continuous feature workflow in [AGENTS.md](AGENTS.md#optional-continuous-feature-workflow)
+is **opt-in and disabled by default**. Execute it only when the user explicitly
+requests it; documenting the workflow or requesting one feature does not enable
+automatic selection of further features.
+
+When enabled, select remaining work from the user's supplied feature list by
+priority, need and dependencies. Implement, validate, commit, push and open one
+PR per feature, then proceed to the next without waiting for merges. Keep
+dependent PRs draft and follow the main-targeting and synchronization rules above.
+Ask for material product/design decisions, respect pauses and the authorized
+scope/duration, and reach out when the list is exhausted or all remaining work
+is already under review. The cycle does not expand standing approval or ownership.
+
+## Decision questions and prompt delivery
+
+Ask decision questions in ordinary chat with concise numbered options and a
+recommendation when useful. A structured choice popup is an optional additional
+channel. Always include the complete question and choices in the visible response
+when waiting for the user's answer, so they can reply directly in chat.
+
+A tool's `accepted` result does not prove that a popup appeared or was answered.
+Silence, timeouts and preselected choices are not consent or refusal. Wait for
+an actual response before work requiring that decision or approval. If a prompt
+is missing, restate the question in chat rather than relying on another popup
+alone. Apply existing authorization without asking the same permission again.
+
 ## Design and readability
 
 Use small, cohesive modules and explicit interfaces. Keep UI, HTTP adapters,

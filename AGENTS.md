@@ -79,12 +79,25 @@ These development rules apply to both frontend and backend work.
 10. After every parent merge, the agent must fetch and verify its merge commit on `origin/main`, then refresh each dependent child before presenting it as ready. A squash merge creates different commit identities; merging PRs in order does not refresh child branches. For a published child, normally merge `origin/main` into its feature branch, resolve conflicts by reviewing the parent and child changes, and push normally. For an unpublished child, replay only the child commits onto current main (for example, `git rebase --onto origin/main <old-parent-tip>`). Revalidate, inspect the main-targeted diff to ensure it contains only the remaining work, and pass the Review guard. Do not tell the user to merge a dependency stack consecutively without this agent refresh between parent and child merges. If safe synchronization requires an unauthorized history rewrite, create a replacement branch/worktree from current main, replay only the child changes, and open a main-targeted replacement PR; keep the old PR draft and identify its replacement. Never merge a child into a retired parent branch.
 11. A GitHub MERGED label alone does not establish main integration. After the user reports merges, audit each PR's base and merge commit using `-Mode Integrated`; verify intended files/features on fetched main before reporting them integrated or basing independent work on them. If changes landed only on a feature branch, prepare a main-targeted recovery PR without merging it yourself. See [the incident and recovery procedure](docs/stacked-pr-integration.md).
 
+## Optional Continuous Feature Workflow
+
+- This workflow is **optional and disabled by default**. Activate it only when the user explicitly requests the continuous feature cycle. A request for one feature, an explanation of the workflow, or permission to document it does not activate the cycle.
+- When explicitly activated, review the user's supplied feature list, implemented code, open PRs, dependencies, priority, and current need. Select the highest-priority remaining feature within the assigned role; do not duplicate work already implemented or under review.
+- Implement each selected feature in its own branch/worktree, validate it, commit and push it, and open its PR. Once those steps are complete, move directly to the next priority feature without waiting for a merge or another instruction to continue.
+- Use current main for independent features. Dependent development may continue from an unmerged parent, but its PR still targets main and remains draft until the parent is integrated and the child is refreshed and validated under the Git workflow above.
+- Ask for the user's decision when a material product/design choice cannot be resolved from existing instructions. Present the question visibly as specified below and pause work that depends on the answer; continue independent authorized work where useful. Routine implementation choices and already-authorized actions do not require repeated confirmation.
+- Stop the cycle when the user asks to pause/stop, its explicitly authorized scope or duration ends, or all features from the supplied list are implemented or already covered by open PRs. Report the remaining/review status and ask the user what to do next rather than inventing new scope. After a pause or stop, resume the cycle only when explicitly requested.
+- Enabling the cycle does not authorize PR merges, remote history rewrites, paid services, major infrastructure changes, or edits outside the assigned ownership boundary. Documenting this workflow does not enable it.
+
 ## Agent Communication
 
 - State which files will change, what the change accomplishes, and which tests or checks were run.
 - If something depends on the other developer or an undefined API contract, flag that dependency rather than guessing.
 - Keep explanations beginner-friendly when working with the frontend developer.
 - Ask before work outside the assigned scope, merging, or rewriting remote history. In-scope shared instruction changes, staging, commits, normal feature-branch pushes, and PR creation/updates follow the standing authorization above; do not request repeated approval.
+- Make decision questions visible in ordinary chat, with concise numbered choices and the recommended option identified when useful. Structured choice prompts may supplement the chat question; never rely on a popup as the only place the question or options appear.
+- A prompt tool returning `accepted` acknowledges submission, not display or a user answer. Do not claim the user saw a prompt, or treat silence, timeout, a preselected choice, or a missing popup as consent or refusal.
+- When an actual decision or approval is required, end the response with the complete question and choices in chat, and wait for the user's reply before dependent work. If the user reports a missing prompt, restate it directly in chat. Distinguish confirmed delivery evidence from assumptions about IDE behavior.
 
 ## Selecting a Specialist Agent
 
