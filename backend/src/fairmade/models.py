@@ -345,6 +345,42 @@ class MarketplaceListing(Base):
     price_minor: Mapped[int | None] = mapped_column(Integer)
 
 
+class Storefront(Base):
+    __tablename__ = "storefronts"
+    __table_args__ = (
+        UniqueConstraint("account_id", name="uq_storefront_account"),
+        CheckConstraint("revision >= 1", name="ck_storefront_revision"),
+        CheckConstraint("state IN ('draft', 'published', 'withdrawn')", name="ck_storefront_state"),
+        CheckConstraint(
+            "published_revision IS NULL OR "
+            "(published_revision >= 1 AND published_revision <= revision)",
+            name="ck_storefront_published_revision",
+        ),
+        CheckConstraint(
+            "state != 'published' OR (published_revision IS NOT NULL "
+            "AND published_at IS NOT NULL AND payload_hash IS NOT NULL "
+            "AND public_payload IS NOT NULL AND search_text IS NOT NULL)",
+            name="ck_storefront_published",
+        ),
+        Index("ix_storefront_browse", "state", "published_at", "id"),
+        Index("ix_storefront_location", "state", "location_key", "published_at"),
+    )
+    # Distinct public IDs keep the resource stable if account cardinality grows later.
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"))
+    revision: Mapped[int] = mapped_column(Integer)
+    state: Mapped[str] = mapped_column(String(10))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, onupdate=utcnow)
+    content: Mapped[dict] = mapped_column(JSON)
+    published_revision: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    published_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    payload_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    public_payload: Mapped[dict | None] = mapped_column(JSON(none_as_null=True), nullable=True)
+    search_text: Mapped[str | None] = mapped_column(Text, nullable=True)
+    location_key: Mapped[str | None] = mapped_column(String(200), nullable=True)
+
+
 class Favorite(Base):
     __tablename__ = "favorites"
     __table_args__ = (

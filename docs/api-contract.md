@@ -2,7 +2,7 @@
 
 ## Status and common conventions
 
-The account, seller-application, product, saved-analysis, quality, comparison, review, Passport, marketplace, inventory, order, sandbox-payment, refund, supplier-sourcing, seller-sales, and favorite endpoints
+The account, seller-application, product, saved-analysis, quality, comparison, review, Passport, marketplace, inventory, order, sandbox-payment, refund, supplier-sourcing, seller-sales, favorite, and storefront endpoints
 below are implemented by the backend for **local development**. Their shared integration contract is
 **proposed; frontend acceptance and browser integration are pending**. No frontend
 changes are included. The existing stateless calculator retains its #2 behavior.
@@ -1449,6 +1449,104 @@ Deleting a removed/foreign favorite returns 404. No favorite edit routes or
 checkout/inventory changes are introduced. CORS still requires exact configured
 origins and now permits DELETE for browser bookmark removal; wildcards are rejected.
 
+## Seller profiles and storefronts
+
+The local MVP supports **one storefront per seller account**, including withdrawn
+storefronts. It has its own stable UUID, separate from the private account UUID.
+Private collection routes are plural so future multi-store support can extend
+the model. That future feature will require a cardinality/listing-assignment
+migration; it is not enabled now.
+
+Storefronts are an optional, additive public grouping. Existing catalog listings
+and checkout do not require a storefront. No accounts, profiles or public
+content are automatically created or published by migration 0014.
+Frontend contract acceptance and browser integration remain pending.
+
+### Private seller editing and approval
+
+| Method and path | Body | Success |
+| --- | --- | --- |
+| POST /api/v1/seller/storefronts | content below | 201: draft |
+| GET /api/v1/seller/storefronts | limit, offset query | 200: owned draft page |
+| GET /api/v1/seller/storefronts/{storefront_id} | None | 200: owned draft |
+| PUT /api/v1/seller/storefronts/{storefront_id} | content plus expected_revision | 200: updated draft |
+| GET /api/v1/seller/storefronts/{storefront_id}/preview | None | 200: exact public preview |
+| POST /api/v1/seller/storefronts/{storefront_id}/publish | existing PublishApproval | 200: public storefront |
+| POST /api/v1/seller/storefronts/{storefront_id}/withdraw | None | 204, empty body |
+
+All private routes require verified seller access. Buyer/pending/admin-only
+accounts receive 403 SELLER_REQUIRED; missing/revoked sessions receive 401.
+Foreign/missing storefront IDs return the same 404 NOT_FOUND. Ownership is
+assigned from the authenticated account, never accepted from clients.
+
+Content is `{display_name, description?, location?}`. display_name is a trimmed,
+nonempty string at most 200 characters. description is optional/null and at most
+2,000 characters. location is an optional/null, nonempty trimmed public label
+at most 200 characters. It is not coordinates, a verified address or a distance
+estimate. No email, phone, private account fields, economics or verification
+flags are projected or accepted as extra fields. Validation errors omit input
+values.
+
+A second POST, including after withdrawal, returns 409 STOREFRONT_LIMIT. Sellers
+edit/republish their existing storefront instead. Creation races are protected by
+the database's named unique account constraint.
+Draft responses contain id, revision, state (draft/published/withdrawn), created_at,
+updated_at, content and published_revision or null. New drafts start at revision 1.
+PUT fully replaces content, increments revision, and requires the existing
+positive strict publication revision bounds. Omitted optional fields become null.
+Stale edits/approvals return 409 REVISION_CONFLICT.
+
+Preview returns `{storefront_id, revision, preview_hash, payload}`. Publication
+requires `{expected_revision, preview_hash, approved: true}`, with the existing
+strict boolean and SHA-256 hash formats. A wrong current hash returns 409
+PREVIEW_MISMATCH. Revision reservation and preview checking serialize writes;
+concurrent edits cannot publish unapproved content.
+
+Publication freezes only the allowlisted current preview. Repeating the exact
+approval for the current published revision returns the same publication metadata.
+Editing a published draft leaves its previously approved public payload, search
+text and location unchanged until explicit new approval. Withdrawal hides the
+storefront and increments revision to invalidate old approvals. Repeated
+withdrawal is idempotent. Reopening requires a fresh preview and approval.
+
+### Public discovery and current listings
+
+| Method and path | Query | Success |
+| --- | --- | --- |
+| GET /api/v1/storefronts | q, location, limit, offset | 200: public storefront page |
+| GET /api/v1/storefronts/{storefront_id} | None | 200: public storefront |
+| GET /api/v1/storefronts/{storefront_id}/listings | limit, offset | 200: CatalogCard page |
+
+Public reads are anonymous. Draft, withdrawn, nonexistent and seller-access-lost
+storefronts return 404 for detail/listings and are excluded from browse. Public
+and private successful responses use Cache-Control: no-store.
+
+Public storefront fields are id, published_revision, published_at (UTC),
+payload_hash and payload. Payload contains storefront_version=seller-storefront-v1,
+basis=seller_reported_unverified, display_name, optional description/location
+and notices. It exposes no private account ID/email, draft content, private
+product/economics data, payout details or identity/quality certification.
+
+q is a trimmed, case-insensitive substring of the approved name/description,
+at most 200 characters; SQL wildcard characters are treated literally.
+location is a trimmed, case-insensitive exact approved label, at most 200
+characters. Empty trimmed filters are ignored. Browse sorts by newest
+published_at then UUID. Pages use the shared limit/offset bounds and
+`{items, limit, offset}`.
+
+Listing pages show only the storefront account's currently visible approved
+catalog listings. Other sellers' products and private/draft/inactive listings
+never appear. Storefront visibility is rechecked in the listing query itself;
+listing/Passport withdrawal, supersession or seller-access loss is also respected.
+Listing pages sort by listing published_at then UUID, newest first.
+
+The account's product ownership is the MVP grouping rule. Storefront edits do
+not rewrite separately approved listing seller names, prices or disclosures,
+and publishing a storefront does not publish products or claim stock/fulfillment.
+Withdrawing only the storefront does not deactivate independently published
+catalog listings. The public profile is self-reported, not identity verification,
+a quality certification or a fairness verdict.
+
 ## Errors and existing endpoints
 
 New application errors use:
@@ -1539,6 +1637,12 @@ preserving earlier data. Downgrade refuses before DDL if favorites or earlier
 protected cost/financial/sourcing records exist. Owners can remove favorites
 through the API. Empty databases can downgrade/upgrade without altering earlier
 records. This follows 0012 in the migration chain.
+
+Migration 0014 adds storefront drafts, approved snapshots and discovery indexes,
+with one-storefront-per-account uniqueness for the local MVP. It preserves prior
+data without backfilling/publishing profiles. Downgrade refuses before DDL if
+storefronts, favorites or earlier protected cost/financial/sourcing records exist,
+so broader SQLite downgrades cannot partly remove schema before earlier guards.
 
 Before frontend integration, jointly accept this proposal and agree on approved
 development origins and browser credential handling. Public deployment requires

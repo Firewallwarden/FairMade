@@ -43,6 +43,10 @@ See the [sales reporting workflow](examples/sales/README.md).
 All authenticated accounts can save private favorites from the public catalog.
 Hidden listings retain the bookmark but expose no catalog content.
 See the [saved-product workflow](examples/favorites/README.md).
+Verified sellers can create one storefront profile for the local MVP, preview
+and explicitly publish it, and withdraw it. Anonymous discovery shows approved
+profile fields and the seller's currently visible listings.
+See the [storefront workflow](examples/storefronts/README.md).
 
 Use Python 3.11 or newer with SQLite 3.26+. From this feature's worktree root, create an isolated
 environment, install the backend, migrate the database, and start the API:
@@ -301,6 +305,31 @@ Migration 0013 adds favorites/indexes without changing earlier records. Run the
 standard upgrade command. Downgrade refuses if favorites or protected history
 exists. Browser removal uses DELETE with explicit CORS origins. Shared pagination
 rejects offsets outside SQLite's supported signed 64-bit range.
+
+## Seller profiles and storefronts
+
+The local MVP permits one storefront per verified seller account, with a stable
+public UUID separate from account identity. Private plural collection routes
+under `/api/v1/seller/storefronts` leave room for future multi-store support.
+That future feature needs a cardinality/listing-assignment migration.
+
+Draft content includes display name, description and an optional public location
+label. Preview and approval publish only those explicit fields. Published drafts
+can be edited without changing current public content until new approval;
+withdrawal hides the profile and invalidates earlier approval revisions.
+Seller-access loss also hides public storefronts.
+
+Anonymous `/api/v1/storefronts` browse/detail and per-storefront `/listings`
+show only current approved data. Private account details, draft edits and
+economics never appear. Profiles are seller-reported and do not certify identity
+or quality. Storefronts group current visible listings by account ownership.
+Existing listing names/prices remain separately approved; withdrawing a
+storefront does not deactivate those listings.
+
+Migration 0014 adds one table and discovery indexes without creating/publishing
+profiles for existing accounts. Downgrade refuses if storefronts or earlier
+protected history exists. No paid services, frontend interfaces, contact lookup
+or precise location data are introduced.
 
 ## Buyer defaults and seller applications
 
