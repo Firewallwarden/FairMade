@@ -12,6 +12,8 @@ from fairmade.marketplace.schemas import CatalogContent
 from fairmade.models import MarketplaceListing, Order, OrderLine, Product
 from fairmade.orders import domain, repository
 from fairmade.orders.schemas import CartPreview, CartRequest, OrderResponse, PricedLine
+from fairmade.sales.cost_basis import save_order_snapshot
+from fairmade.sales.costing import OrderCostLine
 
 
 def _price_cart(
@@ -128,6 +130,20 @@ def create(
             )
             for listing, line in lines
         ]
+    )
+    save_order_snapshot(
+        db,
+        order,
+        [
+            OrderCostLine(
+                listing_id=listing.id,
+                product_id=listing.product_id,
+                quantity=line.quantity,
+                selling_unit=line.listing.product.selling_unit,
+                product_type=line.listing.product.product_type,
+            )
+            for listing, line in lines
+        ],
     )
     db.commit()
     return order, True

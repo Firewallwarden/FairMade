@@ -2,6 +2,7 @@
 
 from decimal import ROUND_CEILING, ROUND_HALF_UP, Decimal, localcontext
 
+from fairmade.pricing.costs import production_costs
 from fairmade.pricing.schemas import (
     CostBreakdown,
     CostCategory,
@@ -30,11 +31,10 @@ def calculate(request: PricingRequest) -> PricingResponse:
 
 
 def _calculate(request: PricingRequest) -> PricingResponse:
-    totals = dict.fromkeys(CostCategory, ZERO)
-    for cost in request.costs:
-        totals[cost.category] += cost.amount
-    labor_total = sum((item.hours * item.hourly_rate for item in request.labor), ZERO)
-    batch_total = sum(totals.values(), labor_total)
+    production = production_costs(request)
+    totals = production.category_totals
+    labor_total = production.labor_total
+    batch_total = production.batch_total
     unit_cost = batch_total / request.sellable_units
     fixed_fee = request.payment_fees.fixed_per_order / request.payment_fees.units_per_order
     rate = request.payment_fees.rate

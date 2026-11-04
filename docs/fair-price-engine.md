@@ -171,7 +171,13 @@ approval, not source verification, certification, or an objective fairness verdi
    taxes and hosted operations remain future work. Full-order buyer refund
    requests with seller approval/denial, verified sandbox execution and recovery
    are implemented for local development; partial refunds, appeals and
-   returns/restocking remain deferred. Credentialed sandbox/browser checks are pending.
+   returns/restocking remain deferred. Private seller sales reports now use
+   explicit cost-analysis selections and immutable order cost snapshots for
+   estimated profit/margin, verified fees and completed refunds. Missing
+   historical costs remain unknown; no retrospective latest-cost assumptions
+   or buyer disclosures are made. Reports are sandbox capture-cohort views,
+   not verified earnings or payout statements. Credentialed sandbox/browser
+   checks are pending.
 5. Supplier intelligence: seller-entered quotes, sourcing-input-specific quality
    requirements, exact usable-unit costs, whole-package/bulk/transport purchase
    comparisons and immutable reports are implemented for local development,

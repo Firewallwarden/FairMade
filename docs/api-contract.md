@@ -2,7 +2,7 @@
 
 ## Status and common conventions
 
-The account, seller-application, product, saved-analysis, quality, comparison, review, Passport, marketplace, inventory, order, sandbox-payment, refund, and supplier-sourcing endpoints
+The account, seller-application, product, saved-analysis, quality, comparison, review, Passport, marketplace, inventory, order, sandbox-payment, refund, supplier-sourcing, and seller-sales endpoints
 below are implemented by the backend for **local development**. Their shared integration contract is
 **proposed; frontend acceptance and browser integration are pending**. No frontend
 changes are included. The existing stateless calculator retains its #2 behavior.
@@ -1253,6 +1253,156 @@ Quality Locks, recommend substitutions, publish data, or modify recipes,
 production economics or Passports. Supplier ratings, nearby discovery, AI
 recommendations and production inventory integration remain future work.
 
+## Private seller sales and estimated profitability
+
+These additive endpoints report recorded sandbox transactions and seller-supplied
+production-cost estimates. They are not production payouts, accounting statements
+or verified business profit. Frontend contract acceptance/browser integration
+remain pending.
+
+### Explicit production-cost selection
+
+| Method and path | Body | Success |
+| --- | --- | --- |
+| GET /api/v1/products/{product_id}/sales-cost-basis | None | 200: selection |
+| PUT /api/v1/products/{product_id}/sales-cost-basis | `{expected_revision, analysis_id}` | 200: updated selection |
+
+Verified seller access and product ownership are required. Foreign products and
+analyses return 404 NOT_FOUND. The analysis must belong to this exact product,
+use production-economics-v1, and match the current product's selling-unit label
+and product type. Unsupported versions return 409 COST_VERSION_UNSUPPORTED;
+incompatible units/types return 409 COST_UNIT_MISMATCH. No label equivalence,
+latest-analysis selection or unit conversion is inferred.
+
+Both body fields are required. expected_revision uses existing strict Quality Lock
+revision bounds. analysis_id is a saved analysis UUID or explicit null to clear.
+Updates increment revision and return 409 REVISION_CONFLICT for stale inputs.
+Selection and order creation serialize SQLite writes. Unknown fields are rejected;
+validation responses omit submitted inputs.
+
+Responses contain product_id, revision, analysis_id and source_snapshot.
+Unconfigured products return revision 0 and null source fields without a write.
+The private source_snapshot contains cost_version=sales-cost-basis-v1,
+calculation_version=production-economics-v1, basis=seller_supplied_unverified,
+analysis_id, analysis_created_at, selling_unit, product_type, exact decimal-string
+batch_production_cost, integer sellable_units, display_unit_cost and warnings.
+Display unit cost is rounded half up to six places and never used for totals.
+Warnings identify missing labor/overhead. Costs include the selected analysis's
+categories and labor, excluding its modeled payment fees.
+
+Selection does not establish complete/verified expenses, a current inventory
+valuation or compliance with Quality Locks.
+
+### Private order snapshots
+
+New orders store sale-cost-snapshot-v1 separately from their public-data-only
+buyer snapshots, in the same transaction as stock reservations. Each line retains
+listing ID, product ID, quantity, approved selling unit/type, selection revision,
+source snapshot and any unavailable_reason. A failed snapshot write rolls back
+the entire order/reservation. Idempotent order retries retain the original cost
+snapshot even if a seller subsequently changes the selection.
+
+Missing sources or a mismatch with the approved listing yield unavailable costs
+without blocking checkout. Reasons include COST_BASIS_NOT_SELECTED and
+COST_BASIS_UNIT_OR_TYPE_MISMATCH. If any line lacks a compatible source, the
+whole order's estimated production cost is unknown.
+
+For available costs, sum `quantity × exact batch production cost / sellable units`
+across all lines. Keep repeating ratios exact, then round the order total once
+to USD cents, half up. Do not multiply rounded display unit costs or add the
+pricing model's estimated processing fees.
+
+Later product/selection edits, new analyses, refunds and restarts do not rewrite
+the snapshot. Orders predating migration 0012 retain unknown costs; configuring
+a basis later does not backfill them. No snapshot edit/delete/backfill endpoint
+is provided. Buyer/cart/order, listing and public Passport DTOs do not expose
+private costs or cost source references.
+
+### Report period, scope and limits
+
+| Method and path | Query | Success |
+| --- | --- | --- |
+| GET /api/v1/seller/sales | start_date, end_date | 200: whole-period summary |
+| GET /api/v1/seller/sales/orders | start_date, end_date, limit, offset | 200: private detail page |
+
+Both endpoints require a verified seller and filter by that account's orders.
+Buyers/pending sellers receive 403 SELLER_REQUIRED; invalid/missing tokens receive
+401. Required dates are UTC calendar dates with inclusive start_date and exclusive
+end_date, 1-366 days apart. For January use 2026-01-01 through 2026-02-01.
+Invalid dates/ranges return 422; range errors use INVALID_PERIOD.
+
+Only completed backend-verified captures whose stored verified_at is within the
+period are included. This timestamp records backend confirmation, not a claimed
+provider settlement or bank-transfer time. Unpaid, cancelled, expired, pending,
+failed and unverified checkouts are not sales.
+
+This is a capture-cohort report. Completed refunds for the selected sales count
+as known at request time, even when verified in a later period. A refund can
+therefore update an earlier sale cohort's totals. It is not a statement of cash
+movements during the selected period. Report requests never call PayPal or mutate
+payments, orders or stock.
+
+Summary fetches at most 1,001 minimal records. Over 1,000 matching sales returns
+409 REPORT_TOO_LARGE; narrow the period rather than silently accepting truncated
+totals. Detail pages remain available with limit 1-100 (default 20), nonnegative
+offset (default 0), and newest captured_at then order ID first. Pages use
+`{items, limit, offset}`.
+
+### Summary and detail fields
+
+Summary metadata: report_version=sandbox-sales-v1, environment=sandbox,
+merchant_mode=shared, period_basis=capture_verified_at,
+refund_basis=completed_refunds_as_of_report, currency=USD, start_date, end_date,
+generated_at and warnings.
+
+| Field | Meaning |
+| --- | --- |
+| sales_count | Matching verified captured orders |
+| gross_sales | Original verified capture amounts |
+| completed_refunds | Verified completed refunds for those orders |
+| sales_less_refunds | Gross sales minus completed refunds |
+| known_processing_fees | Original capture fees for records with known fees |
+| known_estimated_production_costs | Frozen production costs for records with known costs |
+| missing_fee_count | Sales with both fee and net amount unknown |
+| missing_cost_count | Sales without an available frozen cost snapshot |
+| unresolved_refund_count | Sales with refund_pending or needs_review refunds |
+| covered_sales_count | Sales with available estimated profit |
+| covered_estimated_profit | Sum only for covered sales; not total business profit |
+| estimated_profit | Whole-period estimate, or null if any sale lacks coverage |
+| estimated_margin | Profit / sales_less_refunds, or null if profit is unavailable or net sales are not positive |
+
+Money fields are two-place decimal JSON strings; margins are fractional strings
+with six places, half up. Fees use the verified original capture fee, or gross
+minus verified net if only net is available. If both fee/net are absent, fee stays
+null, never silently zero. Known fee/cost totals can be partial and must be shown
+with coverage counts. An empty period has zero counts/totals and null margin.
+
+Order details contain environment, merchant_mode, order_id, created_at, captured_at,
+currency, gross_sales, completed_refunds, processing_fee, fee_basis,
+after_refunds_and_fee, estimated_production_cost, estimated_profit, estimated_margin,
+profit_unavailable_reasons, private cost_snapshot or null, and warnings.
+fee_basis is provider_fee, derived_from_provider_net or unavailable.
+No buyer identities, merchant/provider IDs or raw provider responses are returned.
+Product/listing/analysis IDs in private cost snapshots are seller-only references.
+
+Estimated profit = gross capture − completed refund − original processing fee
+− frozen production cost. Missing fees/costs or unresolved refunds yield null,
+with PROCESSING_FEE_UNAVAILABLE, COST_SNAPSHOT_MISSING, COST_BASIS_UNAVAILABLE
+or REFUND_UNRESOLVED. Open refund requests awaiting a decision are not deducted
+and add OPEN_REFUND_REQUEST_NOT_DEDUCTED. Denied/verified failed refunds are not
+deducted.
+
+Full refunds do not reverse production costs or restock inventory. Original
+capture fees are retained; refund-related fee changes are not recorded/modeled.
+For a synthetic $34 sale, $1 fee and $20 production cost, estimated profit is
+$13 and margin is 0.382353. A completed $34 refund changes profit to −$21 and
+margin to null. These are modeled figures, not verified seller earnings.
+
+Warnings identify sandbox/shared-merchant scope, cohort timing, unverified and
+potentially incomplete costs, refund/fee limitations and unmodeled tax, shipping,
+financing and other costs. Incomplete coverage adds PROFIT_COVERAGE_INCOMPLETE.
+Reports are current views of records; only the order cost snapshots are immutable.
+
 ## Errors and existing endpoints
 
 New application errors use:
@@ -1331,6 +1481,12 @@ Migration 0011 adds sourcing inputs, supplier quotes and comparison history,
 without modifying existing records. It refuses downgrade before DDL if sourcing,
 payment or refund records exist. The financial preflight conservatively also
 protects an empty supplier schema from a partial wider SQLite downgrade.
+
+Migration 0012 adds explicit product cost selections, private order cost snapshots
+and a capture-time index. It preserves earlier records without backfilling costs.
+Downgrade refuses before DDL if cost selections/snapshots, payments, refunds or
+sourcing records exist, including unpaid orders with unknown cost snapshots.
+This protects history and prevents partial schema removal before earlier guards.
 
 Before frontend integration, jointly accept this proposal and agree on approved
 development origins and browser credential handling. Public deployment requires
