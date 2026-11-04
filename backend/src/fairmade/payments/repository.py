@@ -1,12 +1,11 @@
 """Short serialized database phases separated from external network requests."""
 
-from datetime import UTC, timedelta
-
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from fairmade.database import utcnow
-from fairmade.models import Order, OrderLine, PayPalCheckout, new_id
+from fairmade.leases import LeaseBusy, claim_lease, release_lease
+from fairmade.models import Order, OrderLine, PayPalCheckout
 from fairmade.payments.errors import PaymentError
 
 
@@ -27,22 +26,16 @@ def checkout(db: Session, order_id: str) -> PayPalCheckout | None:
 
 
 def claim(payment: PayPalCheckout) -> str:
-    now = utcnow()
-    deadline = payment.lease_expires_at
-    if deadline is not None:
-        deadline = deadline.replace(tzinfo=UTC) if deadline.tzinfo is None else deadline
-        if deadline > now:
-            raise PaymentError(
-                "PAYPAL_OPERATION_IN_PROGRESS", "Another payment operation is in progress."
-            )
-    payment.lease_token = new_id()
-    payment.lease_expires_at = now + timedelta(seconds=60)
-    return payment.lease_token
+    try:
+        return claim_lease(payment, utcnow())
+    except LeaseBusy:
+        raise PaymentError(
+            "PAYPAL_OPERATION_IN_PROGRESS", "Another payment operation is in progress."
+        ) from None
 
 
 def release(payment: PayPalCheckout) -> None:
-    payment.lease_token = None
-    payment.lease_expires_at = None
+    release_lease(payment)
 
 
 def lines(db: Session, order_id: str) -> list[OrderLine]:

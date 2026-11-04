@@ -2,11 +2,10 @@
 
 import re
 from dataclasses import dataclass
-from decimal import Decimal, localcontext
 
 from fairmade.payments.errors import VerificationError
+from fairmade.payments.money import parse_usd_minor
 
-AMOUNT = re.compile(r"[0-9]{1,10}(?:\.[0-9]{1,2})?")
 IDENTIFIER = re.compile(r"[A-Z0-9]{10,64}")
 
 
@@ -20,14 +19,7 @@ class VerifiedPayment:
 
 
 def _minor(value: dict) -> int:
-    if value.get("currency_code") != "USD":
-        raise VerificationError()
-    amount = value.get("value")
-    if not isinstance(amount, str) or not AMOUNT.fullmatch(amount):
-        raise VerificationError()
-    with localcontext() as context:
-        context.prec = 40
-        return int(Decimal(amount) * 100)
+    return parse_usd_minor(value)
 
 
 def _verify(data: dict, order_id: str, remote_id: str, merchant_id: str, expected: int):

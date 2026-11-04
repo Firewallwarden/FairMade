@@ -71,10 +71,12 @@ reconciliation only.
 
 needs_review means the data did not prove the expected payment or stock settlement.
 Inspect the sandbox merchant's transaction history and preserve the local database.
-There is no automatic refund/manual-review resolution endpoint in this slice.
+Buyer full-refund requests with seller approval/denial now have a
+[separate workflow](../refunds/README.md). Manual resolution of inconsistent
+payment evidence is still not automated.
 Do not clear records or force-release stock to make a payment appear successful.
 These records track sandbox merchandise payments; shipping, tax, fulfillment,
-refunds, production payouts and seller onboarding remain separate work.
+partial refunds, production payouts and seller onboarding remain separate work.
 
 Official references:
 [Orders v2](https://developer.paypal.com/api/orders/v2),

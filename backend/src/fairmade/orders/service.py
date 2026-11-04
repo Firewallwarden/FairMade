@@ -153,6 +153,7 @@ def response(order: Order) -> OrderResponse:
             deadline,
             utcnow(),
             order.checkout.state if order.checkout else None,
+            order.refund_request.state if order.refund_request else None,
         ),
         created_at=order.created_at,
         expires_at=deadline,
@@ -163,7 +164,14 @@ def response(order: Order) -> OrderResponse:
 def cancel(db: Session, account_id: str, order_id: str, *, seller=False) -> Order:
     repository.lock_order(db, order_id, account_id, seller=seller)
     order = get_order(db, account_id, order_id, seller=seller)
-    if response(order).status in ("paid", "capture_pending", "payment_review"):
+    if response(order).status in (
+        "paid",
+        "capture_pending",
+        "payment_review",
+        "refund_pending",
+        "refund_review",
+        "refunded",
+    ):
         raise conflict(
             "PAYMENT_REQUIRES_RECONCILIATION", "A paid or uncertain capture cannot be cancelled."
         )

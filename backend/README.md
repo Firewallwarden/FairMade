@@ -26,6 +26,10 @@ See the [synthetic inventory/order workflow](examples/orders/README.md).
 See [sandbox setup and payment integration](examples/paypal/README.md). Live
 production will require seller-connected merchant accounts through a separately
 approved integration; this adapter cannot call live PayPal.
+Buyers can request a full refund of a verified paid order. The receiving seller
+reviews the private reason and approves or denies; approval initiates a verified,
+retry-safe sandbox refund. Refunds do not automatically restock goods. See the
+[buyer request and seller review workflow](examples/refunds/README.md).
 
 Use Python 3.11 or newer with SQLite 3.26+. From this feature's worktree root, create an isolated
 environment, install the backend, migrate the database, and start the API:
@@ -107,6 +111,11 @@ It preserves earlier data; downgrade deletes stock and orders only.
 Migration 0009 adds durable PayPal request IDs, operation leases and sanitized
 capture records. It preserves existing orders and inventory. Downgrade is blocked
 if any payment records exist to avoid losing payment/retry history.
+
+Migration 0010 adds refund requests, seller decision audit and sanitized refund
+receipts without changing existing orders or captures. Downgrade is blocked once
+any payment/refund records exist; keep financial history and migrate with the
+server stopped.
 
 ## Seller-approved Fair Price Passports
 

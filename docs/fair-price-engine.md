@@ -168,7 +168,10 @@ approval, not source verification, certification, or an objective fairness verdi
    verified capture, reconciliation, payment records and atomic stock consumption
    are now implemented, opt-in and pending real sandbox/browser integration testing.
    Production requires seller-connected merchant accounts; fulfillment, shipping,
-   taxes, refunds and hosted operations remain future work.
+   taxes and hosted operations remain future work. Full-order buyer refund
+   requests with seller approval/denial, verified sandbox execution and recovery
+   are implemented for local development; partial refunds, appeals and
+   returns/restocking remain deferred. Credentialed sandbox/browser checks are pending.
 5. Supplier intelligence and expanded business/shopping assistants.
 
 Each milestone is a separate issue or feature worktree and reviewed PR.

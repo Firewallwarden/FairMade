@@ -33,8 +33,15 @@ def effective_status(
     expires_at: datetime,
     now: datetime,
     payment_state: str | None = None,
+    refund_state: str | None = None,
 ) -> str:
     if payment_state == "completed":
+        if refund_state == "refunded":
+            return "refunded"
+        if refund_state == "refund_pending":
+            return "refund_pending"
+        if refund_state == "needs_review":
+            return "refund_review"
         return "paid"
     if payment_state == "needs_review":
         return "payment_review"
