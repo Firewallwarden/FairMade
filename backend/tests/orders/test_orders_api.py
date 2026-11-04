@@ -470,12 +470,15 @@ def test_migration_restart_and_openapi(
         before = conn.execute(text("SELECT * FROM marketplace_listings ORDER BY id")).all()
     config = Config(str(Path(__file__).parents[2] / "alembic.ini"))
     command.check(config)
-    command.downgrade(config, "0007")
-    command.upgrade(config, "head")
+    # New orders also preserve private cost snapshots, even when costs are unknown.
+    # Downgrading must retain that history instead of deleting unpaid orders.
+    with pytest.raises(RuntimeError, match="sales cost snapshot records"):
+        command.downgrade(config, "0007")
+    command.check(config)
     with market_client.app.state.engine.connect() as conn:
         assert conn.execute(text("SELECT * FROM marketplace_listings ORDER BY id")).all() == before
         assert conn.execute(text("PRAGMA foreign_key_check")).all() == []
-    assert market_client.get(ORDERS, headers=buyer_headers).json()["items"] == []
+    assert market_client.get(ORDERS, headers=buyer_headers).json()["items"] == [order]
     schema = market_client.get("/openapi.json").json()
     for path in (ORDERS, ORDERS + "/preview", "/api/v1/seller/orders"):
         for endpoint in schema["paths"][path].values():

@@ -35,6 +35,11 @@ or material, apply input-specific requirements, and compare whole-package cash
 outlay with cost per usable unit. Reports preserve quote and rule snapshots;
 unknown or failed requirements never enter eligible cost summaries.
 See the [synthetic supplier workflow](examples/suppliers/README.md).
+Sellers can explicitly select a saved analysis as a product's private sales cost
+basis. New orders freeze that estimate separately from buyer-visible data.
+Private sandbox sales reports combine verified capture fees, completed refunds
+and frozen costs, showing unavailable profit when required data is missing.
+See the [sales reporting workflow](examples/sales/README.md).
 
 Use Python 3.11 or newer with SQLite 3.26+. From this feature's worktree root, create an isolated
 environment, install the backend, migrate the database, and start the API:
@@ -249,6 +254,33 @@ creating another, and create a new report to reassess freshness or new rules.
 These APIs are private and additive; frontend contract acceptance is pending.
 Supplier discovery, ratings, external data integrations, AI recommendations,
 automatic recipe changes and raw-material stock management are deferred.
+
+## Private sales and estimated profit
+
+Select an existing saved analysis through a product's `sales-cost-basis` endpoint,
+using the current selection revision. An explicit null analysis clears it.
+Analysis and product units/types must match; no latest-analysis fallback occurs.
+New orders freeze that selection in the same transaction as stock reservation.
+Costs use exact batch/yield ratios rounded once per order. Missing/incompatible
+costs do not block checkout; older orders keep unknown costs.
+
+`GET /api/v1/seller/sales` and its `/orders` detail page require verified seller
+access. Supply UTC start_date (inclusive) and end_date (exclusive), 1-366 days
+apart. Reports select completed captures verified during that period and reflect
+completed refunds currently known, including later refunds. This is a sales-cohort
+estimate, not a period cash-flow or bank/payout statement.
+
+Original capture fees and modeled production costs are retained after refunds;
+no stock is restored automatically. Unknown fees/costs or unresolved refunds
+leave profit unavailable. Known subset totals include coverage counts. Summary
+rejects periods with over 1,000 sales; narrow the period or use paginated detail.
+Figures remain sandbox/shared-merchant data and seller-reported cost estimates.
+
+Migration 0012 adds private selection/snapshot tables and a capture-time index
+without backfilling old costs. Run the documented upgrade command before starting
+new code. Downgrade refuses before SQLite DDL if cost selections/snapshots,
+financial or sourcing records exist. Private costs are excluded from buyer orders
+and public schemas.
 
 ## Buyer defaults and seller applications
 

@@ -8,6 +8,7 @@ from uuid import uuid4
 import pytest
 from alembic import command
 from alembic.config import Config
+from alembic.script import ScriptDirectory
 from fastapi.testclient import TestClient
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -361,7 +362,7 @@ def test_schema_matches_migration_and_refuses_evidence_downgrade(
         assert connection.execute(text("PRAGMA foreign_key_check")).all() == []
         assert (
             connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one()
-            == "0011"
+            == ScriptDirectory.from_config(config).get_current_head()
         )
 
 
@@ -417,5 +418,5 @@ def test_wider_downgrade_keeps_schema_intact_when_financial_guard_blocks(
     with paypal_client.app.state.engine.connect() as connection:
         assert (
             connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one()
-            == "0011"
+            == ScriptDirectory.from_config(config).get_current_head()
         )

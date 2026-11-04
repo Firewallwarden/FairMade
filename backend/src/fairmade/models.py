@@ -93,6 +93,42 @@ class Analysis(Base):
     result: Mapped[dict] = mapped_column(JSON)
 
 
+class ProductSalesCostBasis(Base):
+    __tablename__ = "product_sales_cost_bases"
+    __table_args__ = (
+        CheckConstraint("revision >= 0", name="ck_product_sales_cost_basis_revision"),
+        CheckConstraint(
+            "(analysis_id IS NULL AND source_snapshot IS NULL) OR "
+            "(analysis_id IS NOT NULL AND source_snapshot IS NOT NULL)",
+            name="ck_product_sales_cost_basis_source",
+        ),
+    )
+    product_id: Mapped[str] = mapped_column(ForeignKey("products.id"), primary_key=True)
+    revision: Mapped[int] = mapped_column(Integer)
+    analysis_id: Mapped[str | None] = mapped_column(ForeignKey("analyses.id"), nullable=True)
+    source_snapshot: Mapped[dict | None] = mapped_column(JSON(none_as_null=True), nullable=True)
+
+
+class OrderSalesCostSnapshot(Base):
+    __tablename__ = "order_sales_cost_snapshots"
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('available', 'unavailable')", name="ck_order_sales_cost_snapshot_status"
+        ),
+        CheckConstraint(
+            "(status = 'available' AND estimated_cost IS NOT NULL) OR "
+            "(status = 'unavailable' AND estimated_cost IS NULL)",
+            name="ck_order_sales_cost_snapshot_cost",
+        ),
+    )
+    order_id: Mapped[str] = mapped_column(ForeignKey("orders.id"), primary_key=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    status: Mapped[str] = mapped_column(String(20))
+    # Decimal strings avoid SQLite float conversion and integer range overflow.
+    estimated_cost: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    details: Mapped[dict] = mapped_column(JSON)
+
+
 class QualityLockSet(Base):
     __tablename__ = "quality_lock_sets"
     __table_args__ = (CheckConstraint("revision >= 0", name="ck_quality_lock_sets_revision"),)
@@ -378,6 +414,7 @@ class OrderLine(Base):
 class PayPalCheckout(Base):
     __tablename__ = "paypal_checkouts"
     __table_args__ = (
+        Index("ix_paypal_checkout_verified", "verified_at", "order_id"),
         CheckConstraint(
             "state IN ('creating', 'ready', 'capture_pending', "
             "'completed', 'failed', 'needs_review')",
