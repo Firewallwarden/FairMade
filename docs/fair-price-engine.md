@@ -163,6 +163,11 @@ approval, not source verification, certification, or an objective fairness verdi
    Private account favorites now save visible listings without copying catalog
    data. Hidden listings retain bookmarks but return no catalog payload; buyer
    and seller accounts can manage their own saved products.
+   Verified sellers can create one storefront for the local MVP, with explicit
+   draft/preview/publication/withdrawal and a stable public UUID. Public profiles
+   group only current visible listings without rewriting approved listing
+   identities or prices. Profiles remain seller-reported; multi-store support,
+   precise locations and identity/quality verification remain future work.
 4. Orders, inventory reservation, and PayPal Sandbox checkout with verified,
    idempotent payment events and reconciled fees.
    Sellable-unit inventory, exact unpaid order snapshots, buyer/seller histories,
