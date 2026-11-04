@@ -42,6 +42,31 @@ cumulative changes and stay draft until their prerequisites are integrated.
 The readiness guard now rejects non-main bases in Draft mode too. Recovery replays
 the reviewed changes onto current main without force-pushes or agent merges.
 
+## Main-targeted child conflicts after the #18 squash merge
+
+PR #18 was correctly squash-merged into main as
+`f02f9f1c568211e1f5d466641cd6e8f3b12bdb79`. PR #19 also targeted main, but
+retained its original development-parent commits through `7c35734`. The
+development-parent tree and main's squash-merge tree were identical
+(`d10d5d158d573d0fdcb8986e29cf79af22ed4dbc`); their commit identities and
+ancestry were different. Git therefore used an older merge base and reported
+content and add/add conflicts, even though main had no independent content edits
+relative to that parent.
+
+This was a separate problem from the earlier wrong-destination incident.
+The user's squash merges in order were valid. The agent failed to refresh the
+dependent branch after the parent squash merge before its next review.
+The existing Review guard would reject the stale child because current main was
+not its ancestor; it must be rerun after every parent merge.
+
+The resolution merges current main into the published #19 feature branch and
+pushes normally, without rewriting remote history. Each conflicted main blob was
+checked against the original development parent. The resolved index tree was
+then verified to equal the original refund feature tree exactly, including its
+test-fixture move, before adding these workflow clarifications.
+Squashing the final PR still gives main one feature commit; synchronization merge
+commits remain in the feature history.
+
 ## Required workflow
 
 - Continue independent/dependent development without waiting for unrelated merges.
@@ -50,8 +75,20 @@ the reviewed changes onto current main without force-pushes or agent merges.
 - Present only main-targeted PRs as merge-ready. After a parent merges, verify
   the actual merge commit on fetched main, reconcile the child's history/diff,
   retain main as the destination, revalidate, and run the Review guard before marking it ready.
+- The agent performs this refresh after every parent merge. Do not ask the user
+  to squash-merge a whole dependency stack consecutively without an intervening
+  refresh and validation. Continue independent features from fetched main;
+  dependent features can continue in draft while waiting for their prerequisites.
+- Rebase unpublished branches. For published branches, normally merge fetched
+  main into the feature branch and push normally. Review both sides of conflicts
+  rather than choosing one side wholesale. If the parent and squashed main trees
+  match, verify that fact before retaining child changes. Inspect the final diff
+  against main and rerun application checks.
+- For an unpublished child after a squash merge, replay only its remaining
+  commits with `git rebase --onto origin/main <old-parent-tip>`; blindly rebasing
+  the entire inherited history can replay already integrated parent work.
 - Preserve the prohibition on unauthorized force-pushes. If a published child's
-  squash history cannot be reconciled without rewriting it, use a fresh main-based
+  history cannot safely be reconciled without rewriting it, use a fresh main-based
   worktree/branch and replay only its changes. Leave the original draft with a
   superseding-PR reference.
 - After reported merges, check destinations, merge commits, and intended feature

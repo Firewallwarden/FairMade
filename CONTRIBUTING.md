@@ -34,19 +34,28 @@ breaking changes.
    decisions; do not introduce paid services, new infrastructure, or major
    architectural changes without approval.
 4. Implement and validate in the feature worktree. Before opening or updating its
-   PR, fetch and rebase onto its current base (`origin/main` or the parent
-   feature branch). Coordinate conflicts rather than overwriting another
-   contributor's work. Review stacked branch history and base after a parent
-   merges. The PR destination always remains main. Before marking a PR ready, run
+   PR, fetch and synchronize with current main, or the development parent while
+   its prerequisite remains unmerged. Rebase unpublished work; normally merge
+   the updated development base into published feature branches and push normally.
+   This preserves published history without force-pushes. Review both sides of
+   conflicts and coordinate independent edits. The PR destination remains main.
+   After each parent squash merge, the agent must refresh the child against
+   fetched main and inspect its diff for only the remaining work before asking
+   the user to review or merge it. Merging a stack in order alone is insufficient.
+   Before marking a PR ready, run
    `scripts/Test-PullRequestReadiness.ps1 -PullRequest <number> -Mode Review`
    from its clean feature worktree. Promote dependent work only after the parent
-   merge is verified on fetched main. If squash history requires an unauthorized
-   remote rewrite, create a new main-based replacement branch/PR with only the
-   remaining changes; keep the old PR draft and identify its replacement.
+   merge is verified on fetched main and the child has been synchronized and
+   revalidated. For unpublished children, replay only child commits onto main,
+   for example with `git rebase --onto origin/main <old-parent-tip>`.
+   If safe synchronization requires an unauthorized remote rewrite, create a
+   new main-based replacement branch/PR with only the remaining changes; keep the
+   old PR draft and identify its replacement.
 5. Use descriptive commits. The standing authorization covers in-scope staging,
-   commits, normal pushes to the feature branch, and PR creation/updates. Merging,
-   direct pushes to `main`, out-of-scope edits, and rewriting published history
-   require explicit permission. Never force-push `main`; a feature-branch
+   commits, normal pushes to the feature branch, and PR creation/updates.
+   PR merges into main, direct pushes to `main`, out-of-scope edits, and
+   rewriting published history require explicit permission. Never force-push
+   `main`; a feature-branch
    `--force-with-lease` also needs explicit authorization.
 
 Describe the problem and resulting behavior in each PR. Include relevant API and
