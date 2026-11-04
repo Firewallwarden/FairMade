@@ -5,30 +5,16 @@ from decimal import Decimal, localcontext
 from typing import Annotated, Literal, Self
 from uuid import UUID
 
-from pydantic import BeforeValidator, Field, model_validator
+from pydantic import Field, model_validator
 
 from fairmade.comparisons.units import UNITS, named_unit_matches
-from fairmade.database import utcnow
+from fairmade.evidence import Amount as Amount
+from fairmade.evidence import PositiveAmount as PositiveAmount
+from fairmade.evidence import Source as Source
+from fairmade.evidence import today as today
 from fairmade.pricing.schemas import Contract, Label
 from fairmade.schemas import ProductType, UTCResponse
 
-
-def today() -> date:
-    return utcnow().date()
-
-
-def require_decimal_string(value: object) -> object:
-    if not isinstance(value, str):
-        raise ValueError("Prices and quantities must be decimal JSON strings")
-    return value
-
-
-Amount = Annotated[
-    Decimal,
-    BeforeValidator(require_decimal_string, json_schema_input_type=str),
-    Field(ge=0, le=1_000_000_000, decimal_places=6, allow_inf_nan=False),
-]
-PositiveAmount = Annotated[Amount, Field(gt=0)]
 Unit = Literal["g", "kg", "egg", "dozen", "loaf", "item"]
 Notes = Annotated[str, Field(max_length=2000)]
 
@@ -47,12 +33,6 @@ class Quantity(Contract):
                 if count != count.to_integral_value():
                     raise ValueError("Count quantities must represent whole eggs, loaves, or items")
         return self
-
-
-class Source(Contract):
-    name: Label
-    kind: Literal["website", "in_person", "document", "other"]
-    reference: Annotated[str, Field(min_length=1, max_length=2000)]
 
 
 class ObservationData(Contract):

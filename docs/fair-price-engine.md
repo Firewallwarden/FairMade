@@ -172,6 +172,13 @@ approval, not source verification, certification, or an objective fairness verdi
    requests with seller approval/denial, verified sandbox execution and recovery
    are implemented for local development; partial refunds, appeals and
    returns/restocking remain deferred. Credentialed sandbox/browser checks are pending.
-5. Supplier intelligence and expanded business/shopping assistants.
+5. Supplier intelligence: seller-entered quotes, sourcing-input-specific quality
+   requirements, exact usable-unit costs, whole-package/bulk/transport purchase
+   comparisons and immutable reports are implemented for local development,
+   pending frontend contract review. Unknown/failed requirements and stale or
+   unavailable quotes are excluded from eligible cost summaries. No source
+   verification, substitution recommendation or automatic recipe/pricing change
+   occurs. Supplier discovery/ratings, external integrations and expanded
+   business/shopping assistants remain future work.
 
 Each milestone is a separate issue or feature worktree and reviewed PR.

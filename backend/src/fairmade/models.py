@@ -161,6 +161,56 @@ class PriceComparison(Base):
     result: Mapped[dict] = mapped_column(JSON)
 
 
+class SourcingInput(Base):
+    __tablename__ = "sourcing_inputs"
+    __table_args__ = (
+        CheckConstraint("rule_revision >= 0", name="ck_sourcing_inputs_revision"),
+        Index("ix_sourcing_input_product_created", "product_id", "created_at", "id"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    product_id: Mapped[str] = mapped_column(ForeignKey("products.id"))
+    label: Mapped[str] = mapped_column(String(200))
+    rule_revision: Mapped[int] = mapped_column(Integer, default=0)
+    rules: Mapped[list] = mapped_column(JSON, default=list)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, onupdate=utcnow)
+
+
+class SupplierQuote(Base):
+    __tablename__ = "supplier_quotes"
+    __table_args__ = (
+        CheckConstraint("basis = 'seller_reported_unverified'", name="ck_supplier_quotes_basis"),
+        Index("ix_supplier_quote_input_created", "sourcing_input_id", "created_at", "id"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    sourcing_input_id: Mapped[str] = mapped_column(ForeignKey("sourcing_inputs.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    basis: Mapped[str] = mapped_column(String(40))
+    details: Mapped[dict] = mapped_column(JSON)
+
+
+class SupplierComparison(Base):
+    __tablename__ = "supplier_comparisons"
+    __table_args__ = (
+        CheckConstraint(
+            "basis = 'seller_reported_unverified'", name="ck_supplier_comparisons_basis"
+        ),
+        CheckConstraint("rule_revision >= 0", name="ck_supplier_comparisons_revision"),
+        Index("ix_supplier_comparison_input_created", "sourcing_input_id", "created_at", "id"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    sourcing_input_id: Mapped[str] = mapped_column(ForeignKey("sourcing_inputs.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    as_of_date: Mapped[date] = mapped_column(Date)
+    rule_revision: Mapped[int] = mapped_column(Integer)
+    comparison_version: Mapped[str] = mapped_column(String(100))
+    basis: Mapped[str] = mapped_column(String(40))
+    request_snapshot: Mapped[dict] = mapped_column(JSON)
+    sourcing_input_snapshot: Mapped[dict] = mapped_column(JSON)
+    product_snapshot: Mapped[dict] = mapped_column(JSON)
+    result: Mapped[dict] = mapped_column(JSON)
+
+
 class SellerPricingReview(Base):
     __tablename__ = "seller_pricing_reviews"
     __table_args__ = (

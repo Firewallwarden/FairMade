@@ -48,6 +48,7 @@ from fairmade.refunds.routes import refund_error_handler
 from fairmade.refunds.routes import seller_router as seller_refund_router
 from fairmade.reviews.routes import router as review_router
 from fairmade.seller_applications import router as application_router
+from fairmade.suppliers.routes import router as supplier_router
 
 
 def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = None) -> FastAPI:
@@ -61,7 +62,7 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
             finally:
                 application.state.engine.dispose()
 
-    application = FastAPI(title="FairMade API", version="0.11.0", lifespan=lifespan)
+    application = FastAPI(title="FairMade API", version="0.12.0", lifespan=lifespan)
     application.add_exception_handler(RefundError, refund_error_handler)
     application.add_exception_handler(PaymentError, payment_error_handler)
     application.add_exception_handler(CommerceError, commerce_error_handler)
@@ -88,6 +89,7 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
             request.url.path.startswith("/api/v1/auth/")
             or "/paypal-checkout" in request.url.path
             or "/refund-request" in request.url.path
+            or "/sourcing-inputs" in request.url.path
         ):
             # Validation errors may otherwise echo the raw password or entire body.
             errors = [{key: error[key] for key in ("loc", "msg", "type")} for error in exc.errors()]
@@ -125,6 +127,7 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
     application.include_router(paypal_config_router)
     application.include_router(buyer_refund_router)
     application.include_router(seller_refund_router)
+    application.include_router(supplier_router)
     return application
 
 

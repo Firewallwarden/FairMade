@@ -30,6 +30,11 @@ Buyers can request a full refund of a verified paid order. The receiving seller
 reviews the private reason and approves or denies; approval initiates a verified,
 retry-safe sandbox refund. Refunds do not automatically restock goods. See the
 [buyer request and seller review workflow](examples/refunds/README.md).
+Private supplier comparisons now record seller-entered quotes for each ingredient
+or material, apply input-specific requirements, and compare whole-package cash
+outlay with cost per usable unit. Reports preserve quote and rule snapshots;
+unknown or failed requirements never enter eligible cost summaries.
+See the [synthetic supplier workflow](examples/suppliers/README.md).
 
 Use Python 3.11 or newer with SQLite 3.26+. From this feature's worktree root, create an isolated
 environment, install the backend, migrate the database, and start the API:
@@ -225,6 +230,25 @@ See the [synthetic quality examples and workflow](examples/quality/README.md).
 All claims remain `seller_reported_unverified`. No unit conversions, source
 verification, price comparisons, or savings recommendations are made. Existing
 pricing calculations retain their `QUALITY_NOT_EVALUATED` warning.
+
+## Supplier sourcing and comparison history
+
+Create a sourcing input under a product, configure its own Quality Locks, and
+record supplier quotes with provenance, usable yield, package limits, availability
+and a flat transport charge. A comparison specifies the usable quantity needed
+and current rule revision. It keeps failed/unknown/stale alternatives visible
+while excluding them from cost summaries. An input claim match is unverified
+and does not establish finished-product quality or recommend a substitution.
+
+Migration 0011 adds three sourcing tables without changing earlier data. Run the
+same documented upgrade command. Downgrade refuses if sourcing or financial
+records exist, before SQLite DDL, to protect history and avoid partial rollback.
+Supplier quotes and reports have no update/delete routes. Correct a quote by
+creating another, and create a new report to reassess freshness or new rules.
+
+These APIs are private and additive; frontend contract acceptance is pending.
+Supplier discovery, ratings, external data integrations, AI recommendations,
+automatic recipe changes and raw-material stock management are deferred.
 
 ## Buyer defaults and seller applications
 
