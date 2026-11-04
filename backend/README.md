@@ -40,6 +40,9 @@ basis. New orders freeze that estimate separately from buyer-visible data.
 Private sandbox sales reports combine verified capture fees, completed refunds
 and frozen costs, showing unavailable profit when required data is missing.
 See the [sales reporting workflow](examples/sales/README.md).
+All authenticated accounts can save private favorites from the public catalog.
+Hidden listings retain the bookmark but expose no catalog content.
+See the [saved-product workflow](examples/favorites/README.md).
 
 Use Python 3.11 or newer with SQLite 3.26+. From this feature's worktree root, create an isolated
 environment, install the backend, migrate the database, and start the API:
@@ -281,6 +284,23 @@ without backfilling old costs. Run the documented upgrade command before startin
 new code. Downgrade refuses before SQLite DDL if cost selections/snapshots,
 financial or sourcing records exist. Private costs are excluded from buyer orders
 and public schemas.
+
+## Favorites and saved products
+
+Authenticated buyer/seller accounts can create, page, read and remove their own
+favorites under `/api/v1/favorites`. Saving an already-visible saved listing
+returns the same bookmark without changing its time. Hidden/unpublished listings
+cannot be newly saved.
+
+Reads return the current approved public card. If a listing/Passport is withdrawn
+or superseded, or seller access is lost, the bookmark remains with
+listing_visible=false and listing=null. No stale catalog or private content is
+copied into it. Favorites do not reserve stock or prices.
+
+Migration 0013 adds favorites/indexes without changing earlier records. Run the
+standard upgrade command. Downgrade refuses if favorites or protected history
+exists. Browser removal uses DELETE with explicit CORS origins. Shared pagination
+rejects offsets outside SQLite's supported signed 64-bit range.
 
 ## Buyer defaults and seller applications
 
