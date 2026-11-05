@@ -95,6 +95,15 @@ alone. Apply existing authorization without asking the same permission again.
 
 ## Design and readability
 
+Track temporary local-development choices in the
+[local MVP decision log](docs/local-mvp-decisions.md). Add or update the relevant
+entry with each feature PR: identify confirmed choices versus implementation
+limits, link supporting code/docs or PRs, state whether behavior is planned or
+implemented, and explain what needs review or improvement beyond local MVP.
+When replacing a tradeoff, retain its history and link the replacement. Do not
+describe permanent domain rules as temporary or treat a follow-up as approval
+to implement it.
+
 Use small, cohesive modules and explicit interfaces. Keep UI, HTTP adapters,
 business rules, persistence, and external integrations separate where useful.
 Share stable services or domain functions rather than another feature's route
