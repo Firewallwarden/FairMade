@@ -8,8 +8,16 @@ from sqlalchemy.orm import Session
 
 from fairmade.auth import api_error
 from fairmade.database import utcnow
+from fairmade.geography import ApproximateArea
 from fairmade.marketplace.repository import visible_listings
-from fairmade.models import AccountRole, MarketplaceListing, Product, Storefront, new_id
+from fairmade.models import (
+    AccountRole,
+    MarketplaceListing,
+    Product,
+    Storefront,
+    StorefrontDiscoveryLocation,
+    new_id,
+)
 from fairmade.storefronts.schemas import StorefrontContent
 
 
@@ -80,6 +88,24 @@ def visible():
         select(Storefront)
         .join(AccountRole, AccountRole.account_id == Storefront.account_id)
         .where(Storefront.state == "published", AccountRole.role == "seller")
+    )
+
+
+def save_approved_area(db: Session, storefront_id: str, area: ApproximateArea | None) -> None:
+    """Commit the search index together with the exact approved public payload."""
+    if area is None:
+        row = db.get(StorefrontDiscoveryLocation, storefront_id)
+        if row is not None:
+            db.delete(row)
+        return
+    values = {
+        "latitude_hundredths": int(area.latitude * 100),
+        "longitude_hundredths": int(area.longitude * 100),
+    }
+    db.execute(
+        insert(StorefrontDiscoveryLocation)
+        .values(storefront_id=storefront_id, **values)
+        .on_conflict_do_update(index_elements=["storefront_id"], set_=values)
     )
 
 

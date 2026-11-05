@@ -331,6 +331,31 @@ profiles for existing accounts. Downgrade refuses if storefronts or earlier
 protected history exists. No paid services, frontend interfaces, contact lookup
 or precise location data are introduced.
 
+## Nearby seller and product discovery
+
+Sellers can optionally add `approximate_area` (label plus latitude/longitude at
+most two decimal places) to storefront drafts. The existing preview and explicit
+approval publish this representative area point and update its index atomically.
+Draft edits stay private until approval; published points are public and do not
+certify an address or guarantee anonymity. Text location labels are not geocoded.
+
+Anonymous read-only POST `/api/v1/discovery/storefronts` and `/listings` accept
+transient origin coordinates, radius_km (1..500), optional text/type filters and
+pagination. Responses include approved resources and estimated straight-line km,
+nearest first. No buyer origin is saved or echoed; requests use bodies rather
+than URL coordinates and responses use no-store. Search does not guarantee stock.
+Only approved points/currently visible resources match; existing profiles without
+points remain in regular browse. No maps or external service is introduced.
+
+Migration 0015 creates the area index without changing prior publications or
+inferring coordinates. More than 1,000 bounding-box candidates returns an explicit
+SEARCH_TOO_BROAD error; narrow the search rather than using truncated results.
+Downgrades stop before DDL when storefronts or earlier protected history exists.
+See [the runnable examples](examples/discovery/README.md) and
+[the contract](../docs/api-contract.md#approximate-area-nearby-discovery).
+Future work includes location entry/precision policy and spatial-query scaling;
+exact pickup locations require a separate explicit disclosure decision.
+
 ## Buyer defaults and seller applications
 
 Registration and `GET /api/v1/auth/me` return `{id, email, roles}`.

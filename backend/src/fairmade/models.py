@@ -381,6 +381,20 @@ class Storefront(Base):
     location_key: Mapped[str | None] = mapped_column(String(200), nullable=True)
 
 
+class StorefrontDiscoveryLocation(Base):
+    __tablename__ = "storefront_discovery_locations"
+    __table_args__ = (
+        CheckConstraint("latitude_hundredths BETWEEN -9000 AND 9000", name="ck_discovery_latitude"),
+        CheckConstraint(
+            "longitude_hundredths BETWEEN -18000 AND 18000", name="ck_discovery_longitude"
+        ),
+        Index("ix_discovery_area", "latitude_hundredths", "longitude_hundredths"),
+    )
+    storefront_id: Mapped[str] = mapped_column(ForeignKey("storefronts.id"), primary_key=True)
+    latitude_hundredths: Mapped[int] = mapped_column(Integer)
+    longitude_hundredths: Mapped[int] = mapped_column(Integer)
+
+
 class Favorite(Base):
     __tablename__ = "favorites"
     __table_args__ = (

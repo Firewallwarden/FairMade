@@ -1479,13 +1479,14 @@ accounts receive 403 SELLER_REQUIRED; missing/revoked sessions receive 401.
 Foreign/missing storefront IDs return the same 404 NOT_FOUND. Ownership is
 assigned from the authenticated account, never accepted from clients.
 
-Content is `{display_name, description?, location?}`. display_name is a trimmed,
+Content is `{display_name, description?, location?, approximate_area?}`. display_name is a trimmed,
 nonempty string at most 200 characters. description is optional/null and at most
 2,000 characters. location is an optional/null, nonempty trimmed public label
 at most 200 characters. It is not coordinates, a verified address or a distance
 estimate. No email, phone, private account fields, economics or verification
 flags are projected or accepted as extra fields. Validation errors omit input
-values.
+values. Optional approximate_area is an explicitly public representative point;
+see approximate-area discovery below. It is not inferred from the location label.
 
 A second POST, including after withdrawal, returns 409 STOREFRONT_LIMIT. Sellers
 edit/republish their existing storefront instead. Creation races are protected by
@@ -1523,7 +1524,7 @@ and private successful responses use Cache-Control: no-store.
 
 Public storefront fields are id, published_revision, published_at (UTC),
 payload_hash and payload. Payload contains storefront_version=seller-storefront-v1,
-basis=seller_reported_unverified, display_name, optional description/location
+basis=seller_reported_unverified, display_name, optional description/location/approximate_area
 and notices. It exposes no private account ID/email, draft content, private
 product/economics data, payout details or identity/quality certification.
 
@@ -1546,6 +1547,101 @@ and publishing a storefront does not publish products or claim stock/fulfillment
 Withdrawing only the storefront does not deactivate independently published
 catalog listings. The public profile is self-reported, not identity verification,
 a quality certification or a fairness verdict.
+
+## Approximate-area nearby discovery
+
+Backend-implemented for local development; frontend acceptance is pending.
+The approved local MVP uses seller-chosen approximate public area points.
+Exact pickup addresses, geocoding, maps, route/travel distances and automatic
+device location collection are outside this slice. No external service is called.
+
+### Optional seller area and approval
+
+Storefront draft content accepts nullable/omittable approximate_area:
+
+```json
+{
+  "label": "Synthetic example town area",
+  "latitude": "40.00",
+  "longitude": "-90.00"
+}
+```
+
+label is a trimmed nonempty string up to 200 characters. Latitude is -90..90;
+longitude is -180..180. Both are finite decimals with at most **two decimal
+places**; finer input is rejected, not silently rounded/stored. Coordinates are
+returned as decimal strings. Optional basis accepts only
+seller_chosen_approximate and defaults to that value. No address field is accepted.
+Sellers must choose a representative area, not submit a private precise address.
+Two-decimal precision does not guarantee anonymity, verify a town boundary, or
+prevent a seller putting private details in free text. Published area data is public.
+
+The existing storefront preview/hash approval includes the whole area and its
+notice. Editing/removing it changes only the private draft until explicit new
+approval; PUT omission clears it from the replacement draft. Publication updates
+the approved payload and indexed point atomically. Withdrawal or seller-access
+loss excludes the profile and its listings from nearby search. Re-publication
+requires the existing fresh approval. Old profiles/publication hashes remain
+unchanged and are not assigned coordinates by migration or lookup. Profiles
+without points still work in regular browse and checkout but cannot match nearby
+search. A storefront's area applies to all its current listings under the current
+one-store-per-seller ownership rule; it is not a per-product fulfillment address.
+
+### Anonymous search
+
+| Method and path | Body | Success |
+| --- | --- | --- |
+| POST /api/v1/discovery/storefronts | AreaSearch | 200: DiscoveryPage of NearbyStorefront |
+| POST /api/v1/discovery/listings | ListingSearch | 200: DiscoveryPage of NearbyListing |
+
+These are read-only POSTs so transient buyer origins do not enter URLs/query
+logs or browser history. No account/session is needed. The backend does not
+save or echo the origin; deployment logging must also avoid request bodies.
+Successful, validation-error and too-broad responses use Cache-Control: no-store.
+Validation errors omit raw inputs. Search bodies reject unknown fields.
+
+```json
+{
+  "origin": {"latitude": "40.00", "longitude": "-90.00"},
+  "radius_km": "25.0",
+  "q": "bread",
+  "limit": 20,
+  "offset": 0
+}
+```
+
+Required origin latitude/longitude are finite decimals bounded as above, with
+up to six decimal places. Required radius_km is 1..500 km, up to one decimal
+place. Optional/null q is trimmed, nonempty, up to 200 characters; case-insensitive
+substring matching treats SQL wildcard characters literally. Storefront q uses
+only approved profile name/description; listing q uses existing approved catalog
+search text. Only ListingSearch accepts optional/null product_type using the
+existing sourdough/eggs/other enum. limit is a strict integer 1..100 (default20),
+offset a strict integer 0..9,223,372,036,854,775,807 (default0).
+
+Return `{items, limit, offset, distance_basis, notices}`. distance_basis is
+approximate_area_great_circle. NearbyStorefront items contain storefront (the
+existing PublicStorefront DTO) and estimated_distance_km. NearbyListing contains
+listing (the existing CatalogCard), storefront_id, approved approximate_area,
+and estimated_distance_km. No private seller IDs/economics/drafts or buyer origin
+are included. Existing catalog/Passport visibility rules still apply; search
+does not rewrite listing names/prices or reserve/guarantee stock.
+
+Distances use a mean-radius sphere (6371.0088 km), with haversine evaluation.
+Radius filtering uses the unrounded calculated distance (1e-9 km numeric boundary
+tolerance). Sort is ascending unrounded distance then ascending resource UUID;
+pagination follows filtering and sorting. Display estimates round half-up to
+one decimal km as strings, e.g. "1.1". These are approximate straight-line point
+distances, not exact seller distances, road routes, delivery coverage or travel
+times. Date-line crossings and poles are supported. Only numerical geographic
+calculations use floats; existing money/unit calculations are unchanged.
+
+An indexed conservative bounding box fetches at most 1,001 currently visible
+candidates after text/type filters. More than 1,000 returns 409 SEARCH_TOO_BROAD
+with a request to narrow radius/filters; no truncated nearest-first result is
+presented. This bound is applied before exact circular filtering, even when an
+offset would yield an empty page. This is a local MVP search limit; a future
+approved spatial-query design may replace it as usage grows.
 
 ## Errors and existing endpoints
 
@@ -1643,6 +1739,11 @@ with one-storefront-per-account uniqueness for the local MVP. It preserves prior
 data without backfilling/publishing profiles. Downgrade refuses before DDL if
 storefronts, favorites or earlier protected cost/financial/sourcing records exist,
 so broader SQLite downgrades cannot partly remove schema before earlier guards.
+
+Migration 0015 adds an approved-area index table without rewriting any existing
+storefront JSON, hash, timestamp or listing. No buyer locations are stored.
+Downgrade refuses before DDL if storefronts or earlier protected history exists,
+preventing a wider downgrade from partly removing schema before earlier guards.
 
 Before frontend integration, jointly accept this proposal and agree on approved
 development origins and browser credential handling. Public deployment requires
