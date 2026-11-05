@@ -13,6 +13,7 @@ from sqlalchemy import (
     ForeignKey,
     Index,
     Integer,
+    LargeBinary,
     String,
     Text,
     UniqueConstraint,
@@ -343,6 +344,36 @@ class MarketplaceListing(Base):
     search_text: Mapped[str | None] = mapped_column(Text)
     location_key: Mapped[str | None] = mapped_column(String(200))
     price_minor: Mapped[int | None] = mapped_column(Integer)
+
+
+class ProductPhoto(Base):
+    __tablename__ = "product_photos"
+    __table_args__ = (
+        CheckConstraint(
+            "width BETWEEN 1 AND 2048 AND height BETWEEN 1 AND 2048", name="ck_photo_dimensions"
+        ),
+        CheckConstraint(
+            "byte_count BETWEEN 1 AND 4194304 AND length(image_bytes) = byte_count",
+            name="ck_photo_size",
+        ),
+        CheckConstraint("length(sha256) = 64", name="ck_photo_hash"),
+        Index("ix_photo_product_created", "product_id", "created_at", "id"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    product_id: Mapped[str] = mapped_column(ForeignKey("products.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    width: Mapped[int] = mapped_column(Integer)
+    height: Mapped[int] = mapped_column(Integer)
+    byte_count: Mapped[int] = mapped_column(Integer)
+    sha256: Mapped[str] = mapped_column(String(64))
+    image_bytes: Mapped[bytes] = mapped_column(LargeBinary, deferred=True)
+
+
+class ListingPhoto(Base):
+    __tablename__ = "listing_photos"
+    listing_id: Mapped[str] = mapped_column(ForeignKey("marketplace_listings.id"), primary_key=True)
+    photo_id: Mapped[str] = mapped_column(ForeignKey("product_photos.id"), primary_key=True)
+    __table_args__ = (Index("ix_listing_photo_public", "photo_id", "listing_id"),)
 
 
 class Storefront(Base):

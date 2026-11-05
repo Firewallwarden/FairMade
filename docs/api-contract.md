@@ -1643,6 +1643,87 @@ presented. This bound is applied before exact circular filtering, even when an
 offset would yield an empty page. This is a local MVP search limit; a future
 approved spatial-query design may replace it as usage grows.
 
+## Product photo uploads and approved listing images
+
+Backend-implemented for local development; frontend acceptance remains pending.
+Direct uploads use local SQLite blob storage behind a focused repository. Bytes
+and metadata commit/delete atomically; no originals, client filenames, external
+URLs or static upload directory are retained. Managed media hosting is future work.
+
+| Method and path | Input | Success |
+| --- | --- | --- |
+| POST /api/v1/products/{product_id}/photos | Raw JPEG/PNG body | 201 PhotoMetadata |
+| GET /api/v1/products/{product_id}/photos | limit, offset query | 200 Page of PhotoMetadata |
+| GET /api/v1/products/{product_id}/photos/{photo_id}/content | None | 200 normalized image/jpeg bytes |
+| DELETE /api/v1/products/{product_id}/photos/{photo_id} | None | 204 empty |
+| GET /api/v1/marketplace/photos/{photo_id} | None | 200 currently approved image/jpeg bytes |
+
+Private endpoints require the verified seller owning the product; cross-product,
+foreign and missing photos return 404 NOT_FOUND. Upload authorization/ownership
+is checked before image processing. Public image reads are anonymous but require
+a current visible listing referencing the photo: deactivation, superseded or
+withdrawn Passport, lost seller role or approved selection removal hides it.
+Storefront withdrawal alone does not revoke independently approved listing photos.
+
+POST sends Content-Type image/jpeg or image/png with matching file bytes; do not
+send JSON, base64, multipart data or compressed Content-Encoding. The raw stream
+is limited to 5 MiB, even without a trustworthy Content-Length. Empty/oversized
+uploads return 413 PHOTO_SIZE_LIMIT. Unsupported types/encodings or mismatches
+return 415 UNSUPPORTED_PHOTO_TYPE / PHOTO_TYPE_MISMATCH. Only single-frame JPEG/PNG
+is decoded: invalid/truncated content returns 422 INVALID_PHOTO, animation returns
+ANIMATED_PHOTO, and dimensions over 6000 per side or 16 million pixels return
+PHOTO_DIMENSION_LIMIT. Excess normalized size returns PHOTO_OUTPUT_LIMIT.
+
+Processing applies EXIF orientation, fits within 2048 pixels per side while
+preserving aspect ratio, flattens transparency onto white and reencodes JPEG
+quality 85 from fresh pixels. EXIF/XMP/ICC/comments/original filenames and trailing
+data are not passed through. Normalized content is at most 4 MiB. At most two
+decodes run concurrently per process; overload returns 429 PHOTO_PROCESSING_BUSY
+with Retry-After: 1. Pillow is restricted to JPEG/PNG, with built-in decompression
+guards kept active. This is in-process local processing, not a sandboxed media service.
+
+PhotoMetadata contains id, product_id, created_at UTC, width, height, byte_count,
+sha256 and media_type=image/jpeg, never blob bytes or source metadata. Owner list
+pagination uses existing limit/offset bounds. Account storage is limited to
+64 MiB of normalized bytes and 10 photos per product; serialized quota checking
+returns 409 PHOTO_STORAGE_LIMIT rather than allowing concurrent over-allocation.
+Photo IDs and normalized bytes are immutable; replacements are new uploads.
+
+Existing ListingContent optionally accepts photos, null/omitted or up to six
+unique ordered `{photo_id, alt_text}` items. alt_text is a trimmed nonempty label
+up to 200 characters. Only photos belonging to the exact listing product can be
+selected. PUT is full replacement: omitting photos clears the draft selection.
+Null/missing selections keep the old public schema/hash behavior. An explicit
+empty array publishes an empty photo selection after fresh approval.
+
+Preview projects selections into optional public payload.photos, each containing
+id, src (relative API image path), alt_text, width, height, sha256 and media_type.
+No private product/account IDs, timestamps or storage internals are included.
+Selection order, alt text and image digest are part of the exact preview hash;
+activation commits the approved payload and serving references together. Upload
+alone never publishes an image. Draft edits leave the old approved selection
+visible until reactivation/deactivation, and exact activation retry is idempotent.
+Catalog detail/browse, storefront listing pages, favorites and nearby results use
+the existing CatalogCard projection, so they share the approved image selection.
+
+DELETE returns 409 PHOTO_IN_USE while a listing draft or active approved snapshot
+references the photo, even if the active listing is temporarily hidden. Remove
+it from the draft, then approve the replacement or deactivate before deletion.
+Deleting unused content atomically removes normalized bytes, metadata and any
+inactive serving references. No mutable update or external image-fetch API exists.
+
+Images return Cache-Control: no-store, X-Content-Type-Options: nosniff, a restrictive
+CSP and a generated inline JPEG filename. Public visibility is checked every read;
+previously downloaded copies cannot be recalled. Invalid/corrupt stored content
+returns 503 PHOTO_UNAVAILABLE instead of serving mismatched bytes. Private browser
+previews should fetch authenticated blobs; never append session tokens to URLs.
+Use the configured API origin to resolve public relative src values.
+
+Local MVP follow-up: managed storage/serving, backup/retention and capacity policy,
+processing isolation and hard time/memory limits, upload/download abuse controls,
+dependency monitoring, and moderation/claims policy before hosted use. This feature
+does not verify that a photo depicts the product or certify seller claims.
+
 ## Errors and existing endpoints
 
 New application errors use:
@@ -1744,6 +1825,11 @@ Migration 0015 adds an approved-area index table without rewriting any existing
 storefront JSON, hash, timestamp or listing. No buyer locations are stored.
 Downgrade refuses before DDL if storefronts or earlier protected history exists,
 preventing a wider downgrade from partly removing schema before earlier guards.
+
+Migration 0016 adds private normalized photo blobs and approved listing references
+without modifying old listing payloads/hashes. Downgrade refuses before DDL if
+photos, storefronts or earlier protected history exists, preserving media and
+avoiding partial wider downgrades. It follows discovery migration 0015.
 
 Before frontend integration, jointly accept this proposal and agree on approved
 development origins and browser credential handling. Public deployment requires

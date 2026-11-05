@@ -2,6 +2,7 @@
 
 from fairmade.marketplace.schemas import CatalogContent, ListingContent
 from fairmade.passports.schemas import PublicPassport, PublicPublication
+from fairmade.photos.schemas import PublicPhoto
 
 NOTICES = [
     "Listing and location information are seller-reported and unverified.",
@@ -9,7 +10,9 @@ NOTICES = [
 ]
 
 
-def project(content: ListingContent, publication: PublicPublication) -> CatalogContent:
+def project(
+    content: ListingContent, publication: PublicPublication, photos: list[PublicPhoto] | None = None
+) -> CatalogContent:
     passport = PublicPassport.model_validate(publication.payload)
     return CatalogContent(
         product=passport.product,
@@ -20,4 +23,5 @@ def project(content: ListingContent, publication: PublicPublication) -> CatalogC
         passport_id=publication.id,
         passport_payload_hash=publication.payload_hash,
         notices=list(NOTICES),
+        photos=photos,
     )

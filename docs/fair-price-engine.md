@@ -173,6 +173,11 @@ approval, not source verification, certification, or an objective fairness verdi
    distances and bounded nearest-first results. Existing profiles remain unchanged;
    draft points never drive public search. Location entry/geocoding, travel routes,
    exact pickup disclosure and larger-scale spatial queries remain future work.
+   Direct JPEG/PNG photo uploads, bounded normalization and private local SQLite
+   storage are implemented for local development. Listings explicitly select and
+   approve immutable normalized photos; current catalog visibility controls image
+   retrieval. Hosted media storage, isolation/abuse controls and moderation remain
+   follow-up work; images do not verify product/quality claims.
 4. Orders, inventory reservation, and PayPal Sandbox checkout with verified,
    idempotent payment events and reconciled fees.
    Sellable-unit inventory, exact unpaid order snapshots, buyer/seller histories,
