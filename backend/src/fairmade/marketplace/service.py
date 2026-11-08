@@ -17,6 +17,8 @@ from fairmade.marketplace.schemas import (
 from fairmade.models import MarketplaceListing
 from fairmade.passports.repository import visible_publication
 from fairmade.passports.schemas import PublicPublication
+from fairmade.photos import repository as photo_repository
+from fairmade.photos.service import selected
 from fairmade.publication import PublishApproval, public_digest
 
 
@@ -35,6 +37,8 @@ def _publication(db: Session, product_id: str, publication_id: str):
 
 
 def create(db: Session, product_id: str, content: ListingContent) -> MarketplaceListing:
+    photo_repository.reserve_product(db, product_id)
+    selected(db, product_id, content.photos)
     _publication(db, product_id, str(content.passport_publication_id))
     if repository.for_product(db, product_id) is not None:
         raise conflict("LISTING_EXISTS", "This product already has a listing.")
@@ -61,6 +65,8 @@ def replace(db: Session, product_id: str, body: ReplaceListing) -> MarketplaceLi
         body.model_dump(mode="json", exclude={"expected_revision"})
     )
     _publication(db, product_id, str(content.passport_publication_id))
+    photo_repository.reserve_product(db, product_id)
+    selected(db, product_id, content.photos)
     changed = db.execute(
         update(MarketplaceListing)
         .where(
@@ -81,7 +87,11 @@ def preview(db: Session, product_id: str) -> ListingPreview:
     listing = get_listing(db, product_id)
     content = ListingContent.model_validate(listing.content)
     publication = _publication(db, product_id, str(content.passport_publication_id))
-    payload = projection.project(content, PublicPublication.model_validate(publication))
+    payload = projection.project(
+        content,
+        PublicPublication.model_validate(publication),
+        selected(db, product_id, content.photos),
+    )
     return ListingPreview(
         listing_id=listing.id,
         revision=listing.revision,
@@ -108,6 +118,11 @@ def activate(
         return listing
     # All searchable fields come from this approved snapshot, never the mutable draft.
     payload = checked.payload
+    photo_repository.replace_public_links(
+        db,
+        listing.id,
+        [str(photo.id) for photo in (payload.photos or [])],
+    )
     listing.state = "active"
     listing.published_revision = checked.revision
     listing.published_publication_id = str(payload.passport_id)

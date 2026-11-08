@@ -5,10 +5,12 @@ from pathlib import Path
 import pytest
 from alembic import command
 from alembic.config import Config
+from alembic.script import ScriptDirectory
 from fastapi.testclient import TestClient
-from sqlalchemy import delete, event, select, text
+from sqlalchemy import delete, event, text
 from sqlalchemy.orm import Session
 
+from fairmade.database import make_engine
 from fairmade.discovery import repository
 from fairmade.main import create_app
 from fairmade.models import AccountRole, Storefront, StorefrontDiscoveryLocation
@@ -344,7 +346,7 @@ def test_restart_schema_and_downgrade_guard_preserve_approved_area(
         assert connection.execute(text("PRAGMA foreign_key_check")).all() == []
         assert (
             connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one()
-            == "0015"
+            == ScriptDirectory.from_config(config).get_current_head()
         )
 
 
@@ -428,18 +430,47 @@ def test_upgrade_preserves_old_publication_and_does_not_infer_coordinates(
     market_client,
     profile_factory,
     search,
+    tmp_path,
+    monkeypatch,
 ):
     profile = profile_factory(area=False)
-    with Session(market_client.app.state.engine) as db:
-        original = db.execute(text("SELECT * FROM storefronts")).one()._asdict()
-    # Emulate the pre-discovery schema while retaining a genuine approved payload.
-    with market_client.app.state.engine.begin() as connection:
-        connection.execute(text("DROP TABLE storefront_discovery_locations"))
-        connection.execute(text("UPDATE alembic_version SET version_num = '0014'"))
-    command.upgrade(Config(str(BACKEND / "alembic.ini")), "head")
-    command.check(Config(str(BACKEND / "alembic.ini")))
-    with Session(market_client.app.state.engine) as db:
-        assert db.execute(text("SELECT * FROM storefronts")).one()._asdict() == original
-        assert db.scalars(select(StorefrontDiscoveryLocation)).all() == []
-    assert market_client.get(PUBLIC + "/" + profile["id"]).status_code == 200
-    assert find(market_client, search)["items"] == []
+    # Build an actual old schema, instead of dropping whichever newer tables happen
+    # to exist. This keeps the upgrade check valid as later migrations are added.
+    tables = ("accounts", "account_roles", "storefronts")
+    with market_client.app.state.engine.connect() as connection:
+        records = {
+            table: connection.execute(text(f"SELECT * FROM {table}")).mappings().all()
+            for table in tables
+        }
+    legacy_url = "sqlite:///" + (tmp_path / "legacy.sqlite3").as_posix()
+    monkeypatch.setenv("FAIRMADE_DATABASE_URL", legacy_url)
+    config = Config(str(BACKEND / "alembic.ini"))
+    command.upgrade(config, "0014")
+    engine = make_engine(legacy_url)
+    try:
+        with engine.begin() as connection:
+            for table in tables:
+                for row in records[table]:
+                    columns = ", ".join(row.keys())
+                    values = ", ".join(":" + name for name in row.keys())
+                    connection.execute(
+                        text(f"INSERT INTO {table} ({columns}) VALUES ({values})"), dict(row)
+                    )
+        command.upgrade(config, "head")
+        command.check(config)
+        with engine.connect() as connection:
+            assert (
+                connection.execute(text("SELECT * FROM storefronts")).mappings().all()
+                == records["storefronts"]
+            )
+            assert (
+                connection.execute(
+                    text("SELECT COUNT(*) FROM storefront_discovery_locations")
+                ).scalar_one()
+                == 0
+            )
+        with TestClient(create_app(legacy_url)) as legacy:
+            assert legacy.get(PUBLIC + "/" + profile["id"]).status_code == 200
+            assert find(legacy, search)["items"] == []
+    finally:
+        engine.dispose()

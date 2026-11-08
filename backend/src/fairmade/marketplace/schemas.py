@@ -4,9 +4,10 @@ from datetime import datetime
 from typing import Annotated, Literal
 from uuid import UUID
 
-from pydantic import Field
+from pydantic import Field, field_validator
 
 from fairmade.passports.schemas import PublicPrice, PublicProduct, PublicPublication
+from fairmade.photos.schemas import PhotoSelection, PublicPhoto
 from fairmade.pricing.schemas import Contract, Label
 from fairmade.publication import Revision
 from fairmade.schemas import UTCResponse
@@ -17,6 +18,14 @@ class ListingContent(Contract):
     seller_display_name: Label
     location: Label | None = None
     summary: Annotated[str, Field(min_length=1, max_length=1000)] | None = None
+    photos: Annotated[list[PhotoSelection], Field(max_length=6)] | None = None
+
+    @field_validator("photos")
+    @classmethod
+    def unique_photos(cls, value):
+        if value is not None and len({photo.photo_id for photo in value}) != len(value):
+            raise ValueError("Select each photo only once")
+        return value
 
 
 class ReplaceListing(ListingContent):
@@ -44,6 +53,7 @@ class CatalogContent(Contract):
     passport_id: UUID
     passport_payload_hash: str
     notices: list[str]
+    photos: list[PublicPhoto] | None = None
 
 
 class ListingPreview(Contract):

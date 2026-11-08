@@ -356,6 +356,24 @@ See [the runnable examples](examples/discovery/README.md) and
 Future work includes location entry/precision policy and spatial-query scaling;
 exact pickup locations require a separate explicit disclosure decision.
 
+## Product photo uploads
+
+Verified sellers upload raw JPEG/PNG bytes to `/api/v1/products/{product_id}/photos`.
+Uploads are private, bounded, decoded and normalized into metadata-free JPEGs.
+The photo repository stores immutable bytes/digests with metadata in the local
+SQLite database, with atomic saves/deletions and per-product/account quotas.
+Listing drafts may select up to six owned product photos with alt text and order;
+existing preview/hash approval controls publication. Private changes never rewrite
+approved images. Public image reads enforce current listing/Passport/seller visibility.
+Deletion of photos referenced by a draft or active listing is rejected.
+
+Install the new Pillow dependency and migrate through 0016 before using these
+routes. Existing listing publications and hashes are unchanged. No frontend,
+external media hosting or client filenames are introduced. Hosted media storage,
+processor isolation, abuse controls and moderation remain follow-up work.
+See [photo upload examples and limits](examples/photos/README.md) and
+[the contract](../docs/api-contract.md#product-photo-uploads-and-approved-listing-images).
+
 ## Buyer defaults and seller applications
 
 Registration and `GET /api/v1/auth/me` return `{id, email, roles}`.
