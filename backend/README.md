@@ -6,6 +6,11 @@ calculator remains available. Anyone can register a FairMade account and log in.
 Accounts default to buyer; only accounts with verified seller access can manage
 private products and save immutable analysis history. AI services are not called.
 PayPal sandbox calls are opt-in and disabled by default.
+Private per-product recipes now save manually entered ingredient quantities and
+purchase costs, revision-safe edits and immutable costing snapshots. Each explicit
+costing also saves a normal production analysis, without changing stock or prices.
+See the [manual recipe workflow](examples/recipes/README.md) and
+[contract, rounding and production follow-up](../docs/manual-recipe-costing.md).
 Sellers can also define mandatory Quality Locks and save deterministic checks of
 seller-entered alternatives. A passing check is not a quality certification.
 Finished-product comparison endpoints store manually entered price observations

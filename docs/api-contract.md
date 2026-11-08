@@ -106,7 +106,7 @@ Administrator endpoints: GET `/api/v1/admin/seller-applications` with state
 (pending/default, approved, denied, all), bounded limit/offset; GET `/{application_id}`;
 POST `/{application_id}/decision` with `{expected_revision, outcome, reason}`.
 Only current admins can use these; admin alone still does not grant seller access.
-Reasons are applicant-visible, trimmed1..2000 characters without NUL; outcome is
+Reasons are applicant-visible, trimmed, 1..2000 characters without NUL; outcome is
 approved/denied and revision is strict positive. Decision record, status/revision
 and seller grant commit atomically. Matching retries do not rewrite audit or
 restore revoked access; conflicting decisions cannot replace final outcomes.
@@ -121,6 +121,35 @@ grants seller or silently restores revoked access. See the
 [synthetic workflow](../backend/examples/admin-review/README.md).
 Documents, criteria, additional admins, privileged recovery, appeals/reapplication,
 revocation/reverification, notifications and the admin frontend remain future work.
+
+## Manual product recipes and ingredient costing
+
+The user approved manually entered quantities and purchase costs for local MVP;
+supplier-quote integration remains future work. These seller-only endpoints are
+implemented backend proposals pending frontend acceptance:
+
+| Method/path | Behavior |
+| --- | --- |
+| POST /api/v1/products/{id}/recipe | Explicitly create the product's current recipe |
+| GET /api/v1/products/{id}/recipe | Read owned recipe; 404 when absent |
+| PUT /api/v1/products/{id}/recipe | Replace with expected_revision; stale edit: 409 |
+| POST /api/v1/products/{id}/recipe/costings | Save expected revision with UUID request_id; new: 201, exact retry: 200 |
+| GET /api/v1/products/{id}/recipe/costings | Bounded newest-first summary history |
+| GET /api/v1/products/{id}/recipe/costings/{costing_id} | Private immutable detail |
+
+All require bearer authentication, current seller access and product ownership.
+No recipe content is public. Manual consumed/purchase quantities use compatible
+g/kg, ml/l or whole items; purchase costs and ingredient quantities are decimal
+JSON strings. Each line allocates consumed cost and rounds half up to six places.
+Other costs/labor/fees/yield/margin settings feed the existing pricing calculator.
+
+Costing atomically saves recipe provenance and a standard pricing analysis for
+explicit later review/cost-basis selection. Retry keys prevent duplicate analyses;
+saved records survive later edits. There are no stock, quality, supplier, price
+publication or existing cost-selection side effects. Migration 0020 adds only the
+recipe/costing tables and guards downgrade before DDL. See the
+[complete schemas, errors, rounding and future plans](manual-recipe-costing.md)
+and [synthetic workflow](../backend/examples/recipes/README.md).
 
 ## Private products
 

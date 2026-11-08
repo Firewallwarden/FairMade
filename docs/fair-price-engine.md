@@ -211,6 +211,14 @@ approval, not source verification, certification, or an objective fairness verdi
    occurs. Supplier discovery/ratings, external integrations and expanded
    business/shopping assistants remain future work.
 
+6. Manual recipe and ingredient management: one current private recipe per product,
+   revision-safe edits and immutable costings now allocate consumed purchase costs
+   into standard saved production analyses. Historical snapshots retain manual
+   dates, quantities and rounding warnings. Costs stay unverified; stock, quality
+   eligibility and publication remain separate. Selected supplier quotes, source
+   freshness/usable-yield allocation, ingredient catalogs and actual production
+   inventory integration remain future work. See [the contract](manual-recipe-costing.md).
+
 Each milestone is a separate issue or feature worktree and reviewed PR.
 
 Buyer product feedback now uses historical backend-verified sandbox purchase

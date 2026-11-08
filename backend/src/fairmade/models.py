@@ -130,6 +130,33 @@ class Analysis(Base):
     result: Mapped[dict] = mapped_column(JSON)
 
 
+class ProductRecipe(Base):
+    __tablename__ = "product_recipes"
+    __table_args__ = (CheckConstraint("revision >= 1", name="ck_product_recipe_revision"),)
+    product_id: Mapped[str] = mapped_column(ForeignKey("products.id"), primary_key=True)
+    revision: Mapped[int] = mapped_column(Integer)
+    content: Mapped[dict] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class RecipeCosting(Base):
+    __tablename__ = "recipe_costings"
+    __table_args__ = (
+        UniqueConstraint("product_id", "request_id", name="uq_recipe_costing_request"),
+        CheckConstraint("recipe_revision >= 1", name="ck_recipe_costing_revision"),
+        Index("ix_recipe_costings_product_created", "product_id", "created_at", "id"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    product_id: Mapped[str] = mapped_column(ForeignKey("product_recipes.product_id"))
+    request_id: Mapped[str] = mapped_column(String(36))
+    recipe_revision: Mapped[int] = mapped_column(Integer)
+    pricing_analysis_id: Mapped[str] = mapped_column(ForeignKey("analyses.id"), unique=True)
+    recipe_snapshot: Mapped[dict] = mapped_column(JSON)
+    result: Mapped[dict] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
 class ProductSalesCostBasis(Base):
     __tablename__ = "product_sales_cost_bases"
     __table_args__ = (
