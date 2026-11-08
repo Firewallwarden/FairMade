@@ -221,6 +221,13 @@ approval, not source verification, certification, or an objective fairness verdi
 
 Each milestone is a separate issue or feature worktree and reviewed PR.
 
+Manual raw-material/supply inventory now provides a seller-wide private catalog,
+exact quantity balances, receipt/usage/waste/physical-count history and retry-safe
+revision checks. It does not assign costs, consume materials from recipe costings,
+change sellable stock or verify availability/quality. Lots, expiry, valuation,
+material mappings, confirmed production consumption and operational controls
+remain future work. See [the inventory contract](manual-material-inventory.md).
+
 Buyer product feedback now uses historical backend-verified sandbox purchase
 evidence, immediate consented publication and author-only revision/withdrawal.
 One review per buyer/product prevents repeat orders from adding repeated votes.
