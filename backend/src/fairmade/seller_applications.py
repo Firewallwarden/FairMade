@@ -1,8 +1,9 @@
-"""Record intent to sell; verification and role grants are deliberately deferred."""
+"""Buyer-owned seller intent and read-only manual-review outcomes."""
 
 from fastapi import APIRouter, Response
 from sqlalchemy import select
 from sqlalchemy.dialects.sqlite import insert
+from sqlalchemy.orm import joinedload
 
 from fairmade.auth import AUTH_ERRORS, DB, CurrentAccount, api_error
 from fairmade.models import SellerApplication
@@ -40,7 +41,9 @@ def apply_to_sell(
         .on_conflict_do_nothing(index_elements=["account_id"])
     )
     application = db.scalar(
-        select(SellerApplication).where(SellerApplication.account_id == account.id)
+        select(SellerApplication)
+        .options(joinedload(SellerApplication.decision))
+        .where(SellerApplication.account_id == account.id)
     )
     db.commit()
     if inserted.rowcount == 0:
@@ -55,7 +58,9 @@ def apply_to_sell(
 )
 def my_application(account: CurrentAccount, db: DB) -> SellerApplication:
     application = db.scalar(
-        select(SellerApplication).where(SellerApplication.account_id == account.id)
+        select(SellerApplication)
+        .options(joinedload(SellerApplication.decision))
+        .where(SellerApplication.account_id == account.id)
     )
     if application is None:
         raise api_error(404, "NOT_FOUND", "Resource not found.")

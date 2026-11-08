@@ -10,6 +10,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from fairmade.admin_review.routes import router as admin_review_router
 from fairmade.auth import router as auth_router
 from fairmade.commerce_errors import CommerceError
 from fairmade.commerce_http import commerce_error_handler
@@ -75,7 +76,7 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
             finally:
                 application.state.engine.dispose()
 
-    application = FastAPI(title="FairMade API", version="0.19.0", lifespan=lifespan)
+    application = FastAPI(title="FairMade API", version="0.20.0", lifespan=lifespan)
     application.add_exception_handler(RefundError, refund_error_handler)
     application.add_exception_handler(PaymentError, payment_error_handler)
     application.add_exception_handler(CommerceError, commerce_error_handler)
@@ -111,6 +112,7 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
             or "/photos" in request.url.path
             or "/fulfillment" in request.url.path
             or request.url.path.startswith("/api/v1/account/product-reviews")
+            or request.url.path.startswith("/api/v1/admin/")
             or (
                 request.url.path.startswith("/api/v1/orders/")
                 and request.url.path.endswith("/review")
@@ -170,6 +172,7 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
     application.include_router(review_purchase_router)
     application.include_router(review_author_router)
     application.include_router(product_review_public_router)
+    application.include_router(admin_review_router)
     return application
 
 

@@ -56,11 +56,47 @@ class AccountRole(Base):
 
 class SellerApplication(Base):
     __tablename__ = "seller_applications"
-    __table_args__ = (CheckConstraint("status = 'pending'", name="ck_seller_applications_status"),)
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('pending', 'approved', 'denied')", name="ck_seller_applications_status"
+        ),
+        CheckConstraint("revision >= 1", name="ck_seller_applications_revision"),
+    )
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
     account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"), unique=True)
     submitted_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
-    status: Mapped[str] = mapped_column(String(7), default="pending", server_default="pending")
+    status: Mapped[str] = mapped_column(String(8), default="pending", server_default="pending")
+    revision: Mapped[int] = mapped_column(Integer, default=1, server_default=text("1"))
+    decision: Mapped[SellerApplicationDecision | None] = relationship(uselist=False)
+
+
+class SellerApplicationDecision(Base):
+    __tablename__ = "seller_application_decisions"
+    __table_args__ = (
+        CheckConstraint("outcome IN ('approved', 'denied')", name="ck_seller_decision_outcome"),
+        CheckConstraint("expected_revision >= 1", name="ck_seller_decision_revision"),
+        CheckConstraint("length(reason) BETWEEN 1 AND 2000", name="ck_seller_decision_reason"),
+    )
+    application_id: Mapped[str] = mapped_column(
+        ForeignKey("seller_applications.id"), primary_key=True
+    )
+    decided_by_account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"))
+    outcome: Mapped[str] = mapped_column(String(8))
+    reason: Mapped[str] = mapped_column(Text)
+    expected_revision: Mapped[int] = mapped_column(Integer)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class AdminBootstrapRecord(Base):
+    __tablename__ = "admin_bootstrap_records"
+    __table_args__ = (
+        CheckConstraint("id = 1", name="ck_admin_bootstrap_singleton"),
+        CheckConstraint("length(reason) BETWEEN 1 AND 2000", name="ck_admin_bootstrap_reason"),
+    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"))
+    reason: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
 
 
 class LoginSession(Base):

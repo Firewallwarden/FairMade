@@ -41,10 +41,11 @@ password recovery, account deletion, and email/password changes are deferred.
 These are general FairMade accounts. Every registration receives `["buyer"]`.
 Roles are additive and returned in buyer, seller, admin order. A verified seller
 retains buyer capabilities; an admin does not automatically receive seller access.
-Buying/checkout functionality itself remains future work. Clients cannot submit
+Buyer checkout uses the shared sandbox merchant described below. Clients cannot submit
 roles, verification status, or identity fields when registering. Server-side
 authorization reads persisted grants on each request rather than trusting the token
-to contain role claims. Role grants and admin provisioning are deferred.
+to contain role claims. Manual administrative seller review and local first-admin
+bootstrap are described below; there is no public/general role-grant API.
 
 Successful login returns `token_type: "bearer"` and an opaque random token.
 Send `Authorization: Bearer <access_token>` on every private request. Sessions
@@ -67,7 +68,7 @@ Synthetic response shape; the token placeholder is not usable:
 Browser storage and a longer-lived "Remember me" experience are not part of this
 backend milestone. CORS is off unless exact development origins are configured.
 
-## Pending seller applications
+## Seller applications and manual administrative review
 
 | Method and path | JSON request | Success |
 | --- | --- | --- |
@@ -80,7 +81,9 @@ Synthetic SellerApplication response:
 {
   "id": "8239b454-c4c6-40a6-87c2-2c855ad994a5",
   "status": "pending",
-  "submitted_at": "2026-10-30T12:00:00Z"
+  "submitted_at": "2026-10-30T12:00:00Z",
+  "revision": 1,
+  "decision": null
 }
 ```
 
@@ -89,12 +92,35 @@ never verifies the applicant or grants the seller role. One application is
 stored per account. Repeating submission returns the same ID and timestamp,
 including concurrent retries. Existing sellers receive 409 `ALREADY_SELLER`.
 GET returns 404 when the current account has no application. Only the current
-account's application is accessible; there is no listing or ID-based lookup.
+account's application is accessible to the applicant; administrator-only queue/detail
+lookups are separate. Denied submissions remain the same terminal request on retry.
 
-Ownership and status are server-controlled. Evidence fields, approval/rejection,
-resubmission after a decision, privileged role grants, and admin application
-monitoring endpoints are deferred. There is currently no API path from pending
-to seller. Admin dashboards are a future frontend/backend integration.
+Ownership and status are server-controlled. An approved manual administrator
+decision can atomically grant additive seller access while retaining buyer.
+Responses add revision and nullable decision (outcome, shared reason, UTC created_at,
+basis=manual_administrator_review); status now permits pending/approved/denied.
+Admin actors are never exposed to applicants. No identity or quality certification
+is inferred. Existing applications are preserved and receive no automatic decision.
+
+Administrator endpoints: GET `/api/v1/admin/seller-applications` with state
+(pending/default, approved, denied, all), bounded limit/offset; GET `/{application_id}`;
+POST `/{application_id}/decision` with `{expected_revision, outcome, reason}`.
+Only current admins can use these; admin alone still does not grant seller access.
+Reasons are applicant-visible, trimmed1..2000 characters without NUL; outcome is
+approved/denied and revision is strict positive. Decision record, status/revision
+and seller grant commit atomically. Matching retries do not rewrite audit or
+restore revoked access; conflicting decisions cannot replace final outcomes.
+Self-review is forbidden, and preexisting seller grants are not retrospectively
+certified. Queue/detail responses add private applicant account ID/email and
+reviewer account ID, never passwords, tokens, economics or payment data.
+
+No HTTP admin bootstrap exists. A local operator command provisions only the first
+admin on an existing account, with audit and revocation of older sessions; it never
+grants seller or silently restores revoked access. See the
+[full contract and production follow-up](manual-seller-review.md) and
+[synthetic workflow](../backend/examples/admin-review/README.md).
+Documents, criteria, additional admins, privileged recovery, appeals/reapplication,
+revocation/reverification, notifications and the admin frontend remain future work.
 
 ## Private products
 
@@ -1823,8 +1849,9 @@ compatible with #2. Its response is never automatically saved.
 
 Use the [account workflow](../backend/examples/seller-workflow.md) to register,
 log in, submit/read a pending seller application, and log out. Newly registered
-accounts cannot create private products or save history while verification is
-deferred; seller-feature tests use explicitly seeded grants. Migrate the
+accounts cannot create private products or save history until an approved manual
+review grants seller access. Seller-feature tests may use synthetic grants; manual
+review and bootstrap tests use isolated databases and exercise real transitions. Migrate the
 database before testing. Use the same database URL and working directory for
 migrations and the server. Session revocation and saved data persist across restarts.
 
@@ -1902,6 +1929,11 @@ Migration 0018 adds immediately published/author-withdrawn buyer reviews with un
 buyer/product scope, historical private purchase evidence and lookup/page indexes.
 It preserves earlier records without creating reviews, and preflights reviews plus
 earlier protected history before any downgrade DDL. It follows pickup migration 0017.
+
+Migration 0019 preserves existing pending applications while adding revision and
+approved/denied states, immutable manual decisions and initial-admin operator audit.
+No roles/decisions are backfilled. Downgrade checks new audits, non-pending/revised
+applications and prior protected data before any DDL. See the manual review contract.
 
 Before frontend integration, jointly accept this proposal and agree on approved
 development origins and browser credential handling. Public deployment requires

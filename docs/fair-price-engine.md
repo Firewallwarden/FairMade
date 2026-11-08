@@ -141,10 +141,13 @@ approval, not source verification, certification, or an objective fairness verdi
 ## Backend priorities after this slice
 
 1. General FairMade accounts default to buyer; seller access requires verification.
-   Pending seller applications, private products, and analysis history are implemented
-   for local development, with frontend contract review pending. Verification
-   decisions, admin provisioning/monitoring, hosted account recovery, abuse controls,
-   and operations remain future work.
+   Applications, private products and analysis history are implemented for local
+   development, with frontend contract review pending. Manual administrator
+   decisions now grant seller access atomically with audit; a local first-admin
+   command is audited and revokes older sessions. No automatic role grants,
+   self-review or identity/quality certification is implied. Document verification,
+   standards, additional-admin management/recovery, appeals/revocation, hosted
+   account recovery, abuse controls and operations remain future work.
 2. Quality Locks and immutable claim-check history: implemented for local
    development, pending frontend contract review. Manually entered finished-product
    price evidence, limited exact quantity conversions, explicit provenance and

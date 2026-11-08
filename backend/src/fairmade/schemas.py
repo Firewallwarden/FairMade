@@ -81,10 +81,19 @@ class SellerApplicationRequest(Contract):
     """An application records intent only; verification fields are not accepted."""
 
 
+class SellerDecisionResponse(UTCResponse):
+    outcome: Literal["approved", "denied"]
+    reason: str
+    created_at: datetime
+    basis: Literal["manual_administrator_review"] = "manual_administrator_review"
+
+
 class SellerApplicationResponse(UTCResponse):
     id: UUID
-    status: Literal["pending"]
+    status: Literal["pending", "approved", "denied"]
     submitted_at: datetime
+    revision: int
+    decision: SellerDecisionResponse | None = None
 
 
 class ProductResponse(UTCResponse):
