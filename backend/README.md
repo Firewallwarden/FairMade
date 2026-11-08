@@ -388,6 +388,22 @@ See [the contract and future plans](../docs/pickup-fulfillment.md) and
 fees/taxes, schedules/notifications, buyer-confirmed handoff, returns/restocking and
 hosted retention controls remain separate future decisions.
 
+## Verified sandbox purchase product reviews
+
+General FairMade accounts can publish one review per purchased product after
+backend-verified sandbox capture, without seller or pickup approval. Explicit
+publication consent makes bounded rating/text immediately public on a visible
+product. Authors alone can edit/withdraw/republish, with optimistic revisions.
+Public reviews use a generic buyer label and expose no account/order/provider IDs.
+Ratings and text remain unverified opinions, not quality or fairness certification.
+Refunds do not automatically suppress feedback; catalog visibility still governs
+the whole product page. Average ratings use exact integer/decimal calculations.
+Migration 0018 preserves earlier records and guards destructive rollback.
+See [the full contract and production follow-up](../docs/product-reviews.md) and
+[synthetic examples](examples/product-reviews/README.md). Moderation, reporting,
+appeals, abuse controls, privacy/retention, audit and frontend integration remain
+future work. These buyer reviews are separate from private seller pricing reviews.
+
 ## Buyer defaults and seller applications
 
 Registration and `GET /api/v1/auth/me` return `{id, email, roles}`.

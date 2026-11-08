@@ -1752,6 +1752,41 @@ Collected is not independently verified handoff. Delivery/shipping, buyer delive
 addresses, fees/taxes, schedules/notifications, confirmation proof, disputes/returns
 and hosted retention policy remain explicitly deferred.
 
+## Buyer product reviews and verified purchase feedback
+
+Local MVP backend implemented, frontend acceptance pending. Eligible reviews publish
+immediately with explicit publish=true, without seller approval or selective
+suppression. See [the full review contract and production follow-up](product-reviews.md)
+and [synthetic examples](../backend/examples/product-reviews/README.md).
+
+POST `/api/v1/orders/{order_id}/listings/{listing_id}/review` requires ownership of
+the purchased line plus a completed backend-verified sandbox capture. Body is
+`{rating, text, publish: true}`: strict integer1..5, trimmed text1..2000 characters,
+strict true boolean; extras rejected and errors redacted. Returns 201 or 200 exact
+retry, 404 unknown/foreign source, 409 PURCHASE_NOT_VERIFIED or REVIEW_EXISTS.
+One review per buyer/product spans repeat orders. No pickup confirmation is needed.
+
+General-account author routes: GET `/api/v1/account/product-reviews` page;
+GET/PUT `/{review_id}`; POST `/{review_id}/withdraw`. PUT adds expected_revision
+and explicit publication consent; withdrawal takes expected_revision. Revision
+conflicts return 409; foreign/missing reviews return the same 404. Authors can edit,
+withdraw and explicitly republish; sellers have no special control over feedback.
+Original private purchase evidence is frozen; refunds do not erase it or auto-hide
+reviews. Author DTO fields are id, order_id, listing_id, revision, state, rating,
+text and UTC created_at/updated_at, with no internal product/account/provider data.
+
+Anonymous GET `/api/v1/marketplace/listings/{listing_id}/reviews` returns a bounded
+Page of PublicReview; GET its `/summary` returns count/decimal average/evidence
+notices. Only currently visible products expose pages; catalog/Passport withdrawal
+or seller-role loss hides the whole product, while reactivation restores published
+reviews. Public review fields are id, rating, text, UTC created_at/updated_at,
+generic reviewer_label, purchase_basis=sandbox_capture_verified_at_submission and
+claims_basis=buyer_reported_unverified. No author identity or order/payment/refund
+data is exposed. Ratings summarize unverified opinions, not certified quality or
+fairness. Existing pagination bounds apply; newest creation time then UUID first.
+All responses use no-store. Immediate publication is MVP policy; platform moderation,
+reporting/appeals, abuse controls, privacy/retention and edit audit remain future work.
+
 ## Errors and existing endpoints
 
 New application errors use:
@@ -1862,6 +1897,11 @@ avoiding partial wider downgrades. It follows discovery migration 0015.
 Migration 0017 adds append-only private pickup events without rewriting orders,
 payment state or public snapshots. Downgrade preflights pickup history and prior
 protected records before any DDL to avoid partial destructive wider rollback.
+
+Migration 0018 adds immediately published/author-withdrawn buyer reviews with unique
+buyer/product scope, historical private purchase evidence and lookup/page indexes.
+It preserves earlier records without creating reviews, and preflights reviews plus
+earlier protected history before any downgrade DDL. It follows pickup migration 0017.
 
 Before frontend integration, jointly accept this proposal and agree on approved
 development origins and browser credential handling. Public deployment requires

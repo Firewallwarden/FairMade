@@ -346,6 +346,33 @@ class MarketplaceListing(Base):
     price_minor: Mapped[int | None] = mapped_column(Integer)
 
 
+class ProductReview(Base):
+    __tablename__ = "product_reviews"
+    __table_args__ = (
+        UniqueConstraint("buyer_account_id", "product_id", name="uq_review_buyer_product"),
+        CheckConstraint("revision >= 1", name="ck_product_review_revision"),
+        CheckConstraint("state IN ('published', 'withdrawn')", name="ck_product_review_state"),
+        CheckConstraint("rating BETWEEN 1 AND 5", name="ck_product_review_rating"),
+        CheckConstraint("length(text) BETWEEN 1 AND 2000", name="ck_product_review_text"),
+        Index("ix_review_product_public", "product_id", "state", "created_at", "id"),
+        Index("ix_review_author_created", "buyer_account_id", "created_at", "id"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    product_id: Mapped[str] = mapped_column(ForeignKey("products.id"))
+    buyer_account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"))
+    order_id: Mapped[str] = mapped_column(ForeignKey("orders.id"))
+    listing_id: Mapped[str] = mapped_column(ForeignKey("marketplace_listings.id"))
+    order_line_id: Mapped[str] = mapped_column(ForeignKey("order_lines.id"))
+    purchase_capture_id: Mapped[str] = mapped_column(String(64))
+    purchase_verified_at: Mapped[datetime] = mapped_column(DateTime)
+    revision: Mapped[int] = mapped_column(Integer)
+    state: Mapped[str] = mapped_column(String(10))
+    rating: Mapped[int] = mapped_column(Integer)
+    text: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
 class PickupFulfillmentEvent(Base):
     __tablename__ = "pickup_fulfillment_events"
     __table_args__ = (

@@ -46,6 +46,9 @@ from fairmade.photos.routes import public_router as public_photo_router
 from fairmade.photos.routes import router as photo_router
 from fairmade.pricing.schemas import PricingRequest, PricingResponse
 from fairmade.pricing.service import calculate
+from fairmade.product_reviews.routes import author_router as review_author_router
+from fairmade.product_reviews.routes import public_router as product_review_public_router
+from fairmade.product_reviews.routes import purchase_router as review_purchase_router
 from fairmade.products import router as product_router
 from fairmade.quality.routes import router as quality_router
 from fairmade.refunds.errors import RefundError
@@ -72,7 +75,7 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
             finally:
                 application.state.engine.dispose()
 
-    application = FastAPI(title="FairMade API", version="0.18.0", lifespan=lifespan)
+    application = FastAPI(title="FairMade API", version="0.19.0", lifespan=lifespan)
     application.add_exception_handler(RefundError, refund_error_handler)
     application.add_exception_handler(PaymentError, payment_error_handler)
     application.add_exception_handler(CommerceError, commerce_error_handler)
@@ -107,6 +110,11 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
             or request.url.path.startswith("/api/v1/discovery")
             or "/photos" in request.url.path
             or "/fulfillment" in request.url.path
+            or request.url.path.startswith("/api/v1/account/product-reviews")
+            or (
+                request.url.path.startswith("/api/v1/orders/")
+                and request.url.path.endswith("/review")
+            )
         ):
             # Validation errors may otherwise echo the raw password or entire body.
             errors = [{key: error[key] for key in ("loc", "msg", "type")} for error in exc.errors()]
@@ -159,6 +167,9 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
     application.include_router(public_photo_router)
     application.include_router(pickup_buyer_router)
     application.include_router(pickup_seller_router)
+    application.include_router(review_purchase_router)
+    application.include_router(review_author_router)
+    application.include_router(product_review_public_router)
     return application
 
 
