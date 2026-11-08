@@ -168,6 +168,11 @@ approval, not source verification, certification, or an objective fairness verdi
    group only current visible listings without rewriting approved listing
    identities or prices. Profiles remain seller-reported; multi-store support,
    precise locations and identity/quality verification remain future work.
+   Opt-in approved approximate area points and anonymous nearby storefront/listing
+   searches are implemented for local development, with estimated great-circle
+   distances and bounded nearest-first results. Existing profiles remain unchanged;
+   draft points never drive public search. Location entry/geocoding, travel routes,
+   exact pickup disclosure and larger-scale spatial queries remain future work.
 4. Orders, inventory reservation, and PayPal Sandbox checkout with verified,
    idempotent payment events and reconciled fees.
    Sellable-unit inventory, exact unpaid order snapshots, buyer/seller histories,

@@ -73,6 +73,7 @@ def publish(
         db.commit()
         return public_response(profile)
     payload = checked.payload
+    repository.save_approved_area(db, profile.id, payload.approximate_area)
     profile.state = "published"
     profile.published_revision = checked.revision
     profile.published_at = utcnow()

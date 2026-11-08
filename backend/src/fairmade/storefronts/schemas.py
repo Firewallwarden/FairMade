@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Literal
 from uuid import UUID
 
+from fairmade.geography import ApproximateArea
 from fairmade.pricing.schemas import Contract, Label
 from fairmade.publication import Revision
 from fairmade.schemas import Description, UTCResponse
@@ -13,6 +14,7 @@ class StorefrontContent(Contract):
     display_name: Label
     description: Description | None = None
     location: Label | None = None
+    approximate_area: ApproximateArea | None = None
 
 
 class ReplaceStorefront(StorefrontContent):
@@ -35,6 +37,7 @@ class PublicStorefrontContent(Contract):
     display_name: str
     description: str | None = None
     location: str | None = None
+    approximate_area: ApproximateArea | None = None
     notices: list[str]
 
 
