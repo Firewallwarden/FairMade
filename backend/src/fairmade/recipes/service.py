@@ -8,8 +8,8 @@ from sqlalchemy.orm import Session
 from fairmade.analysis_records import build_analysis
 from fairmade.auth import api_error
 from fairmade.database import utcnow
-from fairmade.models import AccountRole, Product, ProductRecipe, RecipeCosting
-from fairmade.ownership import require_owned_product
+from fairmade.models import Product, ProductRecipe, RecipeCosting
+from fairmade.ownership import reserve_owned_product
 from fairmade.pricing.schemas import PricingRequest
 from fairmade.pricing.service import calculate
 from fairmade.recipes import repository
@@ -37,11 +37,7 @@ def require_recipe(db: Session, product_id: str) -> ProductRecipe:
 
 
 def lock_owned_product(db: Session, account_id: str, product_id: UUID) -> Product:
-    require_owned_product(db, account_id, product_id)
-    repository.reserve_product(db, str(product_id))
-    if db.get(AccountRole, (account_id, "seller")) is None:
-        raise error(403, "SELLER_REQUIRED", "Seller access is required.")
-    return require_owned_product(db, account_id, product_id)
+    return reserve_owned_product(db, account_id, product_id)
 
 
 def checked_compilation(content: RecipeData) -> tuple[PricingRequest, CostingResult]:

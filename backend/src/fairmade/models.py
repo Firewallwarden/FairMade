@@ -223,6 +223,44 @@ class MaterialMovement(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
 
 
+class ProductionRecord(Base):
+    __tablename__ = "production_records"
+    __table_args__ = (
+        UniqueConstraint("product_id", "request_id", name="uq_production_record_request"),
+        UniqueConstraint("corrects_record_id", name="uq_production_record_correction"),
+        CheckConstraint("kind IN ('batch', 'production_period')", name="ck_production_record_kind"),
+        CheckConstraint(
+            "total_units BETWEEN 0 AND 1000000 AND sellable_units BETWEEN 0 AND total_units",
+            name="ck_production_record_output",
+        ),
+        CheckConstraint("started_on <= completed_on", name="ck_production_record_dates"),
+        Index(
+            "ix_production_record_product_completed",
+            "product_id",
+            "completed_on",
+            "created_at",
+            "id",
+        ),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    product_id: Mapped[str] = mapped_column(ForeignKey("products.id"))
+    request_id: Mapped[str] = mapped_column(String(36))
+    label: Mapped[str] = mapped_column(String(200))
+    kind: Mapped[str] = mapped_column(String(17))
+    started_on: Mapped[date] = mapped_column(Date)
+    completed_on: Mapped[date] = mapped_column(Date)
+    selling_unit: Mapped[str] = mapped_column(String(200))
+    total_units: Mapped[int] = mapped_column(Integer)
+    sellable_units: Mapped[int] = mapped_column(Integer)
+    corrects_record_id: Mapped[str | None] = mapped_column(
+        ForeignKey("production_records.id"), nullable=True
+    )
+    product_snapshot: Mapped[dict] = mapped_column(JSON)
+    request: Mapped[dict] = mapped_column(JSON)
+    result: Mapped[dict] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
 class ProductSalesCostBasis(Base):
     __tablename__ = "product_sales_cost_bases"
     __table_args__ = (

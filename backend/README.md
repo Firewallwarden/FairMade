@@ -16,6 +16,11 @@ receipt, usage, waste and reasoned physical-count history. Revisions and retry
 keys protect changes; recipe costing and sellable stock remain separate.
 See the [manual material workflow](examples/materials/README.md) and
 [contract and deeper inventory follow-up](../docs/manual-material-inventory.md).
+Completed production records now capture seller-reported actual output and
+allocated costs, including zero-output runs and immutable linked corrections.
+Default history shows the latest correction per report; stock remains manual.
+See the [completed production examples](examples/production/README.md) and
+[contract and optional future workflow](../docs/completed-production-records.md).
 Sellers can also define mandatory Quality Locks and save deterministic checks of
 seller-entered alternatives. A passing check is not a quality certification.
 Finished-product comparison endpoints store manually entered price observations

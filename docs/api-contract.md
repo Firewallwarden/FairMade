@@ -122,6 +122,33 @@ grants seller or silently restores revoked access. See the
 Documents, criteria, additional admins, privileged recovery, appeals/reapplication,
 revocation/reverification, notifications and the admin frontend remain future work.
 
+## Completed production records
+
+The approved local MVP records completed batches/production periods only. The
+planned/in-progress/completed lifecycle is an optional deeper enhancement for
+later, requiring a separate decision.
+
+| Method/path | Behavior |
+| --- | --- |
+| POST /api/v1/products/{id}/production-records | Save reported output/costs; new 201, matching retry 200 |
+| GET /api/v1/products/{id}/production-records | Bounded metadata history, latest corrections by default |
+| GET /api/v1/products/{id}/production-records/{record_id} | Private immutable detail, including corrected originals |
+
+Seller access and product ownership are required. Inputs contain a product-scoped
+UUID request_id, batch/period label and dates, explicit output unit, total/sellable
+whole-unit counts and manual decimal-string costs/labor. Shared deterministic
+cost arithmetic returns category/labor/batch totals and cost per actual sellable
+unit; zero sellable output preserves costs with null unit_cost.
+
+Optional corrects_record_id/correction_reason link an immutable replacement;
+forked or cross-product corrections are rejected. include_corrected=true includes
+prior versions. This is private seller-reported data, not verified completion or
+expenses. Reporting does not alter stock, recipes, pricing analyses, payments or
+public disclosures. Migration 0022 preserves earlier data and guards downgrade
+before DDL. See the
+[complete contract, corrections and optional scope](completed-production-records.md)
+and [synthetic examples](../backend/examples/production/README.md).
+
 ## Manual raw-material and supply quantities
 
 The user approved a manual quantity ledger for local MVP; lots, expiry,

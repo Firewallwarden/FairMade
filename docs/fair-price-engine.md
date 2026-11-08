@@ -221,6 +221,14 @@ approval, not source verification, certification, or an objective fairness verdi
 
 Each milestone is a separate issue or feature worktree and reviewed PR.
 
+Completed production reports now capture manual actual batch/period output and
+allocated costs with immutable product/unit snapshots, safe retries and linear
+corrections. Zero sellable output preserves costs with unknown cost per unit.
+These are private unverified reports, separate from planned recipe costs and
+manual stock. Planned/in-progress lifecycle management is explicitly optional
+future scope, not required simply by moving to production. See
+[the completed-record contract](completed-production-records.md).
+
 Manual raw-material/supply inventory now provides a seller-wide private catalog,
 exact quantity balances, receipt/usage/waste/physical-count history and retry-safe
 revision checks. It does not assign costs, consume materials from recipe costings,
