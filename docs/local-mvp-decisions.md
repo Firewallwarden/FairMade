@@ -1,0 +1,58 @@
+# Local MVP decisions and follow-up
+
+This register tracks deliberate local-development tradeoffs and existing limits
+that need attention as FairMade grows. A local MVP is a working foundation for
+testing and development; it is not evidence of hosted or production readiness.
+
+The entries below were reconstructed from the user's decisions and the checked-in
+backend documentation at the storefront milestone (#24). Exact earlier decision
+dates were not retained. New entries should link their implementation PR, keep a
+stable ID, and preserve history when replaced. Update status in the same PR that
+changes behavior. Future work here is a backlog, not authorization or a promise
+that a design has already been chosen. Frontend implementation/acceptance is
+separate from backend availability.
+
+## Confirmed user choices
+
+| ID | Choice and evidence | Current status and limits | Follow-up / review trigger |
+| --- | --- | --- | --- |
+| MVP-001 | Local testing/development first; hosted readiness deferred. [Backend setup and security](../backend/README.md). | Implemented as a loopback development service with SQLite/Alembic. No hosted deployment claim. | Before shared hosting: decide deployment/database needs; implement appropriate TLS, abuse controls, operational monitoring, backup/restore and recovery, and integration checks. Do not assume SQLite must be replaced without evidence. |
+| MVP-002 | Use a shared PayPal sandbox merchant for development; production uses seller-connected merchant accounts. User confirmed before checkout work; [checkout contract](api-contract.md#shared-merchant-paypal-sandbox-checkout). | Implemented sandbox-only backend verification, idempotency and recovery. Credentialed sandbox/browser checks remain pending; shared merchant reporting does not establish seller payouts. | Before live payments: design approved seller onboarding/account connections, permissions, per-seller payment routing/reconciliation and applicable fee/payout behavior; validate sandbox/browser integration first. |
+| MVP-003 | One storefront per seller account initially; allow growth to multiple later. User confirmed before [#24](https://github.com/Firewallwarden/FairMade/pull/24). | Implemented independent storefront UUID and plural routes, with a database uniqueness constraint. Account product ownership groups listings. | Multi-store work needs an explicit migration for cardinality and listing assignment, authorization/publication review and a frontend contract. Preserve existing IDs and approval boundaries. |
+| MVP-004 | Approximate public seller area for nearby discovery; enhance later. User chose option 1 after #24. [Implementation #26](https://github.com/Firewallwarden/FairMade/pull/26). | Backend implemented in #26, under review; not yet integrated into main. Seller-chosen representative points require exact storefront publication approval; distances are estimates. Text labels are not geocoded. Existing profiles keep their publications and remain outside nearby search until opting in. | Review location entry/geocoding, precision and disclosure consent, distance semantics and search scaling. Exact business/pickup addresses require a separate explicit decision; do not silently infer or expose them. Update integration status after #26 merges. |
+| MVP-005 | Revocable 24-hour bearer tokens. User explicitly approved during account implementation; [authentication contract](api-contract.md). | Implemented fixed expiry and logout revocation. This remains the approved session policy, not a requirement to replace tokens after MVP. | Before hosted browser use, review secure client storage, HTTPS, account recovery, abuse prevention and session management. Any cookie/refresh-token change needs its own design, including CSRF where applicable. |
+| MVP-006 | Buyer refund requests require seller approval or denial. User confirmed before [refunds #19](https://github.com/Firewallwarden/FairMade/pull/19); [refund contract](api-contract.md). | Implemented full-order requests, seller decisions and verified sandbox execution/recovery. Partial refunds, appeals and return/restock handling are not implemented. | Preserve seller review unless a new policy is approved. Define partial refunds, appeals, returns, inventory effects and fee adjustments before extending refunds or using live payments. |
+| MVP-007 | Estimated profit uses a seller-selected saved production-cost analysis frozen when an order is created. User chose the explicit source option before [#22](https://github.com/Firewallwarden/FairMade/pull/22). | Implemented capture-cohort reports with known/missing coverage, original capture fees and completed refunds. Estimates are not earnings statements; old orders without snapshots stay unknown. | Before accounting/payout reporting: design actual-cost reconciliation, time-period cash flows and refund fee adjustments. Never backfill missing costs from the latest analysis without a separate explicit policy. |
+| MVP-014 | Sellers upload product photos directly to FairMade, stored locally for MVP, with managed media storage considered later. User chose option 1 after #26 opened. [Implementation #27](https://github.com/Firewallwarden/FairMade/pull/27). | Backend implemented and tested in draft #27, dependent on #26; not integrated into main. Immutable normalized JPEG blobs in local SQLite let metadata/bytes save or delete atomically, with exact listing publication approval. SQLite media storage is an implementation choice, not an approved production architecture. | Refresh/validate #27 after #26 integrates before marking it ready. Before hosted use, review managed storage/serving, backup/retention/capacity, isolated image processing with hard time/memory limits, abuse controls, dependency updates and moderation policy. Current limits include JPEG/PNG input, 5 MiB uploads, 16 million pixels/6000-pixel sides, 2048-pixel output sides, 10 photos per product, 64 MiB per seller and six photos per listing. |
+
+## Current implementation limits to revisit
+
+These are documented boundaries, not claims that the user individually selected
+each detail or approved a production replacement.
+
+| ID | Current limit and evidence | Status | Follow-up / review trigger |
+| --- | --- | --- | --- |
+| MVP-008 | Pending seller applications record intent only; no verification criteria or role-grant/admin API. [Account workflow](../backend/README.md). | Implemented account/application foundation; seller tests seed synthetic grants. | Define verification evidence, decisions, reviewer permissions and audit/revocation behavior before real seller onboarding. Never add a shortcut from application to seller. |
+| MVP-009 | USD-only deterministic economics; explicit modeled fees; limited unit conversions and bounded requests/reports. [Economics formulas and limits](fair-price-engine.md). | Implemented. Taxes, shipping, discounts and multi-currency settlement are not modeled in checkout totals. | Before broader commerce: agree tax/shipping/discount rules and supported currencies/units, exact rounding and provider reconciliation. Do not invent fees or exchange rates. |
+| MVP-010 | Manually entered unverified market/supplier evidence and deterministic quality checks; no external price retrieval, source verification or LLM provider. [Engine roadmap](fair-price-engine.md). | Implemented provenance/freshness rules, Quality Locks, reports and seller-approved Passports. A passing claim check or publication is not certification or an objective fairness verdict. | Review approved evidence sources, verification, freshness and quality equivalence before external integrations/recommendations. AI/provider spending and new infrastructure need approval. |
+| MVP-011 | Sellable-product stock/holds are implemented, but raw-material inventory, production consumption, fulfillment and return restocking are separate. [Order/inventory contract](api-contract.md). | Implemented local commerce foundation. Refunds do not automatically reverse production costs or restock. | Define production and fulfillment workflows and stock reconciliation before coupling these features. Test concurrency, expiry, retries and recovery at the intended usage level. |
+| MVP-012 | Backend JSON APIs/examples exist; shared frontend contract acceptance and real browser/end-to-end integration remain pending. [API contract status](api-contract.md). | Backend-tested local implementation; this register does not claim a working frontend or successful provider/browser checkout. | Coordinate frontend acceptance, browser session/CORS/payment behavior and end-to-end checks before calling a user journey complete. |
+| MVP-013 | Nearby search uses manually chosen points at most two decimal places, straight-line spherical distance, a 1..500 km radius, and a 1,000-candidate bounding-box limit. [Discovery #26](https://github.com/Firewallwarden/FairMade/pull/26). | Backend implemented in #26, under review. No maps/geocoding service or buyer-location storage. Results do not guarantee travel distance, pickup address, anonymity or stock. A too-broad query errors explicitly rather than returning a truncated nearest-first page. | Improve location entry and spatial search as usage grows; review radius/precision policy and disclosure UX with the frontend. Choose any provider/infrastructure separately. Keep privacy, bounded requests and current publication/authorization checks when replacing this implementation. |
+
+## Rules that remain in force beyond MVP
+
+General accounts default to buyer; seller access is additive and requires the
+approved verification process. Seller economics remain private unless explicitly
+approved for disclosure. Mandatory Quality Locks, deterministic monetary
+calculations, backend authorization and verified payment completion remain
+requirements. They are not temporary compromises to remove for production.
+
+## Updating this register
+
+For a new tradeoff, record the confirmed decision or documented limit, its source,
+implementation status, consequences, and the trigger/follow-up for revisiting it.
+Link the feature PR and update API/feature documentation as appropriate. Retain
+superseded entries with a replacement link rather than deleting their rationale.
+Review this log before planning hosted deployment, live payments, or a feature
+that relies on a listed limitation. New unresolved product choices still require
+the user's answer.
