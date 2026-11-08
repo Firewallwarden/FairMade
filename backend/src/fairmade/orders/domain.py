@@ -11,7 +11,7 @@ from fairmade.passports.schemas import PublicPrice
 MAX_SUBTOTAL_MINOR = 100_000_000_000
 NOTICES = [
     "This is an unpaid order draft, not a purchase or payment confirmation.",
-    "Amounts cover merchandise only; shipping, taxes and fulfillment are not configured.",
+    "Amounts cover merchandise only; shipping, taxes and delivery are not configured.",
     "Stock holds expire after 15 minutes and do not confirm delivery or seller claims.",
 ]
 

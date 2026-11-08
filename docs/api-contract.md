@@ -739,8 +739,8 @@ See [the synthetic marketplace workflow](../backend/examples/marketplace/README.
 Implemented for local development; frontend acceptance is pending. This slice
 creates unpaid order drafts and stock holds, not PayPal orders or paid purchases.
 Amounts are merchandise subtotals, not final payable totals. Shipping, tax,
-fulfillment remain separate work. Sandbox payments and seller-reviewed refunds
-are described in the following sections.
+and delivery remain separate work. Sandbox payments, seller-reviewed refunds
+and private local pickup fulfillment are described in later sections.
 
 | Method | Path | Access / result |
 | --- | --- | --- |
@@ -1724,6 +1724,34 @@ processing isolation and hard time/memory limits, upload/download abuse controls
 dependency monitoring, and moderation/claims policy before hosted use. This feature
 does not verify that a photo depicts the product or certify seller claims.
 
+## Private local pickup fulfillment
+
+Local MVP backend implemented; frontend acceptance remains pending. See the
+[pickup contract and future plans](pickup-fulfillment.md) and
+[synthetic workflow](../backend/examples/fulfillment/README.md).
+GET `/api/v1/orders/{order_id}/fulfillment` and its `/history` subpath are buyer-owned
+reads. GET/PUT `/api/v1/seller/orders/{order_id}/fulfillment` and GET its `/history`
+are verified-seller-owned operations. No anonymous fulfillment route exists.
+
+PUT accepts `{expected_revision, state, pickup_instructions?}`. Revisions are strict
+integers starting at 0; states progress preparing → ready_for_pickup → collected,
+with no skips/reversal and terminal collected. Instructions are trimmed, 1..2000
+characters, nullable/omittable only while preparing. Unknown fields are rejected.
+Writes require completed backend-verified capture and no pending/approved refund.
+Exact latest-content retries do not append another event. Other stale revisions
+or invalid transitions return 409. Buyer/seller ownership and no-store/redacted
+validation rules apply to the private instructions and paginated immutable history.
+
+The response includes order_id, mode=local_pickup, basis=seller_reported_unverified,
+revision, state (initially not_started), pickup_instructions, latest_event or null,
+updates_allowed and notices. History events contain revision, state, instructions,
+and UTC created_at; no actor/account/provider data. updates_allowed describes the
+state gate for seller updates, not the reader's authorization. Payment/stock and
+public location/disclosure data are independent. Existing orders are not backfilled.
+Collected is not independently verified handoff. Delivery/shipping, buyer delivery
+addresses, fees/taxes, schedules/notifications, confirmation proof, disputes/returns
+and hosted retention policy remain explicitly deferred.
+
 ## Errors and existing endpoints
 
 New application errors use:
@@ -1830,6 +1858,10 @@ Migration 0016 adds private normalized photo blobs and approved listing referenc
 without modifying old listing payloads/hashes. Downgrade refuses before DDL if
 photos, storefronts or earlier protected history exists, preserving media and
 avoiding partial wider downgrades. It follows discovery migration 0015.
+
+Migration 0017 adds append-only private pickup events without rewriting orders,
+payment state or public snapshots. Downgrade preflights pickup history and prior
+protected records before any DDL to avoid partial destructive wider rollback.
 
 Before frontend integration, jointly accept this proposal and agree on approved
 development origins and browser credential handling. Public deployment requires
