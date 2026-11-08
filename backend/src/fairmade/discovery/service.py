@@ -5,6 +5,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from sqlalchemy.orm import Session
 
 from fairmade.auth import api_error
+from fairmade.availability.query import public_availability
 from fairmade.discovery import repository
 from fairmade.discovery.schemas import AreaSearch, ListingSearch, NearbyListing, NearbyStorefront
 from fairmade.geography import ApproximateArea, distance_km
@@ -74,7 +75,8 @@ def listings(db: Session, body: ListingSearch) -> dict:
     rows = repository.listing_candidates(db, body)
     check_size(rows)
     ranked = []
-    for listing, profile in rows:
+    for row in rows:
+        listing, profile = row[0], row[1]
         area, distance = area_distance(body, profile)
         if distance <= float(body.radius_km) + 1e-9:
             ranked.append(
@@ -82,7 +84,7 @@ def listings(db: Session, body: ListingSearch) -> dict:
                     distance,
                     listing.id,
                     NearbyListing(
-                        listing=card(listing),
+                        listing=card(listing, public_availability(row)),
                         storefront_id=profile.id,
                         approximate_area=area,
                         estimated_distance_km=display_distance(distance),

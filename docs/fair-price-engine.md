@@ -206,3 +206,10 @@ approval, not source verification, certification, or an objective fairness verdi
    business/shopping assistants remain future work.
 
 Each milestone is a separate issue or feature worktree and reviewed PR.
+
+Public exact available-unit counts and availability filtering are now implemented
+across catalog, storefront and nearby listing results, with live counts in saved
+products. They use existing checkout reservation rules and approved selling units,
+retaining unknown for incomplete/inconsistent inventory and final checkout checks.
+Exact count disclosure is a confirmed ongoing product policy, not an MVP shortcut.
+See [the availability contract](public-listing-availability.md).

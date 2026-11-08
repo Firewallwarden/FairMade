@@ -62,7 +62,10 @@ def test_listing_requires_exact_approval_and_only_exposes_public_fields(
         "payload_hash",
         "payload",
         "passport",
+        "availability",
     }
+    assert result["availability"]["status"] == "unknown"
+    assert "available_units" not in result["availability"]
     encoded = json.dumps(result)
     assert "PRIVATE_MARKET_" not in encoded and "@example.com" not in encoded
     for private_id in (

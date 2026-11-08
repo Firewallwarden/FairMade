@@ -18,6 +18,12 @@ explicit approval, public snapshots, and withdrawal with hidden-by-default discl
 Marketplace listing drafts add explicit activation/deactivation and anonymous
 browse/detail APIs; approved Passports supply the public product identity and price.
 See the [synthetic listing workflow](examples/marketplace/README.md).
+Public listings now include exact recorded available quantities after active
+reservations, with availability filters for catalog, storefront and nearby
+listing searches. Saved-product cards share the live projection. Unknown or
+incompatible inventory is explicit; checkout still rechecks stock.
+See the [availability workflow](examples/availability/README.md) and
+[disclosure policy and contract](../docs/public-listing-availability.md).
 Sellable inventory and unpaid buyer orders now support exact merchandise subtotals,
 15-minute reservations, cancellation, and private buyer/seller history. Shared-merchant
 PayPal sandbox checkout now adds verified capture, recovery, payment records, and
