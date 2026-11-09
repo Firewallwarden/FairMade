@@ -35,13 +35,17 @@ For an existing account, skip registration. Login returns a token and UTC
 expiry timestamp. HTTP 401 after logout or expiry requires another login.
 No browser storage or automatic token renewal is provided by this backend.
 
-The application remains pending. Verification criteria, decisions, role grants,
-and admin access are deferred; the account cannot enable itself as a seller.
+The application remains pending until a separately provisioned administrator
+records a decision. The account cannot enable itself as a seller. Follow the
+[manual review example](admin-review/README.md) for initial administrator setup
+and explicit approval/denial. Approval adds seller while retaining buyer;
+denial is final in this MVP. Manual approval does not certify identity or quality.
 Buyers, pending applicants, and admin-only accounts receive 403 SELLER_REQUIRED
 from every private product/history endpoint.
 
 Seller-feature integration tests explicitly seed seller grants and continue to
 exercise product creation with [product-request.json](product-request.json),
 analysis creation with [pricing-request.json](pricing-request.json), and immutable
-history reads. There is no API or development command to grant these privileges.
+history reads. Manual review tests separately exercise the real approval flow;
+there is no public signup role field or general-purpose role-grant API.
 The stateless pricing endpoint remains available for local calculator testing.

@@ -101,7 +101,7 @@ the identity table to accounts and updates ownership/session references, preserv
 IDs, password hashes, tokens, products, and analyses. It adds buyer roles for every
 existing account plus the roles and seller-application tables. No old account is
 automatically considered a verified seller; its private seller data remains stored
-but inaccessible until seller access is granted after future verification.
+but inaccessible until seller access is granted through the approved review process.
 
 Downgrading 0002 discards roles/applications and restores the old seller-only
 access model. Use it only for deliberate local rollback.
@@ -218,8 +218,8 @@ appropriate IDs for a new report. Historical reports do not change as time passe
 
 See [synthetic finished-product examples](examples/comparisons/README.md).
 This feature does not change pricing formulas or Quality Lock evaluation, certify
-alternatives, recommend savings, or publish private seller data. Verification and
-seller-role provisioning remain deferred.
+alternatives, recommend savings, or publish private seller data. Seller access can
+now be approved through the separate manual administrator review workflow.
 
 ## Quality Locks and evaluation history
 
@@ -236,8 +236,8 @@ are unknown; any failed mandatory rule fails the overall check. An empty rule
 set is not evaluated, never an implicit pass.
 
 These routes require seller access and product ownership, like pricing history.
-Buyers, pending applicants, and admin-only accounts receive 403. Verification and
-role grants remain deferred; automated tests use explicit synthetic seller grants.
+Buyers, pending applicants, and admin-only accounts receive 403. Manual admin review
+can grant seller access; isolated tests may still seed grants for unrelated features.
 
 See the [synthetic quality examples and workflow](examples/quality/README.md).
 All claims remain `seller_reported_unverified`. No unit conversions, source
@@ -412,7 +412,7 @@ buyer, seller, admin; admin alone does not grant seller privileges. Buying and
 checkout endpoints are future features, not added by the role model itself.
 
 An authenticated account can submit `{}` to
-`POST /api/v1/seller-applications` and read its own pending request through
+`POST /api/v1/seller-applications` and read its own request/outcome through
 `GET /api/v1/seller-applications/me`. Submission returns 201, a repeat returns
 the same application with 200, and an account already holding seller access
 receives 409. A missing application returns 404.
@@ -422,10 +422,17 @@ routes now return 403 `SELLER_REQUIRED` for buyers, pending applicants, and
 admin-only accounts. This is an authorization change from #5; frontend integration
 must handle it.
 
-Verification evidence, decisions, seller/admin role grants, admin provisioning,
-admin monitoring APIs, and dashboards are deferred. New accounts cannot currently
-become sellers through this API. The automated tests seed seller grants only to
-exercise protected behavior; no public or development role-grant endpoint exists.
+Manual administrator review now provides an explicit pending-to-approved/denied
+workflow. Approval atomically records the reason/audit and adds seller while
+retaining buyer. Administrators cannot decide their own applications, overwrite
+final decisions or implicitly gain seller access. Shared reasons and status are
+visible to applicants; reviewer identities remain admin-only. A local operator
+command can bootstrap only the first admin, with audit and session revocation;
+there is no HTTP bootstrap or generic role-grant API. Migrate through 0019 first.
+See [the contract and future plans](../docs/manual-seller-review.md) and
+[synthetic examples](examples/admin-review/README.md). Documents, verification
+standards, additional admins/recovery, appeals, revocation and the admin UI remain
+deferred. Approval is administrative access review, not identity/quality certification.
 
 Login returns an opaque bearer token. Send `Authorization: Bearer <token>`
 on private requests. Sessions expire 24 hours after login even if actively used.
