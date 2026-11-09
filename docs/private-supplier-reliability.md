@@ -1,5 +1,7 @@
 # Private supplier profiles and reported reliability
 
+[Implementation #36](https://github.com/Firewallwarden/FairMade/pull/36).
+
 After PR #35 opened, the user chose **private records per seller**, rather than
 shared community supplier ratings, and requested #28-#35 merge before this work.
 Those PRs were individually refreshed, checked and verified squash-merged on main
