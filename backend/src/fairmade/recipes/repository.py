@@ -1,20 +1,9 @@
 """Small queries and a SQLite write reservation for recipe transactions."""
 
-from sqlalchemy import select, update
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from fairmade.models import Product, ProductRecipe, RecipeCosting
-
-
-def reserve_product(db: Session, product_id: str) -> None:
-    # Serialize creates, edits and costing snapshots without changing product metadata.
-    db.execute(
-        update(Product)
-        .where(Product.id == product_id)
-        .values(updated_at=Product.updated_at)
-        .execution_options(synchronize_session=False)
-    )
-    db.expire_all()
+from fairmade.models import ProductRecipe, RecipeCosting
 
 
 def recipe(db: Session, product_id: str) -> ProductRecipe | None:
