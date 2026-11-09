@@ -250,3 +250,10 @@ Public generic buyer labels omit private source identities; catalog visibility
 governs review pages. Ratings are unverified buyer opinions, not Quality Lock or
 fair-price findings. Production moderation, reporting/appeals, abuse controls,
 privacy/retention, audit and frontend integration remain follow-up work.
+
+Public exact available-unit counts and availability filtering are now implemented
+across catalog, storefront and nearby listing results, with live counts in saved
+products. They use existing checkout reservation rules and approved selling units,
+retaining unknown for incomplete/inconsistent inventory and final checkout checks.
+Exact count disclosure is a confirmed ongoing product policy, not an MVP shortcut.
+See [the availability contract](public-listing-availability.md).

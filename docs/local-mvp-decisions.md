@@ -55,6 +55,15 @@ particular deployment stage.
 | --- | --- | --- | --- |
 | DOMAIN-001 | Support livestock groups **and** individual animals together. After #34, the user selected option 3 to enable detailed, precise data. [Contract and examples](livestock-tracking.md). | Implemented and tested in [#35](https://github.com/Firewallwarden/FairMade/pull/35); prerequisite completed-production #33 is verified integrated on main: private profiles, distinct observed headcounts/registered members, revision-safe membership and immutable history, plus explicit frozen group/animal sources on completed reports. Implementation limits include manual observations, exact species-label matching, one current group per animal, one source per report and existing whole output units. No certification or automatic per-animal allocation. | Preserve both tracking levels. Separately decide effective-dated reconstruction, measured multi-source allocations, genealogy/health/feed evidence, taxonomy/imports and reporting. Review retention, backup/restore, capacity/concurrency and frontend integration for hosted use. These are optional extensions or operational reviews, not automatic policy changes or approval for new providers. |
 
+## Confirmed product disclosure decisions
+
+These choices are product policies, not temporary MVP limits. Do not infer that
+production deployment requires replacing them.
+
+| ID | Confirmed decision | Implementation/status | Follow-up |
+| --- | --- | --- | --- |
+| DISC-001 | Publish exact available sellable-unit quantities. User chose option 2 after #33 opened and rejected an MVP/production rationale for restricting counts. [Implementation #34](https://github.com/Firewallwarden/FairMade/pull/34). [Policy and contract](public-listing-availability.md). | Implemented and tested in #34, verified integrated on main: live quantities/status on visible listing cards/details, storefront/nearby searches and favorites; filters precede pagination. Missing, unit-mismatched or inconsistent stock remains unknown; known zero is explicit. This decision has no automatic expiry. | Coordinate frontend rendering, source/checkout notices and snapshot refresh. Existing live-payment/hosted operational work remains separate. Any disclosure-policy change needs a new decision; exact counts themselves are not a temporary compromise. |
+
 ## Rules that remain in force beyond MVP
 
 General accounts default to buyer; seller access is additive and requires the

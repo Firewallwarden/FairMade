@@ -7,6 +7,8 @@ from fastapi import APIRouter, Query, Request, Response
 from fastapi.responses import JSONResponse
 
 from fairmade.auth import AUTH_ERRORS, DB, VerifiedSeller
+from fairmade.availability.query import public_availability
+from fairmade.availability.schemas import AvailabilityStatus
 from fairmade.marketplace import repository, service
 from fairmade.marketplace.errors import ListingError
 from fairmade.marketplace.schemas import (
@@ -92,6 +94,7 @@ def browse(
     q: Annotated[str | None, Query(min_length=1, max_length=200)] = None,
     product_type: ProductType | None = None,
     location: Annotated[str | None, Query(min_length=1, max_length=200)] = None,
+    availability: AvailabilityStatus | None = None,
 ):
     response.headers["Cache-Control"] = "no-store"
     items = repository.browse(
@@ -101,8 +104,13 @@ def browse(
         location=location.strip() if location else None,
         limit=limit,
         offset=offset,
+        availability=availability,
     )
-    return {"items": [service.card(item) for item in items], "limit": limit, "offset": offset}
+    return {
+        "items": [service.card(row[0], public_availability(row)) for row in items],
+        "limit": limit,
+        "offset": offset,
+    }
 
 
 @public_router.get(
