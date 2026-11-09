@@ -5,7 +5,8 @@ unit are required before publishing a new or updated listing**. Existing approve
 listings remain visible. DISC-002 records this product policy; it is not a temporary
 MVP shortcut or authorization to invalidate old approvals.
 
-Backend implementation and the shared HTTP proposal are complete. Frontend forms
+[PR #37](https://github.com/Firewallwarden/FairMade/pull/37) implements the backend
+and shared HTTP proposal, validated by 1,098 backend tests. Frontend forms
 must supply the quantity before activation and display normalized prices as
 comparison information. Frontend acceptance/integration is pending; no frontend
 files are changed. This feature is independent of private supplier PR #36.
