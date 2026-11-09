@@ -751,6 +751,29 @@ promise inventory availability.
 See [the draft/preview/approval workflow](../backend/examples/passports/README.md).
 The new contract is implemented backend-side and remains pending frontend review.
 
+## Exact public listing quantities and availability filters
+
+The user chose exact available-unit disclosure as an ongoing product policy,
+not an MVP/production distinction. Catalog cards/details, storefront listing pages,
+nearby listing results and visible favorite cards add a live availability object:
+status, available_units when known, approved selling_unit, source basis and a
+checkout-recheck notice. Status is available, unavailable or unknown. A known zero
+is returned as zero; unknown quantity is null/omitted using existing response rules.
+
+GET /api/v1/marketplace/listings and GET /api/v1/storefronts/{id}/listings accept
+optional availability=available|unavailable|unknown. POST /api/v1/discovery/listings
+accepts the same optional JSON field. Filters run before pagination and the nearby
+candidate guard. Missing filters preserve normal browse behavior; invalid values 422.
+
+The count uses seller-recorded inventory minus active holds, including unresolved
+capture/review holds, in the listing's approved unit. Missing inventory, mismatched
+units or inconsistent negative balances produce unknown. Private stock/reservation
+details, identities and costs remain excluded. Visibility and no-store behavior
+remain enforced. Counts are live context outside approved payload/hash/revision;
+viewing does not reserve stock, and checkout rechecks current availability.
+See the [full policy and reservation semantics](public-listing-availability.md)
+and [synthetic workflow](../backend/examples/availability/README.md).
+
 ## Seller listings and public marketplace
 
 Backend-implemented for local development; frontend contract acceptance is pending.
@@ -888,11 +911,12 @@ Stale writes return 409 REVISION_CONFLICT. On-hand cannot be below active reserv
 quantity (STOCK_RESERVED). To change the unit basis, first empty the existing stock
 and allow/cancel any active holds (INVENTORY_UNIT_LOCKED otherwise).
 
-reserved is derived from pending orders whose deadline is strictly later than
-server time. available = on_hand - reserved. Order creation, cancellation and
-expiration do not deduct on_hand. A later verified payment integration must
-atomically consume stock and complete the order; no such endpoint exists yet.
-Existing marketplace browse results do not promise availability.
+reserved is derived from pending orders with an unexpired deadline, plus durable
+capture_pending/needs_review holds after that deadline. Completed checkouts are
+excluded. available = on_hand - reserved. Creation, cancellation and expiration
+do not deduct on_hand. Verified payment completion atomically consumes stock and
+completes the order, as implemented by the sandbox integration below. Marketplace
+counts are snapshots of recorded stock; viewing them does not reserve availability.
 
 ### Cart requests and exact snapshots
 

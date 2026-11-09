@@ -7,6 +7,8 @@ from sqlalchemy.dialects.sqlite import insert
 from sqlalchemy.orm import Session
 
 from fairmade.auth import api_error
+from fairmade.availability.query import with_availability
+from fairmade.availability.schemas import AvailabilityStatus
 from fairmade.database import utcnow
 from fairmade.geography import ApproximateArea
 from fairmade.marketplace.repository import visible_listings
@@ -144,7 +146,8 @@ def listings(
     storefront_id: UUID,
     limit: int,
     offset: int,
-) -> list[MarketplaceListing]:
+    availability: AvailabilityStatus | None = None,
+):
     # Recheck storefront visibility in the listing query itself as well. A
     # concurrent withdrawal must not expose unpublished/private product data.
     accounts = (
@@ -156,10 +159,10 @@ def listings(
     # Product ownership is the MVP assignment rule; the storefront UUID remains
     # independent so explicit per-store assignments can be added later.
     statement = (
-        visible_listings()
+        with_availability(visible_listings(), availability)
         .where(MarketplaceListing.product_id.in_(products))
         .order_by(MarketplaceListing.published_at.desc(), MarketplaceListing.id.desc())
         .limit(limit)
         .offset(offset)
     )
-    return list(db.scalars(statement))
+    return list(db.execute(statement))

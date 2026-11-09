@@ -6,6 +6,7 @@ from uuid import UUID
 
 from pydantic import Field
 
+from fairmade.availability.schemas import AvailabilityStatus
 from fairmade.geography import ApproximateArea, SearchOrigin
 from fairmade.marketplace.schemas import CatalogCard
 from fairmade.pricing.schemas import Contract, Label
@@ -23,6 +24,7 @@ class AreaSearch(Contract):
 
 class ListingSearch(AreaSearch):
     product_type: ProductType | None = None
+    availability: AvailabilityStatus | None = None
 
 
 class NearbyStorefront(Contract):

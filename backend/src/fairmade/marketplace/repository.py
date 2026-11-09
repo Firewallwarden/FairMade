@@ -3,6 +3,8 @@
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
+from fairmade.availability.query import with_availability
+from fairmade.availability.schemas import AvailabilityStatus
 from fairmade.models import MarketplaceListing, PassportPublication
 from fairmade.passports.repository import visible_publications
 
@@ -42,8 +44,9 @@ def browse(
     location: str | None,
     limit: int,
     offset: int,
+    availability: AvailabilityStatus | None = None,
 ):
-    statement = visible_listings()
+    statement = with_availability(visible_listings(), availability)
     if query:
         # Treat %, _ and / literally rather than as SQL LIKE patterns.
         statement = statement.where(
@@ -53,7 +56,7 @@ def browse(
         statement = statement.where(MarketplaceListing.product_type == product_type)
     if location:
         statement = statement.where(MarketplaceListing.location_key == location.casefold())
-    return db.scalars(
+    return db.execute(
         statement.order_by(MarketplaceListing.published_at.desc(), MarketplaceListing.id.desc())
         .limit(limit)
         .offset(offset)

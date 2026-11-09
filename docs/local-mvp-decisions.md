@@ -45,6 +45,15 @@ each detail or approved a production replacement.
 | MVP-012 | Backend JSON APIs/examples exist; shared frontend contract acceptance and real browser/end-to-end integration remain pending. [API contract status](api-contract.md). | Backend-tested local implementation; this register does not claim a working frontend or successful provider/browser checkout. | Coordinate frontend acceptance, browser session/CORS/payment behavior and end-to-end checks before calling a user journey complete. |
 | MVP-013 | Nearby search uses manually chosen points at most two decimal places, straight-line spherical distance, a 1..500 km radius, and a 1,000-candidate bounding-box limit. [Discovery #26](https://github.com/Firewallwarden/FairMade/pull/26). | Integrated into main by #26. No maps/geocoding service or buyer-location storage. Results do not guarantee travel distance, pickup address, anonymity or stock. A too-broad query errors explicitly rather than returning a truncated nearest-first page. | Improve location entry and spatial search as usage grows; review radius/precision policy and disclosure UX with the frontend. Choose any provider/infrastructure separately. Keep privacy, bounded requests and current publication/authorization checks when replacing this implementation. |
 
+## Confirmed product disclosure decisions
+
+These choices are product policies, not temporary MVP limits. Do not infer that
+production deployment requires replacing them.
+
+| ID | Confirmed decision | Implementation/status | Follow-up |
+| --- | --- | --- | --- |
+| DISC-001 | Publish exact available sellable-unit quantities. User chose option 2 after #33 opened and rejected an MVP/production rationale for restricting counts. [Implementation #34](https://github.com/Firewallwarden/FairMade/pull/34). [Policy and contract](public-listing-availability.md). | Implemented and tested in independent main-based #34: live quantities/status on visible listing cards/details, storefront/nearby searches and favorites; filters precede pagination. Missing, unit-mismatched or inconsistent stock remains unknown; known zero is explicit. This decision has no automatic expiry. | Coordinate frontend rendering, source/checkout notices and snapshot refresh. Existing live-payment/hosted operational work remains separate. Any disclosure-policy change needs a new decision; exact counts themselves are not a temporary compromise. |
+
 ## Rules that remain in force beyond MVP
 
 General accounts default to buyer; seller access is additive and requires the
