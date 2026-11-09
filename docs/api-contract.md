@@ -122,6 +122,35 @@ grants seller or silently restores revoked access. See the
 Documents, criteria, additional admins, privileged recovery, appeals/reapplication,
 revocation/reverification, notifications and the admin frontend remain future work.
 
+## Manual raw-material and supply quantities
+
+The user approved a manual quantity ledger for local MVP; lots, expiry,
+inventory valuation and production consumption are deferred. Seller-only
+backend endpoints are implemented proposals pending frontend integration:
+
+| Method/path | Behavior |
+| --- | --- |
+| POST /api/v1/seller/materials | Create zero-stock material with name, fixed base unit and optional notes |
+| GET /api/v1/seller/materials | Bounded owner-only catalog |
+| GET /api/v1/seller/materials/{id} | Read current quantity/revision |
+| PUT /api/v1/seller/materials/{id} | Replace metadata with expected_revision |
+| POST /api/v1/seller/materials/{id}/movements | Receipt, usage, waste or physical-count adjustment |
+| GET /api/v1/seller/materials/{id}/movements | Bounded immutable history |
+| GET /api/v1/seller/materials/{id}/movements/{movement_id} | Read owner-scoped event |
+
+All require bearer authentication, current seller access and ownership. Amounts
+are decimal JSON strings; storage uses exact integer millionths of g/ml/item,
+with kg/l conversion and whole-item validation. Negative stock, mixed dimensions,
+stale writes and duplicate conflicting requests are rejected. UUID request keys
+make retries return the original event without applying stock twice.
+
+Balances and events commit atomically. Server time and seller-reported occurrence
+dates are distinct; backdated events still apply in posting order. No prices,
+costs, supplier links, recipe consumption or sellable-stock changes are inferred.
+Migration 0021 preserves existing data and guards downgrade before DDL. See the
+[full contract, errors, limits and deferred production work](manual-material-inventory.md)
+and [synthetic examples](../backend/examples/materials/README.md).
+
 ## Manual product recipes and ingredient costing
 
 The user approved manually entered quantities and purchase costs for local MVP;

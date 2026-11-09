@@ -7,6 +7,7 @@ from uuid import uuid4
 
 from sqlalchemy import (
     JSON,
+    BigInteger,
     CheckConstraint,
     Date,
     DateTime,
@@ -154,6 +155,71 @@ class RecipeCosting(Base):
     pricing_analysis_id: Mapped[str] = mapped_column(ForeignKey("analyses.id"), unique=True)
     recipe_snapshot: Mapped[dict] = mapped_column(JSON)
     result: Mapped[dict] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class Material(Base):
+    __tablename__ = "materials"
+    __table_args__ = (
+        UniqueConstraint("account_id", "name_key", name="uq_material_account_name"),
+        CheckConstraint("revision >= 1", name="ck_material_revision"),
+        CheckConstraint("unit IN ('g', 'ml', 'item')", name="ck_material_unit"),
+        CheckConstraint(
+            "on_hand_micros BETWEEN 0 AND 1000000000000000", name="ck_material_balance"
+        ),
+        CheckConstraint(
+            "unit != 'item' OR on_hand_micros % 1000000 = 0", name="ck_material_whole_items"
+        ),
+        Index("ix_materials_account_created", "account_id", "created_at", "id"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"))
+    name: Mapped[str] = mapped_column(String(200))
+    name_key: Mapped[str] = mapped_column(String(600))
+    notes: Mapped[str | None] = mapped_column(Text)
+    unit: Mapped[str] = mapped_column(String(4))
+    on_hand_micros: Mapped[int] = mapped_column(BigInteger)
+    revision: Mapped[int] = mapped_column(Integer)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class MaterialMovement(Base):
+    __tablename__ = "material_movements"
+    __table_args__ = (
+        UniqueConstraint("material_id", "request_id", name="uq_material_movement_request"),
+        UniqueConstraint("material_id", "revision", name="uq_material_movement_revision"),
+        CheckConstraint("revision >= 2", name="ck_material_movement_revision"),
+        CheckConstraint(
+            "kind IN ('receipt', 'usage', 'waste', 'adjustment')", name="ck_material_movement_kind"
+        ),
+        CheckConstraint("unit IN ('g', 'ml', 'item')", name="ck_material_movement_unit"),
+        CheckConstraint(
+            "before_micros BETWEEN 0 AND 1000000000000000 "
+            "AND after_micros BETWEEN 0 AND 1000000000000000",
+            name="ck_material_movement_balance",
+        ),
+        CheckConstraint(
+            "unit != 'item' OR (before_micros % 1000000 = 0 AND after_micros % 1000000 = 0)",
+            name="ck_material_movement_whole_items",
+        ),
+        CheckConstraint(
+            "(kind = 'receipt' AND after_micros > before_micros) OR "
+            "(kind IN ('usage', 'waste') AND after_micros < before_micros) OR kind = 'adjustment'",
+            name="ck_material_movement_direction",
+        ),
+        Index("ix_material_movements_material_revision", "material_id", "revision", "id"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    material_id: Mapped[str] = mapped_column(ForeignKey("materials.id"))
+    request_id: Mapped[str] = mapped_column(String(36))
+    revision: Mapped[int] = mapped_column(Integer)
+    kind: Mapped[str] = mapped_column(String(10))
+    material_name: Mapped[str] = mapped_column(String(200))
+    unit: Mapped[str] = mapped_column(String(4))
+    before_micros: Mapped[int] = mapped_column(BigInteger)
+    after_micros: Mapped[int] = mapped_column(BigInteger)
+    request: Mapped[dict] = mapped_column(JSON)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
 
 
