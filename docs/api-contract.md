@@ -24,6 +24,62 @@ without additional fields. No floating-point calculation or currency conversion
 is introduced. Selling units are seller-defined labels, not automatic conversions:
 if the unit is "dozen eggs", yield and prices must be expressed per dozen.
 
+## Livestock groups and individual animals
+
+Implemented backend proposal: [full livestock contract](livestock-tracking.md).
+All /api/v1/seller/livestock routes require bearer authentication, current seller
+access and owner scope. No anonymous livestock data is exposed.
+
+| Paths under /api/v1/seller/livestock | Methods / success |
+| --- | --- |
+| /groups and /animals | POST 201 immutable HistoryResponse (exact retry 200); GET 200 Page |
+| /groups/{group_id} and /animals/{animal_id} | GET 200 current profile; PUT 200 immutable HistoryResponse |
+| /groups/{group_id}/history and /animals/{animal_id}/history | GET 200 Page of immutable history |
+| /groups/{group_id}/production-records and /animals/{animal_id}/production-records | GET 200 Page of ProductionSummary |
+
+Group fields: name/species, optional breed/notes, archived and paired optional
+reported_headcount/headcount_on. Reads separately expose registered_active_animals;
+never add registration coverage to reported population. Animal fields: unique
+identifier, optional name/breed/notes/born_on/acquired_on/group_id, species, sex
+(unknown/female/male) and status (active/departed/deceased). Species is fixed at
+registration. One current owned, unarchived, same-species group per active animal;
+departed/deceased animals have no current group. Group archival requires moving
+active members first. Identifiers/group names are case-insensitively unique per
+seller. Counts are strict whole integers 0..1,000,000, dates cannot be future,
+labels are 1..200 characters and notes are at most 2,000.
+
+Create combines profile/species with request_id, occurred_on and a nonblank reason
+(at most 2,000 characters). PUT replaces editable metadata and adds expected_revision;
+it excludes species. Writes atomically save the profile and before/after event.
+Retry IDs are seller-scoped separately for group/animal changes; exact retries
+return their saved event even after later changes. HistoryResponse has id,
+resource_id, request_id, revision, occurred_on, reason, before, after, created_at
+and seller_reported_unverified basis. Backdated events apply in recording order;
+no historical effective-date reconstruction is claimed. Profiles/history and
+errors use no-store, and 422 details omit private raw input.
+
+Pages use existing limit/offset bounds. Group lists optionally filter archived;
+animal lists optionally filter group_id and status before pagination. Profiles
+sort by server creation time/UUID descending; history by revision descending.
+401/403 enforce session/seller access; cross-owner/missing IDs give 404. Conflicts
+include REVISION_CONFLICT, IDEMPOTENCY_CONFLICT, GROUP_EXISTS, ANIMAL_EXISTS,
+GROUP_HAS_MEMBERS, GROUP_ARCHIVED and SPECIES_MISMATCH.
+
+Completed-production POST optionally adds livestock_source:
+{kind: group|animal, id: UUID, expected_revision: integer}. Detail adds nullable
+livestock_snapshot with frozen kind/group/animal profiles, recording time, basis
+and uncertainty notice. An animal source freezes its current group too. This
+describes profiles at recording, not proof of membership during the reported
+period. One report has one selected source; no per-animal yield is invented.
+An identical reference on a linked correction retains its prior frozen snapshot;
+a changed reference explicitly selects a new snapshot, and null clears it.
+Unsourced and legacy requests remain supported. Group source history includes
+direct group reports and individual reports attributed to that group then.
+Source pages omit corrected predecessors unless include_corrected=true and do
+not silently sum overlapping reports. Pricing, public disclosures, stock and
+payments remain separate. Migration 0023 follows completed-production 0022;
+frontend acceptance and integration remain pending.
+
 ## Accounts and sessions
 
 | Method and path | JSON request | Success |

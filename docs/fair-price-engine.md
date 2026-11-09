@@ -221,6 +221,13 @@ approval, not source verification, certification, or an objective fairness verdi
 
 Each milestone is a separate issue or feature worktree and reviewed PR.
 
+Livestock tracking now supports private groups and individual animals together,
+manual observed headcounts, explicit current memberships and immutable profile
+history. Production reports may freeze one explicitly selected group/animal
+source. Group output is never automatically allocated to individual animals, and
+current membership does not rewrite earlier reports. See
+[the livestock contract](livestock-tracking.md); frontend integration is pending.
+
 Completed production reports now capture manual actual batch/period output and
 allocated costs with immutable product/unit snapshots, safe retries and linear
 corrections. Zero sellable output preserves costs with unknown cost per unit.

@@ -8,6 +8,7 @@ from uuid import UUID
 from pydantic import Field, model_validator
 
 from fairmade.evidence import Amount, today
+from fairmade.livestock.schemas import LivestockReference
 from fairmade.pricing.schemas import BatchCost, Contract, CostCategory, Label, Labor
 from fairmade.schemas import UTCResponse
 
@@ -38,6 +39,7 @@ class ProductionRequest(Contract):
     notes: Annotated[str, Field(max_length=2000)] | None = None
     corrects_record_id: UUID | None = None
     correction_reason: Annotated[str, Field(min_length=1, max_length=2000)] | None = None
+    livestock_source: LivestockReference | None = None
 
     @model_validator(mode="after")
     def completed_and_consistent(self) -> Self:
@@ -86,3 +88,4 @@ class ProductionResponse(ProductionSummary):
     product_snapshot: dict
     request: dict
     result: dict
+    livestock_snapshot: dict | None = None

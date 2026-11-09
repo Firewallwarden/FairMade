@@ -1,0 +1,16 @@
+{
+  "request_id": "23000000-0000-4000-8000-000000000003",
+  "label": "Synthetic completed egg-production week",
+  "kind": "production_period",
+  "started_on": "2025-05-01",
+  "completed_on": "2025-05-07",
+  "selling_unit": "dozen",
+  "total_units": 15,
+  "sellable_units": 14,
+  "currency": "USD",
+  "costs": [
+    {"label": "Manually allocated feed", "category": "materials", "amount": "30.00"}
+  ],
+  "labor": [{"label": "Manually allocated care", "hours": "2", "hourly_rate": "15.00"}],
+  "notes": "Synthetic report; only allocate costs for this period, once."
+}

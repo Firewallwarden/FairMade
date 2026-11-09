@@ -28,6 +28,10 @@ POST /api/v1/products/{product_id}/production-records accepts:
 - notes: optional trimmed private text up to 2,000 characters, or null.
 - corrects_record_id/correction_reason: optional paired correction fields.
   Reason is trimmed 1..2,000 characters without NUL.
+- livestock_source: optional explicit group/animal UUID and expected revision.
+  Detail adds a nullable frozen livestock_snapshot. See the
+  [livestock attribution contract](livestock-tracking.md) for ownership,
+  recording-time limitations, source histories and correction behavior.
 
 Unknown fields, planned/in-progress status, roles, owners, prices and supplier
 links are rejected. Allocated overhead, reserves, equipment and imputed labor
@@ -121,7 +125,11 @@ and notifications are optional future work requiring a new decision. They are no
 prerequisites merely because deployment moves beyond local MVP.
 
 Other separately scoped follow-ups include actual/recipe comparisons, explicit
-stock consumption/reconciliation, lot/flock/animal context, partial output units,
+stock consumption/reconciliation, lot context, partial output units,
 expense evidence/allocation, overlapping periods/shared costs, pricing/sales-cost
 integration, history reporting, retention/operations and frontend integration.
 They do not authorize automatic stock changes, verification, providers or infrastructure.
+
+Explicit flock/group and individual-animal context is now implemented separately
+in the [livestock feature](livestock-tracking.md). It preserves source profiles
+without claiming effective-dated membership or automatically allocating output.

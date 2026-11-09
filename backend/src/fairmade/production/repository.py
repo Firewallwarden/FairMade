@@ -3,7 +3,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session, aliased
 
-from fairmade.models import ProductionRecord
+from fairmade.models import Product, ProductionLivestockSource, ProductionRecord
 
 
 def get(db: Session, product_id: str, record_id: str) -> ProductionRecord | None:
@@ -29,7 +29,15 @@ def successor(db: Session, record_id: str) -> str | None:
 
 
 def page(
-    db: Session, product_id: str, include_corrected: bool, limit: int, offset: int
+    db: Session,
+    product_id: str | None,
+    include_corrected: bool,
+    limit: int,
+    offset: int,
+    *,
+    account_id: str | None = None,
+    group_id: str | None = None,
+    animal_id: str | None = None,
 ) -> list[dict]:
     record = ProductionRecord
     # Avoid reading large private cost/input blobs for summary pages.
@@ -46,7 +54,21 @@ def page(
         record.sellable_units,
         record.corrects_record_id,
         record.created_at,
-    ).where(record.product_id == product_id)
+    )
+    if product_id is not None:
+        statement = statement.where(record.product_id == product_id)
+    else:
+        if account_id is None or (group_id is None and animal_id is None):
+            raise ValueError("Livestock history requires an owner and a source")
+        statement = (
+            statement.join(Product, Product.id == record.product_id)
+            .join(ProductionLivestockSource, ProductionLivestockSource.record_id == record.id)
+            .where(Product.account_id == account_id)
+        )
+        if group_id is not None:
+            statement = statement.where(ProductionLivestockSource.group_id == group_id)
+        if animal_id is not None:
+            statement = statement.where(ProductionLivestockSource.animal_id == animal_id)
     if not include_corrected:
         correction = aliased(ProductionRecord)
         has_correction = (
