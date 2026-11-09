@@ -21,7 +21,8 @@ See the [synthetic listing workflow](examples/marketplace/README.md).
 Sellable inventory and unpaid buyer orders now support exact merchandise subtotals,
 15-minute reservations, cancellation, and private buyer/seller history. Shared-merchant
 PayPal sandbox checkout now adds verified capture, recovery, payment records, and
-stock deduction after confirmation. Tax, shipping and fulfillment remain deferred.
+stock deduction after confirmation. Tax, shipping and delivery remain deferred;
+private local pickup progress is tracked separately after verified payment.
 See the [synthetic inventory/order workflow](examples/orders/README.md).
 See [sandbox setup and payment integration](examples/paypal/README.md). Live
 production will require seller-connected merchant accounts through a separately
@@ -373,6 +374,19 @@ external media hosting or client filenames are introduced. Hosted media storage,
 processor isolation, abuse controls and moderation remain follow-up work.
 See [photo upload examples and limits](examples/photos/README.md) and
 [the contract](../docs/api-contract.md#product-photo-uploads-and-approved-listing-images).
+
+## Local pickup fulfillment
+
+Verified-paid orders can have separate, private seller-reported pickup progress:
+preparing → ready for pickup → collected. Only the order's buyer and current seller
+can read instructions/history. Writes use optimistic revisions and append immutable
+events without changing payment/stock or publishing a precise location. Pending or
+approved refunds block progress; collection is terminal and remains unverified.
+Migration 0017 preserves all existing order snapshots and does not backfill progress.
+See [the contract and future plans](../docs/pickup-fulfillment.md) and
+[synthetic examples](examples/fulfillment/README.md). Delivery/shipping, addresses,
+fees/taxes, schedules/notifications, buyer-confirmed handoff, returns/restocking and
+hosted retention controls remain separate future decisions.
 
 ## Buyer defaults and seller applications
 

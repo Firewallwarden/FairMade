@@ -17,6 +17,8 @@ from fairmade.comparisons.routes import router as comparison_router
 from fairmade.database import database_url, make_engine
 from fairmade.discovery.routes import router as discovery_router
 from fairmade.favorites.routes import router as favorites_router
+from fairmade.fulfillment.routes import buyer_router as pickup_buyer_router
+from fairmade.fulfillment.routes import seller_router as pickup_seller_router
 from fairmade.inventory.routes import router as inventory_router
 from fairmade.marketplace.errors import ListingError
 from fairmade.marketplace.routes import listing_error_handler
@@ -70,7 +72,7 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
             finally:
                 application.state.engine.dispose()
 
-    application = FastAPI(title="FairMade API", version="0.17.0", lifespan=lifespan)
+    application = FastAPI(title="FairMade API", version="0.18.0", lifespan=lifespan)
     application.add_exception_handler(RefundError, refund_error_handler)
     application.add_exception_handler(PaymentError, payment_error_handler)
     application.add_exception_handler(CommerceError, commerce_error_handler)
@@ -104,6 +106,7 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
             or request.url.path.startswith("/api/v1/seller/storefronts")
             or request.url.path.startswith("/api/v1/discovery")
             or "/photos" in request.url.path
+            or "/fulfillment" in request.url.path
         ):
             # Validation errors may otherwise echo the raw password or entire body.
             errors = [{key: error[key] for key in ("loc", "msg", "type")} for error in exc.errors()]
@@ -154,6 +157,8 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
     application.include_router(discovery_router)
     application.include_router(photo_router)
     application.include_router(public_photo_router)
+    application.include_router(pickup_buyer_router)
+    application.include_router(pickup_seller_router)
     return application
 
 

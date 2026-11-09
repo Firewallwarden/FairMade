@@ -185,9 +185,12 @@ approval, not source verification, certification, or an objective fairness verdi
    A shared PayPal sandbox merchant is approved for development. Sandbox create,
    verified capture, reconciliation, payment records and atomic stock consumption
    are now implemented, opt-in and pending real sandbox/browser integration testing.
-   Production requires seller-connected merchant accounts; fulfillment, shipping,
-   taxes and hosted operations remain future work. Full-order buyer refund
-   requests with seller approval/denial, verified sandbox execution and recovery
+   Production requires seller-connected merchant accounts; delivery, shipping,
+   taxes and hosted operations remain future work. Private local pickup progress,
+   instructions and append-only history now support verified-paid orders without
+   modifying payment/stock state. Pickup remains seller-reported; delivery, buyer
+   handoff confirmation and notification/retention policies remain future work.
+   Full-order buyer refund requests with seller approval/denial, verified sandbox execution and recovery
    are implemented for local development; partial refunds, appeals and
    returns/restocking remain deferred. Private seller sales reports now use
    explicit cost-analysis selections and immutable order cost snapshots for

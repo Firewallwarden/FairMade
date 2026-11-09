@@ -346,6 +346,32 @@ class MarketplaceListing(Base):
     price_minor: Mapped[int | None] = mapped_column(Integer)
 
 
+class PickupFulfillmentEvent(Base):
+    __tablename__ = "pickup_fulfillment_events"
+    __table_args__ = (
+        UniqueConstraint("order_id", "revision", name="uq_pickup_order_revision"),
+        CheckConstraint("revision >= 1", name="ck_pickup_revision"),
+        CheckConstraint(
+            "state IN ('preparing', 'ready_for_pickup', 'collected')", name="ck_pickup_state"
+        ),
+        CheckConstraint(
+            "pickup_instructions IS NULL OR length(pickup_instructions) BETWEEN 1 AND 2000",
+            name="ck_pickup_instructions",
+        ),
+        CheckConstraint(
+            "state = 'preparing' OR pickup_instructions IS NOT NULL",
+            name="ck_pickup_ready_instructions",
+        ),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    order_id: Mapped[str] = mapped_column(ForeignKey("orders.id"))
+    revision: Mapped[int] = mapped_column(Integer)
+    state: Mapped[str] = mapped_column(String(20))
+    pickup_instructions: Mapped[str | None] = mapped_column(Text)
+    recorded_by_account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
 class ProductPhoto(Base):
     __tablename__ = "product_photos"
     __table_args__ = (
