@@ -209,3 +209,11 @@ approval, not source verification, certification, or an objective fairness verdi
    business/shopping assistants remain future work.
 
 Each milestone is a separate issue or feature worktree and reviewed PR.
+
+Buyer product feedback now uses historical backend-verified sandbox purchase
+evidence, immediate consented publication and author-only revision/withdrawal.
+One review per buyer/product prevents repeat orders from adding repeated votes.
+Public generic buyer labels omit private source identities; catalog visibility
+governs review pages. Ratings are unverified buyer opinions, not Quality Lock or
+fair-price findings. Production moderation, reporting/appeals, abuse controls,
+privacy/retention, audit and frontend integration remain follow-up work.
