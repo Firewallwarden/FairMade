@@ -21,6 +21,7 @@ from fairmade.favorites.routes import router as favorites_router
 from fairmade.fulfillment.routes import buyer_router as pickup_buyer_router
 from fairmade.fulfillment.routes import seller_router as pickup_seller_router
 from fairmade.inventory.routes import router as inventory_router
+from fairmade.livestock.routes import router as livestock_router
 from fairmade.marketplace.errors import ListingError
 from fairmade.marketplace.routes import listing_error_handler
 from fairmade.marketplace.routes import public_router as marketplace_public_router
@@ -79,7 +80,7 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
             finally:
                 application.state.engine.dispose()
 
-    application = FastAPI(title="FairMade API", version="0.23.0", lifespan=lifespan)
+    application = FastAPI(title="FairMade API", version="0.24.0", lifespan=lifespan)
     application.add_exception_handler(RefundError, refund_error_handler)
     application.add_exception_handler(PaymentError, payment_error_handler)
     application.add_exception_handler(CommerceError, commerce_error_handler)
@@ -119,6 +120,7 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
             or "/recipe" in request.url.path
             or request.url.path.startswith("/api/v1/seller/materials")
             or "/production-records" in request.url.path
+            or request.url.path.startswith("/api/v1/seller/livestock")
             or (
                 request.url.path.startswith("/api/v1/orders/")
                 and request.url.path.endswith("/review")
@@ -182,6 +184,7 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
     application.include_router(recipe_router)
     application.include_router(material_router)
     application.include_router(production_router)
+    application.include_router(livestock_router)
     return application
 
 

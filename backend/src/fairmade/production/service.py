@@ -6,6 +6,7 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from fairmade.auth import api_error
+from fairmade.livestock.sources import attach as attach_livestock
 from fairmade.models import ProductionRecord
 from fairmade.ownership import reserve_owned_product
 from fairmade.production import repository
@@ -38,6 +39,7 @@ def save(
         db.commit()
         return previous, False
     corrects_id = str(body.corrects_record_id) if body.corrects_record_id else None
+    prior = None
     if corrects_id is not None:
         prior = require_record(db, product.id, corrects_id)
         if repository.successor(db, prior.id) is not None:
@@ -70,5 +72,7 @@ def save(
         result=result.model_dump(mode="json"),
     )
     db.add(record)
+    with db.no_autoflush:
+        attach_livestock(db, account_id, record, body.livestock_source, prior)
     db.commit()
     return record, True

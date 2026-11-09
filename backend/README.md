@@ -21,6 +21,12 @@ allocated costs, including zero-output runs and immutable linked corrections.
 Default history shows the latest correction per report; stock remains manual.
 See the [completed production examples](examples/production/README.md) and
 [contract and optional future workflow](../docs/completed-production-records.md).
+Private livestock tracking now supports both groups and individual animals,
+observed headcounts distinct from registered members, revision-safe transfers,
+and immutable history. Production reports can explicitly select one source and
+freeze its profile without changing stock or attributing group yield to individuals.
+See the [livestock examples](examples/livestock/README.md) and
+[API contract and limits](../docs/livestock-tracking.md).
 Sellers can also define mandatory Quality Locks and save deterministic checks of
 seller-entered alternatives. A passing check is not a quality certification.
 Finished-product comparison endpoints store manually entered price observations

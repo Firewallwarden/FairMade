@@ -1,0 +1,11 @@
+{
+  "request_id": "23000000-0000-4000-8000-000000000001",
+  "occurred_on": "2025-05-07",
+  "reason": "Synthetic initial flock observation",
+  "name": "Demo laying flock",
+  "species": "chicken",
+  "breed": "Demo breed label, unverified",
+  "reported_headcount": 30,
+  "headcount_on": "2025-05-07",
+  "notes": "Synthetic seller-reported data; not a certification."
+}

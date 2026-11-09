@@ -260,6 +260,135 @@ class ProductionRecord(Base):
     result: Mapped[dict] = mapped_column(JSON)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
 
+    livestock_attribution: Mapped[ProductionLivestockSource | None] = relationship(uselist=False)
+
+    @property
+    def livestock_snapshot(self) -> dict | None:
+        return self.livestock_attribution.snapshot if self.livestock_attribution else None
+
+
+class LivestockGroup(Base):
+    __tablename__ = "livestock_groups"
+    __table_args__ = (
+        UniqueConstraint("account_id", "name_key", name="uq_livestock_group_name"),
+        CheckConstraint("revision >= 1", name="ck_livestock_group_revision"),
+        CheckConstraint("archived IN (0, 1)", name="ck_livestock_group_archived"),
+        CheckConstraint(
+            "(reported_headcount IS NULL AND headcount_on IS NULL) OR "
+            "(reported_headcount IS NOT NULL AND reported_headcount BETWEEN 0 AND 1000000 "
+            "AND headcount_on IS NOT NULL)",
+            name="ck_livestock_group_headcount",
+        ),
+        Index("ix_livestock_groups_account_created", "account_id", "created_at", "id"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"))
+    name: Mapped[str] = mapped_column(String(200))
+    name_key: Mapped[str] = mapped_column(String(600))
+    species: Mapped[str] = mapped_column(String(200))
+    species_key: Mapped[str] = mapped_column(String(600))
+    breed: Mapped[str | None] = mapped_column(String(200))
+    notes: Mapped[str | None] = mapped_column(Text)
+    reported_headcount: Mapped[int | None] = mapped_column(Integer)
+    headcount_on: Mapped[date | None] = mapped_column(Date)
+    archived: Mapped[int] = mapped_column(Integer)
+    revision: Mapped[int] = mapped_column(Integer)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class LivestockAnimal(Base):
+    __tablename__ = "livestock_animals"
+    __table_args__ = (
+        UniqueConstraint("account_id", "identifier_key", name="uq_livestock_animal_identifier"),
+        CheckConstraint("revision >= 1", name="ck_livestock_animal_revision"),
+        CheckConstraint("sex IN ('unknown', 'female', 'male')", name="ck_livestock_animal_sex"),
+        CheckConstraint(
+            "status IN ('active', 'departed', 'deceased')", name="ck_livestock_animal_status"
+        ),
+        CheckConstraint(
+            "status = 'active' OR group_id IS NULL", name="ck_livestock_animal_membership"
+        ),
+        CheckConstraint(
+            "born_on IS NULL OR acquired_on IS NULL OR born_on <= acquired_on",
+            name="ck_livestock_animal_dates",
+        ),
+        Index("ix_livestock_animals_account_created", "account_id", "created_at", "id"),
+        Index("ix_livestock_animals_group_status", "group_id", "status", "id"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"))
+    identifier: Mapped[str] = mapped_column(String(200))
+    identifier_key: Mapped[str] = mapped_column(String(600))
+    name: Mapped[str | None] = mapped_column(String(200))
+    species: Mapped[str] = mapped_column(String(200))
+    species_key: Mapped[str] = mapped_column(String(600))
+    breed: Mapped[str | None] = mapped_column(String(200))
+    sex: Mapped[str] = mapped_column(String(7))
+    born_on: Mapped[date | None] = mapped_column(Date)
+    acquired_on: Mapped[date | None] = mapped_column(Date)
+    status: Mapped[str] = mapped_column(String(8))
+    group_id: Mapped[str | None] = mapped_column(ForeignKey("livestock_groups.id"))
+    notes: Mapped[str | None] = mapped_column(Text)
+    revision: Mapped[int] = mapped_column(Integer)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class LivestockGroupEvent(Base):
+    __tablename__ = "livestock_group_events"
+    __table_args__ = (
+        UniqueConstraint("account_id", "request_id", name="uq_livestock_group_event_request"),
+        UniqueConstraint("group_id", "revision", name="uq_livestock_group_event_revision"),
+        CheckConstraint("revision >= 1", name="ck_livestock_group_event_revision"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"))
+    group_id: Mapped[str] = mapped_column(ForeignKey("livestock_groups.id"))
+    request_id: Mapped[str] = mapped_column(String(36))
+    revision: Mapped[int] = mapped_column(Integer)
+    occurred_on: Mapped[date] = mapped_column(Date)
+    reason: Mapped[str] = mapped_column(Text)
+    request: Mapped[dict] = mapped_column(JSON)
+    before: Mapped[dict | None] = mapped_column(JSON(none_as_null=True))
+    after: Mapped[dict] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class LivestockAnimalEvent(Base):
+    __tablename__ = "livestock_animal_events"
+    __table_args__ = (
+        UniqueConstraint("account_id", "request_id", name="uq_livestock_animal_event_request"),
+        UniqueConstraint("animal_id", "revision", name="uq_livestock_animal_event_revision"),
+        CheckConstraint("revision >= 1", name="ck_livestock_animal_event_revision"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"))
+    animal_id: Mapped[str] = mapped_column(ForeignKey("livestock_animals.id"))
+    request_id: Mapped[str] = mapped_column(String(36))
+    revision: Mapped[int] = mapped_column(Integer)
+    occurred_on: Mapped[date] = mapped_column(Date)
+    reason: Mapped[str] = mapped_column(Text)
+    request: Mapped[dict] = mapped_column(JSON)
+    before: Mapped[dict | None] = mapped_column(JSON(none_as_null=True))
+    after: Mapped[dict] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class ProductionLivestockSource(Base):
+    __tablename__ = "production_livestock_sources"
+    __table_args__ = (
+        CheckConstraint(
+            "group_id IS NOT NULL OR animal_id IS NOT NULL", name="ck_production_livestock_target"
+        ),
+        Index("ix_production_livestock_group", "group_id", "record_id"),
+        Index("ix_production_livestock_animal", "animal_id", "record_id"),
+    )
+    record_id: Mapped[str] = mapped_column(ForeignKey("production_records.id"), primary_key=True)
+    group_id: Mapped[str | None] = mapped_column(ForeignKey("livestock_groups.id"))
+    animal_id: Mapped[str | None] = mapped_column(ForeignKey("livestock_animals.id"))
+    snapshot: Mapped[dict] = mapped_column(JSON)
+
 
 class ProductSalesCostBasis(Base):
     __tablename__ = "product_sales_cost_bases"
