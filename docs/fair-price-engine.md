@@ -221,6 +221,13 @@ approval, not source verification, certification, or an objective fairness verdi
 
 Each milestone is a separate issue or feature worktree and reviewed PR.
 
+New/updated listing publication now requires a seller-declared quantity for one
+selling unit and approval of its normalized unit-price display. Mass, volume and
+named count dimensions remain distinct; old approved listings remain visible
+with unknown unit pricing. Checkout still charges the original selling-unit
+price. See [the unit-pricing contract](standardized-unit-pricing.md), including
+the frontend publication-validation change and grandfathered snapshots.
+
 Livestock tracking now supports private groups and individual animals together,
 manual observed headcounts, explicit current memberships and immutable profile
 history. Production reports may freeze one explicitly selected group/animal

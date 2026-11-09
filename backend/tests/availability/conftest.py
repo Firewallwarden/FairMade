@@ -11,6 +11,7 @@ def listing_factory(market_client, market_headers, market_source):
             headers=market_headers,
             json={
                 "passport_publication_id": source["publication"]["id"],
+                "selling_quantity": {"value": "1", "unit": "item"},
                 "seller_display_name": "Example bakery",
                 "location": "Exampletown",
             },

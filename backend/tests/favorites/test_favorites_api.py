@@ -347,6 +347,7 @@ def test_bookmark_uses_newly_approved_catalog_price(
             json={
                 "expected_revision": 1,
                 "passport_publication_id": publication["id"],
+                "selling_quantity": {"value": "1", "unit": "item"},
                 "seller_display_name": "Updated example bakery",
             },
         ).status_code

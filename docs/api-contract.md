@@ -856,6 +856,7 @@ Creation takes only:
 ```json
 {
   "passport_publication_id": "60000000-0000-4000-8000-000000000001",
+  "selling_quantity": {"value": "500", "unit": "g"},
   "seller_display_name": "Example bakery",
   "location": "Exampletown",
   "summary": "Synthetic local-development listing."
@@ -868,6 +869,8 @@ public text (1..200 characters), never populated from account email. Location is
 optional seller-entered label (1..200), not a verified address or geospatial search.
 Summary is optional text (1..1000). Optional fields may be null. Whitespace is
 trimmed; unknown fields, including client price/type/state fields, return 422.
+selling_quantity is optional/null for saving a private draft but required for a
+new publication; see the approved policy and compatibility details below.
 
 The private response has id, product_id, revision, state (draft/active/inactive),
 created_at, updated_at, nullable published_revision, and content. It starts at
@@ -876,13 +879,53 @@ PUT requires the complete content and strict expected_revision, with the same
 bounds as Passport drafts; it increments revision. Stale edits return 409.
 Draft edits do not change the current approved public content or searchable fields.
 
-Preview returns listing_id, revision, preview_hash, and payload. The allowlisted
+Preview returns listing_id, revision, preview_hash, payload and publication_blockers.
+The allowlisted
 payload contains listing_version marketplace-listing-v1, product and price copied
 from the approved Passport, explicit seller_display_name, optional location/summary,
 passport_id, passport_payload_hash, and mandatory notices. No private account,
 product, review, source, or draft IDs are included. The price is a USD decimal string
 in whole cents; the backend also stores authoritative integer cents internally.
 Clients must render seller content as text.
+
+### Standardized selling quantities and unit prices
+
+The user approved requiring quantity/unit before new or updated publication.
+This changes activation validation for older clients. Frontend forms must submit
+selling_quantity and preserve it during full listing/photo replacements; frontend
+acceptance/integration is pending. Incomplete draft saves remain supported.
+
+selling_quantity is {value: decimal string, unit: g|kg|ml|l|egg|dozen|loaf|item} and
+describes contents of one selling unit. Value is finite/positive, at most one
+billion, six decimal places and 64 input characters. Count bases must be whole;
+0.5 dozen is allowed as six eggs. Named egg/dozen/loaf units must match the
+approved product type, otherwise 409 SELLING_QUANTITY_MISMATCH. Labels, private
+cost inputs and comparison targets never supply guessed quantities.
+
+New approved payloads add selling_quantity and server-calculated unit_price with
+calculation_version standard-unit-pricing-v1, currency USD, status, nullable amount,
+reference_unit (kg/l/egg/loaf/item), reference_quantity "1" and unverified basis.
+Decimal arithmetic uses exact conversion factors and six-place half-up display
+rounding. A positive result rounded to zero gives below_display_precision with
+null/omitted amount; an actual zero price gives calculated/"0.000000". Both fields
+and relevant notices participate in the seller's exact preview/hash approval.
+
+Missing quantity produces publication_blockers=[SELLING_QUANTITY_REQUIRED] when
+a new approval is needed, and activation gives 409 SELLING_QUANTITY_REQUIRED.
+An unchanged active legacy revision can still retry its exact approval. Existing
+approved payloads/hashes/timestamps remain unchanged and visible, with missing
+quantity/price interpreted as unknown. New revisions or reactivation require the
+declaration. Draft edits stay private until activation. Public catalog, storefront,
+nearby and saved-product views use the same approved fields.
+
+No schema migration or backfill occurs. Cart/inventory counts and original
+selling prices remain authoritative for commerce. Order items[].unit_price is the
+charge price; items[].listing.unit_price is comparison metadata. No density,
+loaf-weight, generic-item equivalence, quality certification or fairness verdict
+is inferred. See the [full unit-pricing contract](standardized-unit-pricing.md)
+and [synthetic workflow](../backend/examples/unit-pricing/README.md).
+
+### Activation, visibility and browsing
 
 Activation requires the same expected_revision/preview_hash/approved:true body
 as Passport publication. The server serializes the write, recomputes the current
