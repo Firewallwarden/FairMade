@@ -1,7 +1,8 @@
 # Livestock groups, individual animals and production sources
 
 The user chose **both groups and individual animals** after public-availability
-PR #34. This is a product-model decision for detailed data, with no automatic
+PR #34. [Implementation #35](https://github.com/Firewallwarden/FairMade/pull/35)
+records this product-model decision for detailed data, with no automatic
 MVP/production expiry. Backend APIs are implemented proposals pending frontend
 acceptance; no frontend is included. All livestock information is private,
 seller-reported and unverified. Registration does not certify identity, health,
