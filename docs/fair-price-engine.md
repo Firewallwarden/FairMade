@@ -208,8 +208,8 @@ approval, not source verification, certification, or an objective fairness verdi
    pending frontend contract review. Unknown/failed requirements and stale or
    unavailable quotes are excluded from eligible cost summaries. No source
    verification, substitution recommendation or automatic recipe/pricing change
-   occurs. Supplier discovery/ratings, external integrations and expanded
-   business/shopping assistants remain future work.
+   occurs. External supplier discovery, shared community ratings and expanded
+   business/shopping assistants remain separately scoped.
 
 6. Manual recipe and ingredient management: one current private recipe per product,
    revision-safe edits and immutable costings now allocate consumed purchase costs
@@ -220,6 +220,12 @@ approval, not source verification, certification, or an objective fairness verdi
    inventory integration remain future work. See [the contract](manual-recipe-costing.md).
 
 Each milestone is a separate issue or feature worktree and reviewed PR.
+
+Private supplier profiles now support seller-reported ratings and delivery
+observations, immutable correction history and exact known/unknown summary
+denominators. Optional quote references preserve private evidence without changing
+comparison eligibility or Quality Locks. These records are not shared community
+ratings or verified performance. See [the private supplier contract](private-supplier-reliability.md).
 
 Livestock tracking now supports private groups and individual animals together,
 manual observed headcounts, explicit current memberships and immutable profile
