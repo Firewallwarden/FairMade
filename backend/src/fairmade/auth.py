@@ -66,6 +66,15 @@ def require_seller(account: CurrentAccount) -> Account:
 VerifiedSeller = Annotated[Account, Depends(require_seller)]
 
 
+def require_admin(account: CurrentAccount) -> Account:
+    if "admin" not in account.roles:
+        raise api_error(403, "ADMIN_REQUIRED", "Administrator access is required.")
+    return account
+
+
+Administrator = Annotated[Account, Depends(require_admin)]
+
+
 @router.post(
     "/register",
     response_model=AccountResponse,

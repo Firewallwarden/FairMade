@@ -6,6 +6,21 @@ calculator remains available. Anyone can register a FairMade account and log in.
 Accounts default to buyer; only accounts with verified seller access can manage
 private products and save immutable analysis history. AI services are not called.
 PayPal sandbox calls are opt-in and disabled by default.
+Private per-product recipes now save manually entered ingredient quantities and
+purchase costs, revision-safe edits and immutable costing snapshots. Each explicit
+costing also saves a normal production analysis, without changing stock or prices.
+See the [manual recipe workflow](examples/recipes/README.md) and
+[contract, rounding and production follow-up](../docs/manual-recipe-costing.md).
+Sellers can also maintain private raw-material/supply quantities with exact
+receipt, usage, waste and reasoned physical-count history. Revisions and retry
+keys protect changes; recipe costing and sellable stock remain separate.
+See the [manual material workflow](examples/materials/README.md) and
+[contract and deeper inventory follow-up](../docs/manual-material-inventory.md).
+Completed production records now capture seller-reported actual output and
+allocated costs, including zero-output runs and immutable linked corrections.
+Default history shows the latest correction per report; stock remains manual.
+See the [completed production examples](examples/production/README.md) and
+[contract and optional future workflow](../docs/completed-production-records.md).
 Sellers can also define mandatory Quality Locks and save deterministic checks of
 seller-entered alternatives. A passing check is not a quality certification.
 Finished-product comparison endpoints store manually entered price observations
@@ -27,7 +42,8 @@ See the [availability workflow](examples/availability/README.md) and
 Sellable inventory and unpaid buyer orders now support exact merchandise subtotals,
 15-minute reservations, cancellation, and private buyer/seller history. Shared-merchant
 PayPal sandbox checkout now adds verified capture, recovery, payment records, and
-stock deduction after confirmation. Tax, shipping and fulfillment remain deferred.
+stock deduction after confirmation. Tax, shipping and delivery remain deferred;
+private local pickup progress is tracked separately after verified payment.
 See the [synthetic inventory/order workflow](examples/orders/README.md).
 See [sandbox setup and payment integration](examples/paypal/README.md). Live
 production will require seller-connected merchant accounts through a separately
@@ -106,7 +122,7 @@ the identity table to accounts and updates ownership/session references, preserv
 IDs, password hashes, tokens, products, and analyses. It adds buyer roles for every
 existing account plus the roles and seller-application tables. No old account is
 automatically considered a verified seller; its private seller data remains stored
-but inaccessible until seller access is granted after future verification.
+but inaccessible until seller access is granted through the approved review process.
 
 Downgrading 0002 discards roles/applications and restores the old seller-only
 access model. Use it only for deliberate local rollback.
@@ -223,8 +239,8 @@ appropriate IDs for a new report. Historical reports do not change as time passe
 
 See [synthetic finished-product examples](examples/comparisons/README.md).
 This feature does not change pricing formulas or Quality Lock evaluation, certify
-alternatives, recommend savings, or publish private seller data. Verification and
-seller-role provisioning remain deferred.
+alternatives, recommend savings, or publish private seller data. Seller access can
+now be approved through the separate manual administrator review workflow.
 
 ## Quality Locks and evaluation history
 
@@ -241,8 +257,8 @@ are unknown; any failed mandatory rule fails the overall check. An empty rule
 set is not evaluated, never an implicit pass.
 
 These routes require seller access and product ownership, like pricing history.
-Buyers, pending applicants, and admin-only accounts receive 403. Verification and
-role grants remain deferred; automated tests use explicit synthetic seller grants.
+Buyers, pending applicants, and admin-only accounts receive 403. Manual admin review
+can grant seller access; isolated tests may still seed grants for unrelated features.
 
 See the [synthetic quality examples and workflow](examples/quality/README.md).
 All claims remain `seller_reported_unverified`. No unit conversions, source
@@ -380,6 +396,35 @@ processor isolation, abuse controls and moderation remain follow-up work.
 See [photo upload examples and limits](examples/photos/README.md) and
 [the contract](../docs/api-contract.md#product-photo-uploads-and-approved-listing-images).
 
+## Local pickup fulfillment
+
+Verified-paid orders can have separate, private seller-reported pickup progress:
+preparing → ready for pickup → collected. Only the order's buyer and current seller
+can read instructions/history. Writes use optimistic revisions and append immutable
+events without changing payment/stock or publishing a precise location. Pending or
+approved refunds block progress; collection is terminal and remains unverified.
+Migration 0017 preserves all existing order snapshots and does not backfill progress.
+See [the contract and future plans](../docs/pickup-fulfillment.md) and
+[synthetic examples](examples/fulfillment/README.md). Delivery/shipping, addresses,
+fees/taxes, schedules/notifications, buyer-confirmed handoff, returns/restocking and
+hosted retention controls remain separate future decisions.
+
+## Verified sandbox purchase product reviews
+
+General FairMade accounts can publish one review per purchased product after
+backend-verified sandbox capture, without seller or pickup approval. Explicit
+publication consent makes bounded rating/text immediately public on a visible
+product. Authors alone can edit/withdraw/republish, with optimistic revisions.
+Public reviews use a generic buyer label and expose no account/order/provider IDs.
+Ratings and text remain unverified opinions, not quality or fairness certification.
+Refunds do not automatically suppress feedback; catalog visibility still governs
+the whole product page. Average ratings use exact integer/decimal calculations.
+Migration 0018 preserves earlier records and guards destructive rollback.
+See [the full contract and production follow-up](../docs/product-reviews.md) and
+[synthetic examples](examples/product-reviews/README.md). Moderation, reporting,
+appeals, abuse controls, privacy/retention, audit and frontend integration remain
+future work. These buyer reviews are separate from private seller pricing reviews.
+
 ## Buyer defaults and seller applications
 
 Registration and `GET /api/v1/auth/me` return `{id, email, roles}`.
@@ -388,7 +433,7 @@ buyer, seller, admin; admin alone does not grant seller privileges. Buying and
 checkout endpoints are future features, not added by the role model itself.
 
 An authenticated account can submit `{}` to
-`POST /api/v1/seller-applications` and read its own pending request through
+`POST /api/v1/seller-applications` and read its own request/outcome through
 `GET /api/v1/seller-applications/me`. Submission returns 201, a repeat returns
 the same application with 200, and an account already holding seller access
 receives 409. A missing application returns 404.
@@ -398,10 +443,17 @@ routes now return 403 `SELLER_REQUIRED` for buyers, pending applicants, and
 admin-only accounts. This is an authorization change from #5; frontend integration
 must handle it.
 
-Verification evidence, decisions, seller/admin role grants, admin provisioning,
-admin monitoring APIs, and dashboards are deferred. New accounts cannot currently
-become sellers through this API. The automated tests seed seller grants only to
-exercise protected behavior; no public or development role-grant endpoint exists.
+Manual administrator review now provides an explicit pending-to-approved/denied
+workflow. Approval atomically records the reason/audit and adds seller while
+retaining buyer. Administrators cannot decide their own applications, overwrite
+final decisions or implicitly gain seller access. Shared reasons and status are
+visible to applicants; reviewer identities remain admin-only. A local operator
+command can bootstrap only the first admin, with audit and session revocation;
+there is no HTTP bootstrap or generic role-grant API. Migrate through 0019 first.
+See [the contract and future plans](../docs/manual-seller-review.md) and
+[synthetic examples](examples/admin-review/README.md). Documents, verification
+standards, additional admins/recovery, appeals, revocation and the admin UI remain
+deferred. Approval is administrative access review, not identity/quality certification.
 
 Login returns an opaque bearer token. Send `Authorization: Bearer <token>`
 on private requests. Sessions expire 24 hours after login even if actively used.

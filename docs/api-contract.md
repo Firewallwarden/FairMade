@@ -41,10 +41,11 @@ password recovery, account deletion, and email/password changes are deferred.
 These are general FairMade accounts. Every registration receives `["buyer"]`.
 Roles are additive and returned in buyer, seller, admin order. A verified seller
 retains buyer capabilities; an admin does not automatically receive seller access.
-Buying/checkout functionality itself remains future work. Clients cannot submit
+Buyer checkout uses the shared sandbox merchant described below. Clients cannot submit
 roles, verification status, or identity fields when registering. Server-side
 authorization reads persisted grants on each request rather than trusting the token
-to contain role claims. Role grants and admin provisioning are deferred.
+to contain role claims. Manual administrative seller review and local first-admin
+bootstrap are described below; there is no public/general role-grant API.
 
 Successful login returns `token_type: "bearer"` and an opaque random token.
 Send `Authorization: Bearer <access_token>` on every private request. Sessions
@@ -67,7 +68,7 @@ Synthetic response shape; the token placeholder is not usable:
 Browser storage and a longer-lived "Remember me" experience are not part of this
 backend milestone. CORS is off unless exact development origins are configured.
 
-## Pending seller applications
+## Seller applications and manual administrative review
 
 | Method and path | JSON request | Success |
 | --- | --- | --- |
@@ -80,7 +81,9 @@ Synthetic SellerApplication response:
 {
   "id": "8239b454-c4c6-40a6-87c2-2c855ad994a5",
   "status": "pending",
-  "submitted_at": "2026-10-30T12:00:00Z"
+  "submitted_at": "2026-10-30T12:00:00Z",
+  "revision": 1,
+  "decision": null
 }
 ```
 
@@ -89,12 +92,120 @@ never verifies the applicant or grants the seller role. One application is
 stored per account. Repeating submission returns the same ID and timestamp,
 including concurrent retries. Existing sellers receive 409 `ALREADY_SELLER`.
 GET returns 404 when the current account has no application. Only the current
-account's application is accessible; there is no listing or ID-based lookup.
+account's application is accessible to the applicant; administrator-only queue/detail
+lookups are separate. Denied submissions remain the same terminal request on retry.
 
-Ownership and status are server-controlled. Evidence fields, approval/rejection,
-resubmission after a decision, privileged role grants, and admin application
-monitoring endpoints are deferred. There is currently no API path from pending
-to seller. Admin dashboards are a future frontend/backend integration.
+Ownership and status are server-controlled. An approved manual administrator
+decision can atomically grant additive seller access while retaining buyer.
+Responses add revision and nullable decision (outcome, shared reason, UTC created_at,
+basis=manual_administrator_review); status now permits pending/approved/denied.
+Admin actors are never exposed to applicants. No identity or quality certification
+is inferred. Existing applications are preserved and receive no automatic decision.
+
+Administrator endpoints: GET `/api/v1/admin/seller-applications` with state
+(pending/default, approved, denied, all), bounded limit/offset; GET `/{application_id}`;
+POST `/{application_id}/decision` with `{expected_revision, outcome, reason}`.
+Only current admins can use these; admin alone still does not grant seller access.
+Reasons are applicant-visible, trimmed, 1..2000 characters without NUL; outcome is
+approved/denied and revision is strict positive. Decision record, status/revision
+and seller grant commit atomically. Matching retries do not rewrite audit or
+restore revoked access; conflicting decisions cannot replace final outcomes.
+Self-review is forbidden, and preexisting seller grants are not retrospectively
+certified. Queue/detail responses add private applicant account ID/email and
+reviewer account ID, never passwords, tokens, economics or payment data.
+
+No HTTP admin bootstrap exists. A local operator command provisions only the first
+admin on an existing account, with audit and revocation of older sessions; it never
+grants seller or silently restores revoked access. See the
+[full contract and production follow-up](manual-seller-review.md) and
+[synthetic workflow](../backend/examples/admin-review/README.md).
+Documents, criteria, additional admins, privileged recovery, appeals/reapplication,
+revocation/reverification, notifications and the admin frontend remain future work.
+
+## Completed production records
+
+The approved local MVP records completed batches/production periods only. The
+planned/in-progress/completed lifecycle is an optional deeper enhancement for
+later, requiring a separate decision.
+
+| Method/path | Behavior |
+| --- | --- |
+| POST /api/v1/products/{id}/production-records | Save reported output/costs; new 201, matching retry 200 |
+| GET /api/v1/products/{id}/production-records | Bounded metadata history, latest corrections by default |
+| GET /api/v1/products/{id}/production-records/{record_id} | Private immutable detail, including corrected originals |
+
+Seller access and product ownership are required. Inputs contain a product-scoped
+UUID request_id, batch/period label and dates, explicit output unit, total/sellable
+whole-unit counts and manual decimal-string costs/labor. Shared deterministic
+cost arithmetic returns category/labor/batch totals and cost per actual sellable
+unit; zero sellable output preserves costs with null unit_cost.
+
+Optional corrects_record_id/correction_reason link an immutable replacement;
+forked or cross-product corrections are rejected. include_corrected=true includes
+prior versions. This is private seller-reported data, not verified completion or
+expenses. Reporting does not alter stock, recipes, pricing analyses, payments or
+public disclosures. Migration 0022 preserves earlier data and guards downgrade
+before DDL. See the
+[complete contract, corrections and optional scope](completed-production-records.md)
+and [synthetic examples](../backend/examples/production/README.md).
+
+## Manual raw-material and supply quantities
+
+The user approved a manual quantity ledger for local MVP; lots, expiry,
+inventory valuation and production consumption are deferred. Seller-only
+backend endpoints are implemented proposals pending frontend integration:
+
+| Method/path | Behavior |
+| --- | --- |
+| POST /api/v1/seller/materials | Create zero-stock material with name, fixed base unit and optional notes |
+| GET /api/v1/seller/materials | Bounded owner-only catalog |
+| GET /api/v1/seller/materials/{id} | Read current quantity/revision |
+| PUT /api/v1/seller/materials/{id} | Replace metadata with expected_revision |
+| POST /api/v1/seller/materials/{id}/movements | Receipt, usage, waste or physical-count adjustment |
+| GET /api/v1/seller/materials/{id}/movements | Bounded immutable history |
+| GET /api/v1/seller/materials/{id}/movements/{movement_id} | Read owner-scoped event |
+
+All require bearer authentication, current seller access and ownership. Amounts
+are decimal JSON strings; storage uses exact integer millionths of g/ml/item,
+with kg/l conversion and whole-item validation. Negative stock, mixed dimensions,
+stale writes and duplicate conflicting requests are rejected. UUID request keys
+make retries return the original event without applying stock twice.
+
+Balances and events commit atomically. Server time and seller-reported occurrence
+dates are distinct; backdated events still apply in posting order. No prices,
+costs, supplier links, recipe consumption or sellable-stock changes are inferred.
+Migration 0021 preserves existing data and guards downgrade before DDL. See the
+[full contract, errors, limits and deferred production work](manual-material-inventory.md)
+and [synthetic examples](../backend/examples/materials/README.md).
+
+## Manual product recipes and ingredient costing
+
+The user approved manually entered quantities and purchase costs for local MVP;
+supplier-quote integration remains future work. These seller-only endpoints are
+implemented backend proposals pending frontend acceptance:
+
+| Method/path | Behavior |
+| --- | --- |
+| POST /api/v1/products/{id}/recipe | Explicitly create the product's current recipe |
+| GET /api/v1/products/{id}/recipe | Read owned recipe; 404 when absent |
+| PUT /api/v1/products/{id}/recipe | Replace with expected_revision; stale edit: 409 |
+| POST /api/v1/products/{id}/recipe/costings | Save expected revision with UUID request_id; new: 201, exact retry: 200 |
+| GET /api/v1/products/{id}/recipe/costings | Bounded newest-first summary history |
+| GET /api/v1/products/{id}/recipe/costings/{costing_id} | Private immutable detail |
+
+All require bearer authentication, current seller access and product ownership.
+No recipe content is public. Manual consumed/purchase quantities use compatible
+g/kg, ml/l or whole items; purchase costs and ingredient quantities are decimal
+JSON strings. Each line allocates consumed cost and rounds half up to six places.
+Other costs/labor/fees/yield/margin settings feed the existing pricing calculator.
+
+Costing atomically saves recipe provenance and a standard pricing analysis for
+explicit later review/cost-basis selection. Retry keys prevent duplicate analyses;
+saved records survive later edits. There are no stock, quality, supplier, price
+publication or existing cost-selection side effects. Migration 0020 adds only the
+recipe/costing tables and guards downgrade before DDL. See the
+[complete schemas, errors, rounding and future plans](manual-recipe-costing.md)
+and [synthetic workflow](../backend/examples/recipes/README.md).
 
 ## Private products
 
@@ -762,8 +873,8 @@ See [the synthetic marketplace workflow](../backend/examples/marketplace/README.
 Implemented for local development; frontend acceptance is pending. This slice
 creates unpaid order drafts and stock holds, not PayPal orders or paid purchases.
 Amounts are merchandise subtotals, not final payable totals. Shipping, tax,
-fulfillment remain separate work. Sandbox payments and seller-reviewed refunds
-are described in the following sections.
+and delivery remain separate work. Sandbox payments, seller-reviewed refunds
+and private local pickup fulfillment are described in later sections.
 
 | Method | Path | Access / result |
 | --- | --- | --- |
@@ -1748,6 +1859,69 @@ processing isolation and hard time/memory limits, upload/download abuse controls
 dependency monitoring, and moderation/claims policy before hosted use. This feature
 does not verify that a photo depicts the product or certify seller claims.
 
+## Private local pickup fulfillment
+
+Local MVP backend implemented; frontend acceptance remains pending. See the
+[pickup contract and future plans](pickup-fulfillment.md) and
+[synthetic workflow](../backend/examples/fulfillment/README.md).
+GET `/api/v1/orders/{order_id}/fulfillment` and its `/history` subpath are buyer-owned
+reads. GET/PUT `/api/v1/seller/orders/{order_id}/fulfillment` and GET its `/history`
+are verified-seller-owned operations. No anonymous fulfillment route exists.
+
+PUT accepts `{expected_revision, state, pickup_instructions?}`. Revisions are strict
+integers starting at 0; states progress preparing → ready_for_pickup → collected,
+with no skips/reversal and terminal collected. Instructions are trimmed, 1..2000
+characters, nullable/omittable only while preparing. Unknown fields are rejected.
+Writes require completed backend-verified capture and no pending/approved refund.
+Exact latest-content retries do not append another event. Other stale revisions
+or invalid transitions return 409. Buyer/seller ownership and no-store/redacted
+validation rules apply to the private instructions and paginated immutable history.
+
+The response includes order_id, mode=local_pickup, basis=seller_reported_unverified,
+revision, state (initially not_started), pickup_instructions, latest_event or null,
+updates_allowed and notices. History events contain revision, state, instructions,
+and UTC created_at; no actor/account/provider data. updates_allowed describes the
+state gate for seller updates, not the reader's authorization. Payment/stock and
+public location/disclosure data are independent. Existing orders are not backfilled.
+Collected is not independently verified handoff. Delivery/shipping, buyer delivery
+addresses, fees/taxes, schedules/notifications, confirmation proof, disputes/returns
+and hosted retention policy remain explicitly deferred.
+
+## Buyer product reviews and verified purchase feedback
+
+Local MVP backend implemented, frontend acceptance pending. Eligible reviews publish
+immediately with explicit publish=true, without seller approval or selective
+suppression. See [the full review contract and production follow-up](product-reviews.md)
+and [synthetic examples](../backend/examples/product-reviews/README.md).
+
+POST `/api/v1/orders/{order_id}/listings/{listing_id}/review` requires ownership of
+the purchased line plus a completed backend-verified sandbox capture. Body is
+`{rating, text, publish: true}`: strict integer1..5, trimmed text1..2000 characters,
+strict true boolean; extras rejected and errors redacted. Returns 201 or 200 exact
+retry, 404 unknown/foreign source, 409 PURCHASE_NOT_VERIFIED or REVIEW_EXISTS.
+One review per buyer/product spans repeat orders. No pickup confirmation is needed.
+
+General-account author routes: GET `/api/v1/account/product-reviews` page;
+GET/PUT `/{review_id}`; POST `/{review_id}/withdraw`. PUT adds expected_revision
+and explicit publication consent; withdrawal takes expected_revision. Revision
+conflicts return 409; foreign/missing reviews return the same 404. Authors can edit,
+withdraw and explicitly republish; sellers have no special control over feedback.
+Original private purchase evidence is frozen; refunds do not erase it or auto-hide
+reviews. Author DTO fields are id, order_id, listing_id, revision, state, rating,
+text and UTC created_at/updated_at, with no internal product/account/provider data.
+
+Anonymous GET `/api/v1/marketplace/listings/{listing_id}/reviews` returns a bounded
+Page of PublicReview; GET its `/summary` returns count/decimal average/evidence
+notices. Only currently visible products expose pages; catalog/Passport withdrawal
+or seller-role loss hides the whole product, while reactivation restores published
+reviews. Public review fields are id, rating, text, UTC created_at/updated_at,
+generic reviewer_label, purchase_basis=sandbox_capture_verified_at_submission and
+claims_basis=buyer_reported_unverified. No author identity or order/payment/refund
+data is exposed. Ratings summarize unverified opinions, not certified quality or
+fairness. Existing pagination bounds apply; newest creation time then UUID first.
+All responses use no-store. Immediate publication is MVP policy; platform moderation,
+reporting/appeals, abuse controls, privacy/retention and edit audit remain future work.
+
 ## Errors and existing endpoints
 
 New application errors use:
@@ -1784,8 +1958,9 @@ compatible with #2. Its response is never automatically saved.
 
 Use the [account workflow](../backend/examples/seller-workflow.md) to register,
 log in, submit/read a pending seller application, and log out. Newly registered
-accounts cannot create private products or save history while verification is
-deferred; seller-feature tests use explicitly seeded grants. Migrate the
+accounts cannot create private products or save history until an approved manual
+review grants seller access. Seller-feature tests may use synthetic grants; manual
+review and bootstrap tests use isolated databases and exercise real transitions. Migrate the
 database before testing. Use the same database URL and working directory for
 migrations and the server. Session revocation and saved data persist across restarts.
 
@@ -1854,6 +2029,20 @@ Migration 0016 adds private normalized photo blobs and approved listing referenc
 without modifying old listing payloads/hashes. Downgrade refuses before DDL if
 photos, storefronts or earlier protected history exists, preserving media and
 avoiding partial wider downgrades. It follows discovery migration 0015.
+
+Migration 0017 adds append-only private pickup events without rewriting orders,
+payment state or public snapshots. Downgrade preflights pickup history and prior
+protected records before any DDL to avoid partial destructive wider rollback.
+
+Migration 0018 adds immediately published/author-withdrawn buyer reviews with unique
+buyer/product scope, historical private purchase evidence and lookup/page indexes.
+It preserves earlier records without creating reviews, and preflights reviews plus
+earlier protected history before any downgrade DDL. It follows pickup migration 0017.
+
+Migration 0019 preserves existing pending applications while adding revision and
+approved/denied states, immutable manual decisions and initial-admin operator audit.
+No roles/decisions are backfilled. Downgrade checks new audits, non-pending/revised
+applications and prior protected data before any DDL. See the manual review contract.
 
 Before frontend integration, jointly accept this proposal and agree on approved
 development origins and browser credential handling. Public deployment requires

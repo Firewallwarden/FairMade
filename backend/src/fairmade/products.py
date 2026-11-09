@@ -5,6 +5,7 @@ from uuid import UUID
 from fastapi import APIRouter
 from sqlalchemy import select
 
+from fairmade.analysis_records import build_analysis
 from fairmade.auth import AUTH_ERRORS, DB, VerifiedSeller, api_error
 from fairmade.models import Analysis, Product
 from fairmade.ownership import require_owned_product
@@ -80,13 +81,7 @@ def save_analysis(
 ) -> Analysis:
     product = owned_product(db, seller, product_id)
     result = calculate(body)
-    analysis = Analysis(
-        product_id=product.id,
-        calculation_version=result.calculation_version,
-        product_snapshot=ProductResponse.model_validate(product).model_dump(mode="json"),
-        inputs=body.model_dump(mode="json"),
-        result=result.model_dump(mode="json"),
-    )
+    analysis = build_analysis(product, body, result)
     db.add(analysis)
     db.commit()
     return analysis

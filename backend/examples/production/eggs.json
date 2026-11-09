@@ -1,0 +1,18 @@
+{
+  "request_id": "19000000-0000-4000-8000-000000000002",
+  "label": "Synthetic completed egg production period",
+  "kind": "production_period",
+  "started_on": "2026-11-01",
+  "completed_on": "2026-11-07",
+  "selling_unit": "dozen",
+  "total_units": 26,
+  "sellable_units": 24,
+  "currency": "USD",
+  "costs": [
+    {"label": "Feed consumed during period", "category": "materials", "amount": "18.00"},
+    {"label": "Cartons used", "category": "packaging", "amount": "6.00"},
+    {"label": "Housing allocation", "category": "overhead", "amount": "4.00"}
+  ],
+  "labor": [{"label": "Care during period", "hours": "2", "hourly_rate": "15.00"}],
+  "notes": "Output counts dozens, not individual eggs. No bird, welfare or food-safety verification."
+}

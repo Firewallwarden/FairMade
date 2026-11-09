@@ -478,7 +478,8 @@ def test_application_is_pending_repeatable_and_persistent(account_client, migrat
     first = account_client.post(path, headers=headers, json={})
     assert first.status_code == 201
     saved = first.json()
-    assert set(saved) == {"id", "status", "submitted_at"}
+    assert set(saved) == {"id", "status", "submitted_at", "revision", "decision"}
+    assert saved["revision"] == 1 and saved["decision"] is None
     assert saved["status"] == "pending" and saved["submitted_at"].endswith("Z")
     repeat = account_client.post(path, headers=headers, json={})
     assert repeat.status_code == 200
@@ -650,7 +651,17 @@ def test_openapi_describes_roles_and_pending_application_api(account_client):
     body = schema["components"]["schemas"]["SellerApplicationRequest"]
     assert body["additionalProperties"] is False
     assert body["properties"] == {}
-    assert not any(path.startswith("/api/v1/admin") for path in schema["paths"])
+    admin_paths = [path for path in schema["paths"] if path.startswith("/api/v1/admin")]
+    assert set(admin_paths) == {
+        "/api/v1/admin/seller-applications",
+        "/api/v1/admin/seller-applications/{application_id}",
+        "/api/v1/admin/seller-applications/{application_id}/decision",
+    }
+    for path in admin_paths:
+        for admin_operation in schema["paths"][path].values():
+            assert admin_operation["security"] == [{"HTTPBearer": []}]
+            assert "403" in admin_operation["responses"]
+    assert not any("bootstrap" in path for path in schema["paths"])
 
 
 def test_concurrent_application_submissions_create_one_record(account_client, migrated_url):

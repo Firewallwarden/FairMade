@@ -141,10 +141,13 @@ approval, not source verification, certification, or an objective fairness verdi
 ## Backend priorities after this slice
 
 1. General FairMade accounts default to buyer; seller access requires verification.
-   Pending seller applications, private products, and analysis history are implemented
-   for local development, with frontend contract review pending. Verification
-   decisions, admin provisioning/monitoring, hosted account recovery, abuse controls,
-   and operations remain future work.
+   Applications, private products and analysis history are implemented for local
+   development, with frontend contract review pending. Manual administrator
+   decisions now grant seller access atomically with audit; a local first-admin
+   command is audited and revokes older sessions. No automatic role grants,
+   self-review or identity/quality certification is implied. Document verification,
+   standards, additional-admin management/recovery, appeals/revocation, hosted
+   account recovery, abuse controls and operations remain future work.
 2. Quality Locks and immutable claim-check history: implemented for local
    development, pending frontend contract review. Manually entered finished-product
    price evidence, limited exact quantity conversions, explicit provenance and
@@ -185,9 +188,12 @@ approval, not source verification, certification, or an objective fairness verdi
    A shared PayPal sandbox merchant is approved for development. Sandbox create,
    verified capture, reconciliation, payment records and atomic stock consumption
    are now implemented, opt-in and pending real sandbox/browser integration testing.
-   Production requires seller-connected merchant accounts; fulfillment, shipping,
-   taxes and hosted operations remain future work. Full-order buyer refund
-   requests with seller approval/denial, verified sandbox execution and recovery
+   Production requires seller-connected merchant accounts; delivery, shipping,
+   taxes and hosted operations remain future work. Private local pickup progress,
+   instructions and append-only history now support verified-paid orders without
+   modifying payment/stock state. Pickup remains seller-reported; delivery, buyer
+   handoff confirmation and notification/retention policies remain future work.
+   Full-order buyer refund requests with seller approval/denial, verified sandbox execution and recovery
    are implemented for local development; partial refunds, appeals and
    returns/restocking remain deferred. Private seller sales reports now use
    explicit cost-analysis selections and immutable order cost snapshots for
@@ -205,7 +211,38 @@ approval, not source verification, certification, or an objective fairness verdi
    occurs. Supplier discovery/ratings, external integrations and expanded
    business/shopping assistants remain future work.
 
+6. Manual recipe and ingredient management: one current private recipe per product,
+   revision-safe edits and immutable costings now allocate consumed purchase costs
+   into standard saved production analyses. Historical snapshots retain manual
+   dates, quantities and rounding warnings. Costs stay unverified; stock, quality
+   eligibility and publication remain separate. Selected supplier quotes, source
+   freshness/usable-yield allocation, ingredient catalogs and actual production
+   inventory integration remain future work. See [the contract](manual-recipe-costing.md).
+
 Each milestone is a separate issue or feature worktree and reviewed PR.
+
+Completed production reports now capture manual actual batch/period output and
+allocated costs with immutable product/unit snapshots, safe retries and linear
+corrections. Zero sellable output preserves costs with unknown cost per unit.
+These are private unverified reports, separate from planned recipe costs and
+manual stock. Planned/in-progress lifecycle management is explicitly optional
+future scope, not required simply by moving to production. See
+[the completed-record contract](completed-production-records.md).
+
+Manual raw-material/supply inventory now provides a seller-wide private catalog,
+exact quantity balances, receipt/usage/waste/physical-count history and retry-safe
+revision checks. It does not assign costs, consume materials from recipe costings,
+change sellable stock or verify availability/quality. Lots, expiry, valuation,
+material mappings, confirmed production consumption and operational controls
+remain future work. See [the inventory contract](manual-material-inventory.md).
+
+Buyer product feedback now uses historical backend-verified sandbox purchase
+evidence, immediate consented publication and author-only revision/withdrawal.
+One review per buyer/product prevents repeat orders from adding repeated votes.
+Public generic buyer labels omit private source identities; catalog visibility
+governs review pages. Ratings are unverified buyer opinions, not Quality Lock or
+fair-price findings. Production moderation, reporting/appeals, abuse controls,
+privacy/retention, audit and frontend integration remain follow-up work.
 
 Public exact available-unit counts and availability filtering are now implemented
 across catalog, storefront and nearby listing results, with live counts in saved

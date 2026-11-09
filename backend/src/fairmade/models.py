@@ -7,6 +7,7 @@ from uuid import uuid4
 
 from sqlalchemy import (
     JSON,
+    BigInteger,
     CheckConstraint,
     Date,
     DateTime,
@@ -56,11 +57,47 @@ class AccountRole(Base):
 
 class SellerApplication(Base):
     __tablename__ = "seller_applications"
-    __table_args__ = (CheckConstraint("status = 'pending'", name="ck_seller_applications_status"),)
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('pending', 'approved', 'denied')", name="ck_seller_applications_status"
+        ),
+        CheckConstraint("revision >= 1", name="ck_seller_applications_revision"),
+    )
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
     account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"), unique=True)
     submitted_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
-    status: Mapped[str] = mapped_column(String(7), default="pending", server_default="pending")
+    status: Mapped[str] = mapped_column(String(8), default="pending", server_default="pending")
+    revision: Mapped[int] = mapped_column(Integer, default=1, server_default=text("1"))
+    decision: Mapped[SellerApplicationDecision | None] = relationship(uselist=False)
+
+
+class SellerApplicationDecision(Base):
+    __tablename__ = "seller_application_decisions"
+    __table_args__ = (
+        CheckConstraint("outcome IN ('approved', 'denied')", name="ck_seller_decision_outcome"),
+        CheckConstraint("expected_revision >= 1", name="ck_seller_decision_revision"),
+        CheckConstraint("length(reason) BETWEEN 1 AND 2000", name="ck_seller_decision_reason"),
+    )
+    application_id: Mapped[str] = mapped_column(
+        ForeignKey("seller_applications.id"), primary_key=True
+    )
+    decided_by_account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"))
+    outcome: Mapped[str] = mapped_column(String(8))
+    reason: Mapped[str] = mapped_column(Text)
+    expected_revision: Mapped[int] = mapped_column(Integer)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class AdminBootstrapRecord(Base):
+    __tablename__ = "admin_bootstrap_records"
+    __table_args__ = (
+        CheckConstraint("id = 1", name="ck_admin_bootstrap_singleton"),
+        CheckConstraint("length(reason) BETWEEN 1 AND 2000", name="ck_admin_bootstrap_reason"),
+    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"))
+    reason: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
 
 
 class LoginSession(Base):
@@ -92,6 +129,136 @@ class Analysis(Base):
     product_snapshot: Mapped[dict] = mapped_column(JSON)
     inputs: Mapped[dict] = mapped_column(JSON)
     result: Mapped[dict] = mapped_column(JSON)
+
+
+class ProductRecipe(Base):
+    __tablename__ = "product_recipes"
+    __table_args__ = (CheckConstraint("revision >= 1", name="ck_product_recipe_revision"),)
+    product_id: Mapped[str] = mapped_column(ForeignKey("products.id"), primary_key=True)
+    revision: Mapped[int] = mapped_column(Integer)
+    content: Mapped[dict] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class RecipeCosting(Base):
+    __tablename__ = "recipe_costings"
+    __table_args__ = (
+        UniqueConstraint("product_id", "request_id", name="uq_recipe_costing_request"),
+        CheckConstraint("recipe_revision >= 1", name="ck_recipe_costing_revision"),
+        Index("ix_recipe_costings_product_created", "product_id", "created_at", "id"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    product_id: Mapped[str] = mapped_column(ForeignKey("product_recipes.product_id"))
+    request_id: Mapped[str] = mapped_column(String(36))
+    recipe_revision: Mapped[int] = mapped_column(Integer)
+    pricing_analysis_id: Mapped[str] = mapped_column(ForeignKey("analyses.id"), unique=True)
+    recipe_snapshot: Mapped[dict] = mapped_column(JSON)
+    result: Mapped[dict] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class Material(Base):
+    __tablename__ = "materials"
+    __table_args__ = (
+        UniqueConstraint("account_id", "name_key", name="uq_material_account_name"),
+        CheckConstraint("revision >= 1", name="ck_material_revision"),
+        CheckConstraint("unit IN ('g', 'ml', 'item')", name="ck_material_unit"),
+        CheckConstraint(
+            "on_hand_micros BETWEEN 0 AND 1000000000000000", name="ck_material_balance"
+        ),
+        CheckConstraint(
+            "unit != 'item' OR on_hand_micros % 1000000 = 0", name="ck_material_whole_items"
+        ),
+        Index("ix_materials_account_created", "account_id", "created_at", "id"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"))
+    name: Mapped[str] = mapped_column(String(200))
+    name_key: Mapped[str] = mapped_column(String(600))
+    notes: Mapped[str | None] = mapped_column(Text)
+    unit: Mapped[str] = mapped_column(String(4))
+    on_hand_micros: Mapped[int] = mapped_column(BigInteger)
+    revision: Mapped[int] = mapped_column(Integer)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class MaterialMovement(Base):
+    __tablename__ = "material_movements"
+    __table_args__ = (
+        UniqueConstraint("material_id", "request_id", name="uq_material_movement_request"),
+        UniqueConstraint("material_id", "revision", name="uq_material_movement_revision"),
+        CheckConstraint("revision >= 2", name="ck_material_movement_revision"),
+        CheckConstraint(
+            "kind IN ('receipt', 'usage', 'waste', 'adjustment')", name="ck_material_movement_kind"
+        ),
+        CheckConstraint("unit IN ('g', 'ml', 'item')", name="ck_material_movement_unit"),
+        CheckConstraint(
+            "before_micros BETWEEN 0 AND 1000000000000000 "
+            "AND after_micros BETWEEN 0 AND 1000000000000000",
+            name="ck_material_movement_balance",
+        ),
+        CheckConstraint(
+            "unit != 'item' OR (before_micros % 1000000 = 0 AND after_micros % 1000000 = 0)",
+            name="ck_material_movement_whole_items",
+        ),
+        CheckConstraint(
+            "(kind = 'receipt' AND after_micros > before_micros) OR "
+            "(kind IN ('usage', 'waste') AND after_micros < before_micros) OR kind = 'adjustment'",
+            name="ck_material_movement_direction",
+        ),
+        Index("ix_material_movements_material_revision", "material_id", "revision", "id"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    material_id: Mapped[str] = mapped_column(ForeignKey("materials.id"))
+    request_id: Mapped[str] = mapped_column(String(36))
+    revision: Mapped[int] = mapped_column(Integer)
+    kind: Mapped[str] = mapped_column(String(10))
+    material_name: Mapped[str] = mapped_column(String(200))
+    unit: Mapped[str] = mapped_column(String(4))
+    before_micros: Mapped[int] = mapped_column(BigInteger)
+    after_micros: Mapped[int] = mapped_column(BigInteger)
+    request: Mapped[dict] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class ProductionRecord(Base):
+    __tablename__ = "production_records"
+    __table_args__ = (
+        UniqueConstraint("product_id", "request_id", name="uq_production_record_request"),
+        UniqueConstraint("corrects_record_id", name="uq_production_record_correction"),
+        CheckConstraint("kind IN ('batch', 'production_period')", name="ck_production_record_kind"),
+        CheckConstraint(
+            "total_units BETWEEN 0 AND 1000000 AND sellable_units BETWEEN 0 AND total_units",
+            name="ck_production_record_output",
+        ),
+        CheckConstraint("started_on <= completed_on", name="ck_production_record_dates"),
+        Index(
+            "ix_production_record_product_completed",
+            "product_id",
+            "completed_on",
+            "created_at",
+            "id",
+        ),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    product_id: Mapped[str] = mapped_column(ForeignKey("products.id"))
+    request_id: Mapped[str] = mapped_column(String(36))
+    label: Mapped[str] = mapped_column(String(200))
+    kind: Mapped[str] = mapped_column(String(17))
+    started_on: Mapped[date] = mapped_column(Date)
+    completed_on: Mapped[date] = mapped_column(Date)
+    selling_unit: Mapped[str] = mapped_column(String(200))
+    total_units: Mapped[int] = mapped_column(Integer)
+    sellable_units: Mapped[int] = mapped_column(Integer)
+    corrects_record_id: Mapped[str | None] = mapped_column(
+        ForeignKey("production_records.id"), nullable=True
+    )
+    product_snapshot: Mapped[dict] = mapped_column(JSON)
+    request: Mapped[dict] = mapped_column(JSON)
+    result: Mapped[dict] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
 
 
 class ProductSalesCostBasis(Base):
@@ -344,6 +511,59 @@ class MarketplaceListing(Base):
     search_text: Mapped[str | None] = mapped_column(Text)
     location_key: Mapped[str | None] = mapped_column(String(200))
     price_minor: Mapped[int | None] = mapped_column(Integer)
+
+
+class ProductReview(Base):
+    __tablename__ = "product_reviews"
+    __table_args__ = (
+        UniqueConstraint("buyer_account_id", "product_id", name="uq_review_buyer_product"),
+        CheckConstraint("revision >= 1", name="ck_product_review_revision"),
+        CheckConstraint("state IN ('published', 'withdrawn')", name="ck_product_review_state"),
+        CheckConstraint("rating BETWEEN 1 AND 5", name="ck_product_review_rating"),
+        CheckConstraint("length(text) BETWEEN 1 AND 2000", name="ck_product_review_text"),
+        Index("ix_review_product_public", "product_id", "state", "created_at", "id"),
+        Index("ix_review_author_created", "buyer_account_id", "created_at", "id"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    product_id: Mapped[str] = mapped_column(ForeignKey("products.id"))
+    buyer_account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"))
+    order_id: Mapped[str] = mapped_column(ForeignKey("orders.id"))
+    listing_id: Mapped[str] = mapped_column(ForeignKey("marketplace_listings.id"))
+    order_line_id: Mapped[str] = mapped_column(ForeignKey("order_lines.id"))
+    purchase_capture_id: Mapped[str] = mapped_column(String(64))
+    purchase_verified_at: Mapped[datetime] = mapped_column(DateTime)
+    revision: Mapped[int] = mapped_column(Integer)
+    state: Mapped[str] = mapped_column(String(10))
+    rating: Mapped[int] = mapped_column(Integer)
+    text: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class PickupFulfillmentEvent(Base):
+    __tablename__ = "pickup_fulfillment_events"
+    __table_args__ = (
+        UniqueConstraint("order_id", "revision", name="uq_pickup_order_revision"),
+        CheckConstraint("revision >= 1", name="ck_pickup_revision"),
+        CheckConstraint(
+            "state IN ('preparing', 'ready_for_pickup', 'collected')", name="ck_pickup_state"
+        ),
+        CheckConstraint(
+            "pickup_instructions IS NULL OR length(pickup_instructions) BETWEEN 1 AND 2000",
+            name="ck_pickup_instructions",
+        ),
+        CheckConstraint(
+            "state = 'preparing' OR pickup_instructions IS NOT NULL",
+            name="ck_pickup_ready_instructions",
+        ),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    order_id: Mapped[str] = mapped_column(ForeignKey("orders.id"))
+    revision: Mapped[int] = mapped_column(Integer)
+    state: Mapped[str] = mapped_column(String(20))
+    pickup_instructions: Mapped[str | None] = mapped_column(Text)
+    recorded_by_account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
 
 
 class ProductPhoto(Base):
