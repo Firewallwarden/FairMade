@@ -29,6 +29,44 @@ def new_id() -> str:
     return str(uuid4())
 
 
+class DescriptionDraft(Base):
+    __tablename__ = "description_drafts"
+    __table_args__ = (
+        UniqueConstraint("product_id", "request_id", name="uq_description_draft_request"),
+        CheckConstraint("revision BETWEEN 1 AND 2147483646", name="ck_description_draft_revision"),
+        CheckConstraint("state IN ('draft', 'approved')", name="ck_description_draft_state"),
+        CheckConstraint("length(description) BETWEEN 1 AND 2000", name="ck_description_draft_text"),
+        CheckConstraint(
+            "provider = 'ollama_local' AND model = 'qwen3:8b'", name="ck_description_draft_provider"
+        ),
+        CheckConstraint("tone IN ('plain', 'friendly')", name="ck_description_draft_tone"),
+        CheckConstraint(
+            "(state = 'draft' AND approved_at IS NULL AND approved_by_account_id IS NULL) OR "
+            "(state = 'approved' AND approved_at IS NOT NULL "
+            "AND approved_by_account_id IS NOT NULL)",
+            name="ck_description_draft_approval",
+        ),
+        Index("ix_description_draft_product_created", "product_id", "created_at", "id"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    product_id: Mapped[str] = mapped_column(ForeignKey("products.id"))
+    request_id: Mapped[str] = mapped_column(String(36))
+    request_hash: Mapped[str] = mapped_column(String(64))
+    revision: Mapped[int] = mapped_column(Integer)
+    state: Mapped[str] = mapped_column(String(12))
+    generated_text: Mapped[str] = mapped_column(Text)
+    description: Mapped[str] = mapped_column(Text)
+    source_snapshot: Mapped[dict] = mapped_column(JSON)
+    source_hash: Mapped[str] = mapped_column(String(64))
+    provider: Mapped[str] = mapped_column(String(20))
+    model: Mapped[str] = mapped_column(String(40))
+    tone: Mapped[str] = mapped_column(String(12))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, onupdate=utcnow)
+    approved_at: Mapped[datetime | None] = mapped_column(DateTime)
+    approved_by_account_id: Mapped[str | None] = mapped_column(ForeignKey("accounts.id"))
+
+
 class Account(Base):
     __tablename__ = "accounts"
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)

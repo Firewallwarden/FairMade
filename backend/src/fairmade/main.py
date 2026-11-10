@@ -17,6 +17,7 @@ from fairmade.commerce_errors import CommerceError
 from fairmade.commerce_http import commerce_error_handler
 from fairmade.comparisons.routes import router as comparison_router
 from fairmade.database import database_url, make_engine
+from fairmade.description_drafts.routes import router as description_router
 from fairmade.discovery.routes import router as discovery_router
 from fairmade.favorites.routes import router as favorites_router
 from fairmade.fulfillment.routes import buyer_router as pickup_buyer_router
@@ -82,7 +83,7 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
             finally:
                 application.state.engine.dispose()
 
-    application = FastAPI(title="FairMade API", version="0.29.0", lifespan=lifespan)
+    application = FastAPI(title="FairMade API", version="0.30.0", lifespan=lifespan)
     application.add_exception_handler(RefundError, refund_error_handler)
     application.add_exception_handler(PaymentError, payment_error_handler)
     application.add_exception_handler(CommerceError, commerce_error_handler)
@@ -108,6 +109,7 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
         if (
             request.url.path.startswith("/api/v1/auth/")
             or request.url.path.startswith("/api/v1/assistants")
+            or "/description-drafts" in request.url.path
             or "/paypal-checkout" in request.url.path
             or "/refund-request" in request.url.path
             or "/sourcing-inputs" in request.url.path
@@ -154,6 +156,7 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
         return calculate(request)
 
     application.include_router(auth_router)
+    application.include_router(description_router)
     application.include_router(assistant_router)
     application.include_router(application_router)
     application.include_router(product_router)

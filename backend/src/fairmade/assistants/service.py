@@ -3,7 +3,6 @@
 import json
 import re
 from decimal import Decimal
-from threading import BoundedSemaphore
 
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
@@ -12,6 +11,7 @@ from fairmade.assistants.context import QUESTION_AMOUNTS, model_evidence
 from fairmade.assistants.evidence import buyer_evidence, scenario_evidence, seller_evidence
 from fairmade.assistants.facts import statements
 from fairmade.assistants.gateway import Gateway
+from fairmade.assistants.runtime import INFERENCE_SLOT
 from fairmade.assistants.schemas import (
     AnswerDraft,
     AssistantResponse,
@@ -23,7 +23,6 @@ from fairmade.auth import api_error
 from fairmade.database import utcnow
 from fairmade.models import AccountRole, LoginSession
 
-INFERENCE_SLOT = BoundedSemaphore(1)
 MAX_EVIDENCE_BYTES = 24000
 PLAN_SYSTEM = """Extract the explicit selling prices the user wants simulated.
 Questions about charging a price MUST include that price.

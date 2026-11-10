@@ -17,6 +17,10 @@ Seller assistant sales/history questions now reuse private sandbox sales totals
 and bounded saved cost analyses. See [period semantics and limits](../docs/assistant-sales-history.md).
 Selected supplier reports now explain current checks and exclusion reasons while
 preserving eligible-only cost minima. See [supplier explanations](../docs/assistant-supplier-explanations.md).
+Local AI can generate private description drafts from product metadata. Sellers
+edit and approve exact copy before applying it to the private product; public
+publication stays separate. Run migration 0025 and see
+[the description workflow](../docs/ai-description-drafts.md).
 Sellers can keep private supplier profiles, subjective ratings and dated delivery
 observations with immutable corrections and exact summaries that show missing data.
 Optional quote references freeze owned evidence without changing comparisons or
