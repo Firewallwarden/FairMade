@@ -2,11 +2,24 @@
 
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from fairmade.auth import api_error
-from fairmade.models import Product
+from fairmade.models import Account, AccountRole, Product
+
+
+def reserve_seller_account(db: Session, account_id: str) -> None:
+    """Serialize SQLite account-owned writes and refresh the current seller grant."""
+    db.execute(
+        update(Account)
+        .where(Account.id == account_id)
+        .values(created_at=Account.created_at)
+        .execution_options(synchronize_session=False)
+    )
+    db.expire_all()
+    if db.get(AccountRole, (account_id, "seller")) is None:
+        raise api_error(403, "SELLER_REQUIRED", "Seller access is required.")
 
 
 def require_owned_product(db: Session, account_id: str, product_id: UUID | str) -> Product:
@@ -19,3 +32,18 @@ def require_owned_product(db: Session, account_id: str, product_id: UUID | str) 
     if product is None:
         raise api_error(404, "NOT_FOUND", "Resource not found.")
     return product
+
+
+def reserve_owned_product(db: Session, account_id: str, product_id: UUID | str) -> Product:
+    """Serialize a local product write, then refresh ownership and seller access."""
+    product = require_owned_product(db, account_id, product_id)
+    db.execute(
+        update(Product)
+        .where(Product.id == product.id)
+        .values(updated_at=Product.updated_at)
+        .execution_options(synchronize_session=False)
+    )
+    db.expire_all()
+    if db.get(AccountRole, (account_id, "seller")) is None:
+        raise api_error(403, "SELLER_REQUIRED", "Seller access is required.")
+    return require_owned_product(db, account_id, product_id)

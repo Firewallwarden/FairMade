@@ -211,7 +211,37 @@ approval, not source verification, certification, or an objective fairness verdi
    occurs. Supplier discovery/ratings, external integrations and expanded
    business/shopping assistants remain future work.
 
+6. Manual recipe and ingredient management: one current private recipe per product,
+   revision-safe edits and immutable costings now allocate consumed purchase costs
+   into standard saved production analyses. Historical snapshots retain manual
+   dates, quantities and rounding warnings. Costs stay unverified; stock, quality
+   eligibility and publication remain separate. Selected supplier quotes, source
+   freshness/usable-yield allocation, ingredient catalogs and actual production
+   inventory integration remain future work. See [the contract](manual-recipe-costing.md).
+
 Each milestone is a separate issue or feature worktree and reviewed PR.
+
+Livestock tracking now supports private groups and individual animals together,
+manual observed headcounts, explicit current memberships and immutable profile
+history. Production reports may freeze one explicitly selected group/animal
+source. Group output is never automatically allocated to individual animals, and
+current membership does not rewrite earlier reports. See
+[the livestock contract](livestock-tracking.md); frontend integration is pending.
+
+Completed production reports now capture manual actual batch/period output and
+allocated costs with immutable product/unit snapshots, safe retries and linear
+corrections. Zero sellable output preserves costs with unknown cost per unit.
+These are private unverified reports, separate from planned recipe costs and
+manual stock. Planned/in-progress lifecycle management is explicitly optional
+future scope, not required simply by moving to production. See
+[the completed-record contract](completed-production-records.md).
+
+Manual raw-material/supply inventory now provides a seller-wide private catalog,
+exact quantity balances, receipt/usage/waste/physical-count history and retry-safe
+revision checks. It does not assign costs, consume materials from recipe costings,
+change sellable stock or verify availability/quality. Lots, expiry, valuation,
+material mappings, confirmed production consumption and operational controls
+remain future work. See [the inventory contract](manual-material-inventory.md).
 
 Buyer product feedback now uses historical backend-verified sandbox purchase
 evidence, immediate consented publication and author-only revision/withdrawal.
@@ -220,3 +250,10 @@ Public generic buyer labels omit private source identities; catalog visibility
 governs review pages. Ratings are unverified buyer opinions, not Quality Lock or
 fair-price findings. Production moderation, reporting/appeals, abuse controls,
 privacy/retention, audit and frontend integration remain follow-up work.
+
+Public exact available-unit counts and availability filtering are now implemented
+across catalog, storefront and nearby listing results, with live counts in saved
+products. They use existing checkout reservation rules and approved selling units,
+retaining unknown for incomplete/inconsistent inventory and final checkout checks.
+Exact count disclosure is a confirmed ongoing product policy, not an MVP shortcut.
+See [the availability contract](public-listing-availability.md).

@@ -2,11 +2,12 @@
 
 from uuid import UUID
 
-from sqlalchemy import DateTime, delete, literal, select
+from sqlalchemy import DateTime, and_, delete, literal, select
 from sqlalchemy.dialects.sqlite import insert
 from sqlalchemy.orm import Session
 
 from fairmade.auth import api_error
+from fairmade.availability.query import public_availability, with_availability
 from fairmade.database import utcnow
 from fairmade.favorites.schemas import FavoriteResponse
 from fairmade.marketplace.repository import visible_listings
@@ -15,32 +16,34 @@ from fairmade.models import Favorite, MarketplaceListing, new_id
 
 
 def _owned(account_id: str):
-    catalog = visible_listings().subquery()
-    return (
-        select(
-            Favorite,
-            catalog.c.id.label("visible_id"),
-            catalog.c.published_revision,
-            catalog.c.published_at,
-            catalog.c.payload_hash,
-            catalog.c.public_payload,
-        )
+    visible_ids = visible_listings().with_only_columns(MarketplaceListing.id).correlate(None)
+    statement = (
+        select(Favorite, MarketplaceListing)
         .select_from(Favorite)
-        .outerjoin(catalog, catalog.c.id == Favorite.listing_id)
+        .outerjoin(
+            MarketplaceListing,
+            and_(
+                MarketplaceListing.id == Favorite.listing_id,
+                MarketplaceListing.id.in_(visible_ids),
+            ),
+        )
         .where(Favorite.account_id == account_id)
     )
+    return with_availability(statement)
 
 
 def _response(row) -> FavoriteResponse:
     favorite = row[0]
     listing = None
-    if row.visible_id is not None:
+    visible = row[1]
+    if visible is not None:
         listing = CatalogCard(
-            id=row.visible_id,
-            published_revision=row.published_revision,
-            published_at=row.published_at,
-            payload_hash=row.payload_hash,
-            payload=row.public_payload,
+            id=visible.id,
+            published_revision=visible.published_revision,
+            published_at=visible.published_at,
+            payload_hash=visible.payload_hash,
+            payload=visible.public_payload,
+            availability=public_availability(row),
         )
     return FavoriteResponse(
         id=favorite.id,
@@ -71,7 +74,7 @@ def create(db: Session, account_id: str, listing_id: UUID) -> tuple[FavoriteResp
         .on_conflict_do_nothing(index_elements=["account_id", "listing_id"])
     )
     row = db.execute(_owned(account_id).where(Favorite.listing_id == str(listing_id))).first()
-    if row is None or row.visible_id is None:
+    if row is None or row[1] is None:
         raise api_error(404, "NOT_FOUND", "Resource not found.")
     response = _response(row)
     db.commit()

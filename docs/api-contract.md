@@ -24,6 +24,62 @@ without additional fields. No floating-point calculation or currency conversion
 is introduced. Selling units are seller-defined labels, not automatic conversions:
 if the unit is "dozen eggs", yield and prices must be expressed per dozen.
 
+## Livestock groups and individual animals
+
+Implemented backend proposal: [full livestock contract](livestock-tracking.md).
+All /api/v1/seller/livestock routes require bearer authentication, current seller
+access and owner scope. No anonymous livestock data is exposed.
+
+| Paths under /api/v1/seller/livestock | Methods / success |
+| --- | --- |
+| /groups and /animals | POST 201 immutable HistoryResponse (exact retry 200); GET 200 Page |
+| /groups/{group_id} and /animals/{animal_id} | GET 200 current profile; PUT 200 immutable HistoryResponse |
+| /groups/{group_id}/history and /animals/{animal_id}/history | GET 200 Page of immutable history |
+| /groups/{group_id}/production-records and /animals/{animal_id}/production-records | GET 200 Page of ProductionSummary |
+
+Group fields: name/species, optional breed/notes, archived and paired optional
+reported_headcount/headcount_on. Reads separately expose registered_active_animals;
+never add registration coverage to reported population. Animal fields: unique
+identifier, optional name/breed/notes/born_on/acquired_on/group_id, species, sex
+(unknown/female/male) and status (active/departed/deceased). Species is fixed at
+registration. One current owned, unarchived, same-species group per active animal;
+departed/deceased animals have no current group. Group archival requires moving
+active members first. Identifiers/group names are case-insensitively unique per
+seller. Counts are strict whole integers 0..1,000,000, dates cannot be future,
+labels are 1..200 characters and notes are at most 2,000.
+
+Create combines profile/species with request_id, occurred_on and a nonblank reason
+(at most 2,000 characters). PUT replaces editable metadata and adds expected_revision;
+it excludes species. Writes atomically save the profile and before/after event.
+Retry IDs are seller-scoped separately for group/animal changes; exact retries
+return their saved event even after later changes. HistoryResponse has id,
+resource_id, request_id, revision, occurred_on, reason, before, after, created_at
+and seller_reported_unverified basis. Backdated events apply in recording order;
+no historical effective-date reconstruction is claimed. Profiles/history and
+errors use no-store, and 422 details omit private raw input.
+
+Pages use existing limit/offset bounds. Group lists optionally filter archived;
+animal lists optionally filter group_id and status before pagination. Profiles
+sort by server creation time/UUID descending; history by revision descending.
+401/403 enforce session/seller access; cross-owner/missing IDs give 404. Conflicts
+include REVISION_CONFLICT, IDEMPOTENCY_CONFLICT, GROUP_EXISTS, ANIMAL_EXISTS,
+GROUP_HAS_MEMBERS, GROUP_ARCHIVED and SPECIES_MISMATCH.
+
+Completed-production POST optionally adds livestock_source:
+{kind: group|animal, id: UUID, expected_revision: integer}. Detail adds nullable
+livestock_snapshot with frozen kind/group/animal profiles, recording time, basis
+and uncertainty notice. An animal source freezes its current group too. This
+describes profiles at recording, not proof of membership during the reported
+period. One report has one selected source; no per-animal yield is invented.
+An identical reference on a linked correction retains its prior frozen snapshot;
+a changed reference explicitly selects a new snapshot, and null clears it.
+Unsourced and legacy requests remain supported. Group source history includes
+direct group reports and individual reports attributed to that group then.
+Source pages omit corrected predecessors unless include_corrected=true and do
+not silently sum overlapping reports. Pricing, public disclosures, stock and
+payments remain separate. Migration 0023 follows completed-production 0022;
+frontend acceptance and integration remain pending.
+
 ## Accounts and sessions
 
 | Method and path | JSON request | Success |
@@ -106,7 +162,7 @@ Administrator endpoints: GET `/api/v1/admin/seller-applications` with state
 (pending/default, approved, denied, all), bounded limit/offset; GET `/{application_id}`;
 POST `/{application_id}/decision` with `{expected_revision, outcome, reason}`.
 Only current admins can use these; admin alone still does not grant seller access.
-Reasons are applicant-visible, trimmed1..2000 characters without NUL; outcome is
+Reasons are applicant-visible, trimmed, 1..2000 characters without NUL; outcome is
 approved/denied and revision is strict positive. Decision record, status/revision
 and seller grant commit atomically. Matching retries do not rewrite audit or
 restore revoked access; conflicting decisions cannot replace final outcomes.
@@ -121,6 +177,91 @@ grants seller or silently restores revoked access. See the
 [synthetic workflow](../backend/examples/admin-review/README.md).
 Documents, criteria, additional admins, privileged recovery, appeals/reapplication,
 revocation/reverification, notifications and the admin frontend remain future work.
+
+## Completed production records
+
+The approved local MVP records completed batches/production periods only. The
+planned/in-progress/completed lifecycle is an optional deeper enhancement for
+later, requiring a separate decision.
+
+| Method/path | Behavior |
+| --- | --- |
+| POST /api/v1/products/{id}/production-records | Save reported output/costs; new 201, matching retry 200 |
+| GET /api/v1/products/{id}/production-records | Bounded metadata history, latest corrections by default |
+| GET /api/v1/products/{id}/production-records/{record_id} | Private immutable detail, including corrected originals |
+
+Seller access and product ownership are required. Inputs contain a product-scoped
+UUID request_id, batch/period label and dates, explicit output unit, total/sellable
+whole-unit counts and manual decimal-string costs/labor. Shared deterministic
+cost arithmetic returns category/labor/batch totals and cost per actual sellable
+unit; zero sellable output preserves costs with null unit_cost.
+
+Optional corrects_record_id/correction_reason link an immutable replacement;
+forked or cross-product corrections are rejected. include_corrected=true includes
+prior versions. This is private seller-reported data, not verified completion or
+expenses. Reporting does not alter stock, recipes, pricing analyses, payments or
+public disclosures. Migration 0022 preserves earlier data and guards downgrade
+before DDL. See the
+[complete contract, corrections and optional scope](completed-production-records.md)
+and [synthetic examples](../backend/examples/production/README.md).
+
+## Manual raw-material and supply quantities
+
+The user approved a manual quantity ledger for local MVP; lots, expiry,
+inventory valuation and production consumption are deferred. Seller-only
+backend endpoints are implemented proposals pending frontend integration:
+
+| Method/path | Behavior |
+| --- | --- |
+| POST /api/v1/seller/materials | Create zero-stock material with name, fixed base unit and optional notes |
+| GET /api/v1/seller/materials | Bounded owner-only catalog |
+| GET /api/v1/seller/materials/{id} | Read current quantity/revision |
+| PUT /api/v1/seller/materials/{id} | Replace metadata with expected_revision |
+| POST /api/v1/seller/materials/{id}/movements | Receipt, usage, waste or physical-count adjustment |
+| GET /api/v1/seller/materials/{id}/movements | Bounded immutable history |
+| GET /api/v1/seller/materials/{id}/movements/{movement_id} | Read owner-scoped event |
+
+All require bearer authentication, current seller access and ownership. Amounts
+are decimal JSON strings; storage uses exact integer millionths of g/ml/item,
+with kg/l conversion and whole-item validation. Negative stock, mixed dimensions,
+stale writes and duplicate conflicting requests are rejected. UUID request keys
+make retries return the original event without applying stock twice.
+
+Balances and events commit atomically. Server time and seller-reported occurrence
+dates are distinct; backdated events still apply in posting order. No prices,
+costs, supplier links, recipe consumption or sellable-stock changes are inferred.
+Migration 0021 preserves existing data and guards downgrade before DDL. See the
+[full contract, errors, limits and deferred production work](manual-material-inventory.md)
+and [synthetic examples](../backend/examples/materials/README.md).
+
+## Manual product recipes and ingredient costing
+
+The user approved manually entered quantities and purchase costs for local MVP;
+supplier-quote integration remains future work. These seller-only endpoints are
+implemented backend proposals pending frontend acceptance:
+
+| Method/path | Behavior |
+| --- | --- |
+| POST /api/v1/products/{id}/recipe | Explicitly create the product's current recipe |
+| GET /api/v1/products/{id}/recipe | Read owned recipe; 404 when absent |
+| PUT /api/v1/products/{id}/recipe | Replace with expected_revision; stale edit: 409 |
+| POST /api/v1/products/{id}/recipe/costings | Save expected revision with UUID request_id; new: 201, exact retry: 200 |
+| GET /api/v1/products/{id}/recipe/costings | Bounded newest-first summary history |
+| GET /api/v1/products/{id}/recipe/costings/{costing_id} | Private immutable detail |
+
+All require bearer authentication, current seller access and product ownership.
+No recipe content is public. Manual consumed/purchase quantities use compatible
+g/kg, ml/l or whole items; purchase costs and ingredient quantities are decimal
+JSON strings. Each line allocates consumed cost and rounds half up to six places.
+Other costs/labor/fees/yield/margin settings feed the existing pricing calculator.
+
+Costing atomically saves recipe provenance and a standard pricing analysis for
+explicit later review/cost-basis selection. Retry keys prevent duplicate analyses;
+saved records survive later edits. There are no stock, quality, supplier, price
+publication or existing cost-selection side effects. Migration 0020 adds only the
+recipe/costing tables and guards downgrade before DDL. See the
+[complete schemas, errors, rounding and future plans](manual-recipe-costing.md)
+and [synthetic workflow](../backend/examples/recipes/README.md).
 
 ## Private products
 
@@ -666,6 +807,29 @@ promise inventory availability.
 See [the draft/preview/approval workflow](../backend/examples/passports/README.md).
 The new contract is implemented backend-side and remains pending frontend review.
 
+## Exact public listing quantities and availability filters
+
+The user chose exact available-unit disclosure as an ongoing product policy,
+not an MVP/production distinction. Catalog cards/details, storefront listing pages,
+nearby listing results and visible favorite cards add a live availability object:
+status, available_units when known, approved selling_unit, source basis and a
+checkout-recheck notice. Status is available, unavailable or unknown. A known zero
+is returned as zero; unknown quantity is null/omitted using existing response rules.
+
+GET /api/v1/marketplace/listings and GET /api/v1/storefronts/{id}/listings accept
+optional availability=available|unavailable|unknown. POST /api/v1/discovery/listings
+accepts the same optional JSON field. Filters run before pagination and the nearby
+candidate guard. Missing filters preserve normal browse behavior; invalid values 422.
+
+The count uses seller-recorded inventory minus active holds, including unresolved
+capture/review holds, in the listing's approved unit. Missing inventory, mismatched
+units or inconsistent negative balances produce unknown. Private stock/reservation
+details, identities and costs remain excluded. Visibility and no-store behavior
+remain enforced. Counts are live context outside approved payload/hash/revision;
+viewing does not reserve stock, and checkout rechecks current availability.
+See the [full policy and reservation semantics](public-listing-availability.md)
+and [synthetic workflow](../backend/examples/availability/README.md).
+
 ## Seller listings and public marketplace
 
 Backend-implemented for local development; frontend contract acceptance is pending.
@@ -803,11 +967,12 @@ Stale writes return 409 REVISION_CONFLICT. On-hand cannot be below active reserv
 quantity (STOCK_RESERVED). To change the unit basis, first empty the existing stock
 and allow/cancel any active holds (INVENTORY_UNIT_LOCKED otherwise).
 
-reserved is derived from pending orders whose deadline is strictly later than
-server time. available = on_hand - reserved. Order creation, cancellation and
-expiration do not deduct on_hand. A later verified payment integration must
-atomically consume stock and complete the order; no such endpoint exists yet.
-Existing marketplace browse results do not promise availability.
+reserved is derived from pending orders with an unexpired deadline, plus durable
+capture_pending/needs_review holds after that deadline. Completed checkouts are
+excluded. available = on_hand - reserved. Creation, cancellation and expiration
+do not deduct on_hand. Verified payment completion atomically consumes stock and
+completes the order, as implemented by the sandbox integration below. Marketplace
+counts are snapshots of recorded stock; viewing them does not reserve availability.
 
 ### Cart requests and exact snapshots
 

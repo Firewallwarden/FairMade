@@ -6,6 +6,7 @@ from uuid import UUID
 
 from pydantic import Field, field_validator
 
+from fairmade.availability.schemas import ListingAvailability
 from fairmade.passports.schemas import PublicPrice, PublicProduct, PublicPublication
 from fairmade.photos.schemas import PhotoSelection, PublicPhoto
 from fairmade.pricing.schemas import Contract, Label
@@ -69,6 +70,7 @@ class CatalogCard(UTCResponse):
     published_at: datetime
     payload_hash: str
     payload: CatalogContent
+    availability: ListingAvailability
 
 
 class CatalogDetail(CatalogCard):

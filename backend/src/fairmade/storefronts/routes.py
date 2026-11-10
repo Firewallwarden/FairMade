@@ -6,6 +6,8 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query, Response
 
 from fairmade.auth import AUTH_ERRORS, DB, VerifiedSeller
+from fairmade.availability.query import public_availability
+from fairmade.availability.schemas import AvailabilityStatus
 from fairmade.marketplace.schemas import CatalogCard
 from fairmade.marketplace.service import card
 from fairmade.models import Storefront
@@ -141,7 +143,12 @@ def listings(
     db: DB,
     limit: Limit = 20,
     offset: Offset = 0,
+    availability: AvailabilityStatus | None = None,
 ) -> dict:
     repository.public_profile(db, storefront_id)
-    rows = repository.listings(db, storefront_id, limit, offset)
-    return {"items": [card(row) for row in rows], "limit": limit, "offset": offset}
+    rows = repository.listings(db, storefront_id, limit, offset, availability)
+    return {
+        "items": [card(row[0], public_availability(row)) for row in rows],
+        "limit": limit,
+        "offset": offset,
+    }

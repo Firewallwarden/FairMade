@@ -3,6 +3,7 @@
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
+from fairmade.availability.query import with_availability
 from fairmade.discovery.schemas import AreaSearch, ListingSearch
 from fairmade.geography import bounding_box
 from fairmade.marketplace.repository import visible_listings
@@ -60,4 +61,5 @@ def listing_candidates(db: Session, body: ListingSearch):
         )
     if body.product_type:
         statement = statement.where(MarketplaceListing.product_type == body.product_type)
+    statement = with_availability(statement, body.availability)
     return db.execute(statement.order_by(MarketplaceListing.id).limit(MAX_CANDIDATES + 1)).all()

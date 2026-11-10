@@ -7,6 +7,7 @@ from uuid import uuid4
 
 from sqlalchemy import (
     JSON,
+    BigInteger,
     CheckConstraint,
     Date,
     DateTime,
@@ -128,6 +129,265 @@ class Analysis(Base):
     product_snapshot: Mapped[dict] = mapped_column(JSON)
     inputs: Mapped[dict] = mapped_column(JSON)
     result: Mapped[dict] = mapped_column(JSON)
+
+
+class ProductRecipe(Base):
+    __tablename__ = "product_recipes"
+    __table_args__ = (CheckConstraint("revision >= 1", name="ck_product_recipe_revision"),)
+    product_id: Mapped[str] = mapped_column(ForeignKey("products.id"), primary_key=True)
+    revision: Mapped[int] = mapped_column(Integer)
+    content: Mapped[dict] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class RecipeCosting(Base):
+    __tablename__ = "recipe_costings"
+    __table_args__ = (
+        UniqueConstraint("product_id", "request_id", name="uq_recipe_costing_request"),
+        CheckConstraint("recipe_revision >= 1", name="ck_recipe_costing_revision"),
+        Index("ix_recipe_costings_product_created", "product_id", "created_at", "id"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    product_id: Mapped[str] = mapped_column(ForeignKey("product_recipes.product_id"))
+    request_id: Mapped[str] = mapped_column(String(36))
+    recipe_revision: Mapped[int] = mapped_column(Integer)
+    pricing_analysis_id: Mapped[str] = mapped_column(ForeignKey("analyses.id"), unique=True)
+    recipe_snapshot: Mapped[dict] = mapped_column(JSON)
+    result: Mapped[dict] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class Material(Base):
+    __tablename__ = "materials"
+    __table_args__ = (
+        UniqueConstraint("account_id", "name_key", name="uq_material_account_name"),
+        CheckConstraint("revision >= 1", name="ck_material_revision"),
+        CheckConstraint("unit IN ('g', 'ml', 'item')", name="ck_material_unit"),
+        CheckConstraint(
+            "on_hand_micros BETWEEN 0 AND 1000000000000000", name="ck_material_balance"
+        ),
+        CheckConstraint(
+            "unit != 'item' OR on_hand_micros % 1000000 = 0", name="ck_material_whole_items"
+        ),
+        Index("ix_materials_account_created", "account_id", "created_at", "id"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"))
+    name: Mapped[str] = mapped_column(String(200))
+    name_key: Mapped[str] = mapped_column(String(600))
+    notes: Mapped[str | None] = mapped_column(Text)
+    unit: Mapped[str] = mapped_column(String(4))
+    on_hand_micros: Mapped[int] = mapped_column(BigInteger)
+    revision: Mapped[int] = mapped_column(Integer)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class MaterialMovement(Base):
+    __tablename__ = "material_movements"
+    __table_args__ = (
+        UniqueConstraint("material_id", "request_id", name="uq_material_movement_request"),
+        UniqueConstraint("material_id", "revision", name="uq_material_movement_revision"),
+        CheckConstraint("revision >= 2", name="ck_material_movement_revision"),
+        CheckConstraint(
+            "kind IN ('receipt', 'usage', 'waste', 'adjustment')", name="ck_material_movement_kind"
+        ),
+        CheckConstraint("unit IN ('g', 'ml', 'item')", name="ck_material_movement_unit"),
+        CheckConstraint(
+            "before_micros BETWEEN 0 AND 1000000000000000 "
+            "AND after_micros BETWEEN 0 AND 1000000000000000",
+            name="ck_material_movement_balance",
+        ),
+        CheckConstraint(
+            "unit != 'item' OR (before_micros % 1000000 = 0 AND after_micros % 1000000 = 0)",
+            name="ck_material_movement_whole_items",
+        ),
+        CheckConstraint(
+            "(kind = 'receipt' AND after_micros > before_micros) OR "
+            "(kind IN ('usage', 'waste') AND after_micros < before_micros) OR kind = 'adjustment'",
+            name="ck_material_movement_direction",
+        ),
+        Index("ix_material_movements_material_revision", "material_id", "revision", "id"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    material_id: Mapped[str] = mapped_column(ForeignKey("materials.id"))
+    request_id: Mapped[str] = mapped_column(String(36))
+    revision: Mapped[int] = mapped_column(Integer)
+    kind: Mapped[str] = mapped_column(String(10))
+    material_name: Mapped[str] = mapped_column(String(200))
+    unit: Mapped[str] = mapped_column(String(4))
+    before_micros: Mapped[int] = mapped_column(BigInteger)
+    after_micros: Mapped[int] = mapped_column(BigInteger)
+    request: Mapped[dict] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class ProductionRecord(Base):
+    __tablename__ = "production_records"
+    __table_args__ = (
+        UniqueConstraint("product_id", "request_id", name="uq_production_record_request"),
+        UniqueConstraint("corrects_record_id", name="uq_production_record_correction"),
+        CheckConstraint("kind IN ('batch', 'production_period')", name="ck_production_record_kind"),
+        CheckConstraint(
+            "total_units BETWEEN 0 AND 1000000 AND sellable_units BETWEEN 0 AND total_units",
+            name="ck_production_record_output",
+        ),
+        CheckConstraint("started_on <= completed_on", name="ck_production_record_dates"),
+        Index(
+            "ix_production_record_product_completed",
+            "product_id",
+            "completed_on",
+            "created_at",
+            "id",
+        ),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    product_id: Mapped[str] = mapped_column(ForeignKey("products.id"))
+    request_id: Mapped[str] = mapped_column(String(36))
+    label: Mapped[str] = mapped_column(String(200))
+    kind: Mapped[str] = mapped_column(String(17))
+    started_on: Mapped[date] = mapped_column(Date)
+    completed_on: Mapped[date] = mapped_column(Date)
+    selling_unit: Mapped[str] = mapped_column(String(200))
+    total_units: Mapped[int] = mapped_column(Integer)
+    sellable_units: Mapped[int] = mapped_column(Integer)
+    corrects_record_id: Mapped[str | None] = mapped_column(
+        ForeignKey("production_records.id"), nullable=True
+    )
+    product_snapshot: Mapped[dict] = mapped_column(JSON)
+    request: Mapped[dict] = mapped_column(JSON)
+    result: Mapped[dict] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+    livestock_attribution: Mapped[ProductionLivestockSource | None] = relationship(uselist=False)
+
+    @property
+    def livestock_snapshot(self) -> dict | None:
+        return self.livestock_attribution.snapshot if self.livestock_attribution else None
+
+
+class LivestockGroup(Base):
+    __tablename__ = "livestock_groups"
+    __table_args__ = (
+        UniqueConstraint("account_id", "name_key", name="uq_livestock_group_name"),
+        CheckConstraint("revision >= 1", name="ck_livestock_group_revision"),
+        CheckConstraint("archived IN (0, 1)", name="ck_livestock_group_archived"),
+        CheckConstraint(
+            "(reported_headcount IS NULL AND headcount_on IS NULL) OR "
+            "(reported_headcount IS NOT NULL AND reported_headcount BETWEEN 0 AND 1000000 "
+            "AND headcount_on IS NOT NULL)",
+            name="ck_livestock_group_headcount",
+        ),
+        Index("ix_livestock_groups_account_created", "account_id", "created_at", "id"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"))
+    name: Mapped[str] = mapped_column(String(200))
+    name_key: Mapped[str] = mapped_column(String(600))
+    species: Mapped[str] = mapped_column(String(200))
+    species_key: Mapped[str] = mapped_column(String(600))
+    breed: Mapped[str | None] = mapped_column(String(200))
+    notes: Mapped[str | None] = mapped_column(Text)
+    reported_headcount: Mapped[int | None] = mapped_column(Integer)
+    headcount_on: Mapped[date | None] = mapped_column(Date)
+    archived: Mapped[int] = mapped_column(Integer)
+    revision: Mapped[int] = mapped_column(Integer)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class LivestockAnimal(Base):
+    __tablename__ = "livestock_animals"
+    __table_args__ = (
+        UniqueConstraint("account_id", "identifier_key", name="uq_livestock_animal_identifier"),
+        CheckConstraint("revision >= 1", name="ck_livestock_animal_revision"),
+        CheckConstraint("sex IN ('unknown', 'female', 'male')", name="ck_livestock_animal_sex"),
+        CheckConstraint(
+            "status IN ('active', 'departed', 'deceased')", name="ck_livestock_animal_status"
+        ),
+        CheckConstraint(
+            "status = 'active' OR group_id IS NULL", name="ck_livestock_animal_membership"
+        ),
+        CheckConstraint(
+            "born_on IS NULL OR acquired_on IS NULL OR born_on <= acquired_on",
+            name="ck_livestock_animal_dates",
+        ),
+        Index("ix_livestock_animals_account_created", "account_id", "created_at", "id"),
+        Index("ix_livestock_animals_group_status", "group_id", "status", "id"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"))
+    identifier: Mapped[str] = mapped_column(String(200))
+    identifier_key: Mapped[str] = mapped_column(String(600))
+    name: Mapped[str | None] = mapped_column(String(200))
+    species: Mapped[str] = mapped_column(String(200))
+    species_key: Mapped[str] = mapped_column(String(600))
+    breed: Mapped[str | None] = mapped_column(String(200))
+    sex: Mapped[str] = mapped_column(String(7))
+    born_on: Mapped[date | None] = mapped_column(Date)
+    acquired_on: Mapped[date | None] = mapped_column(Date)
+    status: Mapped[str] = mapped_column(String(8))
+    group_id: Mapped[str | None] = mapped_column(ForeignKey("livestock_groups.id"))
+    notes: Mapped[str | None] = mapped_column(Text)
+    revision: Mapped[int] = mapped_column(Integer)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class LivestockGroupEvent(Base):
+    __tablename__ = "livestock_group_events"
+    __table_args__ = (
+        UniqueConstraint("account_id", "request_id", name="uq_livestock_group_event_request"),
+        UniqueConstraint("group_id", "revision", name="uq_livestock_group_event_revision"),
+        CheckConstraint("revision >= 1", name="ck_livestock_group_event_revision"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"))
+    group_id: Mapped[str] = mapped_column(ForeignKey("livestock_groups.id"))
+    request_id: Mapped[str] = mapped_column(String(36))
+    revision: Mapped[int] = mapped_column(Integer)
+    occurred_on: Mapped[date] = mapped_column(Date)
+    reason: Mapped[str] = mapped_column(Text)
+    request: Mapped[dict] = mapped_column(JSON)
+    before: Mapped[dict | None] = mapped_column(JSON(none_as_null=True))
+    after: Mapped[dict] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class LivestockAnimalEvent(Base):
+    __tablename__ = "livestock_animal_events"
+    __table_args__ = (
+        UniqueConstraint("account_id", "request_id", name="uq_livestock_animal_event_request"),
+        UniqueConstraint("animal_id", "revision", name="uq_livestock_animal_event_revision"),
+        CheckConstraint("revision >= 1", name="ck_livestock_animal_event_revision"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"))
+    animal_id: Mapped[str] = mapped_column(ForeignKey("livestock_animals.id"))
+    request_id: Mapped[str] = mapped_column(String(36))
+    revision: Mapped[int] = mapped_column(Integer)
+    occurred_on: Mapped[date] = mapped_column(Date)
+    reason: Mapped[str] = mapped_column(Text)
+    request: Mapped[dict] = mapped_column(JSON)
+    before: Mapped[dict | None] = mapped_column(JSON(none_as_null=True))
+    after: Mapped[dict] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class ProductionLivestockSource(Base):
+    __tablename__ = "production_livestock_sources"
+    __table_args__ = (
+        CheckConstraint(
+            "group_id IS NOT NULL OR animal_id IS NOT NULL", name="ck_production_livestock_target"
+        ),
+        Index("ix_production_livestock_group", "group_id", "record_id"),
+        Index("ix_production_livestock_animal", "animal_id", "record_id"),
+    )
+    record_id: Mapped[str] = mapped_column(ForeignKey("production_records.id"), primary_key=True)
+    group_id: Mapped[str | None] = mapped_column(ForeignKey("livestock_groups.id"))
+    animal_id: Mapped[str | None] = mapped_column(ForeignKey("livestock_animals.id"))
+    snapshot: Mapped[dict] = mapped_column(JSON)
 
 
 class ProductSalesCostBasis(Base):

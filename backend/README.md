@@ -6,6 +6,27 @@ calculator remains available. Anyone can register a FairMade account and log in.
 Accounts default to buyer; only accounts with verified seller access can manage
 private products and save immutable analysis history. AI services are not called.
 PayPal sandbox calls are opt-in and disabled by default.
+Private per-product recipes now save manually entered ingredient quantities and
+purchase costs, revision-safe edits and immutable costing snapshots. Each explicit
+costing also saves a normal production analysis, without changing stock or prices.
+See the [manual recipe workflow](examples/recipes/README.md) and
+[contract, rounding and production follow-up](../docs/manual-recipe-costing.md).
+Sellers can also maintain private raw-material/supply quantities with exact
+receipt, usage, waste and reasoned physical-count history. Revisions and retry
+keys protect changes; recipe costing and sellable stock remain separate.
+See the [manual material workflow](examples/materials/README.md) and
+[contract and deeper inventory follow-up](../docs/manual-material-inventory.md).
+Completed production records now capture seller-reported actual output and
+allocated costs, including zero-output runs and immutable linked corrections.
+Default history shows the latest correction per report; stock remains manual.
+See the [completed production examples](examples/production/README.md) and
+[contract and optional future workflow](../docs/completed-production-records.md).
+Private livestock tracking now supports both groups and individual animals,
+observed headcounts distinct from registered members, revision-safe transfers,
+and immutable history. Production reports can explicitly select one source and
+freeze its profile without changing stock or attributing group yield to individuals.
+See the [livestock examples](examples/livestock/README.md) and
+[API contract and limits](../docs/livestock-tracking.md).
 Sellers can also define mandatory Quality Locks and save deterministic checks of
 seller-entered alternatives. A passing check is not a quality certification.
 Finished-product comparison endpoints store manually entered price observations
@@ -18,6 +39,12 @@ explicit approval, public snapshots, and withdrawal with hidden-by-default discl
 Marketplace listing drafts add explicit activation/deactivation and anonymous
 browse/detail APIs; approved Passports supply the public product identity and price.
 See the [synthetic listing workflow](examples/marketplace/README.md).
+Public listings now include exact recorded available quantities after active
+reservations, with availability filters for catalog, storefront and nearby
+listing searches. Saved-product cards share the live projection. Unknown or
+incompatible inventory is explicit; checkout still rechecks stock.
+See the [availability workflow](examples/availability/README.md) and
+[disclosure policy and contract](../docs/public-listing-availability.md).
 Sellable inventory and unpaid buyer orders now support exact merchandise subtotals,
 15-minute reservations, cancellation, and private buyer/seller history. Shared-merchant
 PayPal sandbox checkout now adds verified capture, recovery, payment records, and

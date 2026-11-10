@@ -1,0 +1,18 @@
+{
+  "request_id": "19000000-0000-4000-8000-000000000001",
+  "label": "Synthetic completed bread bake",
+  "kind": "batch",
+  "started_on": "2026-11-01",
+  "completed_on": "2026-11-01",
+  "selling_unit": "loaf",
+  "total_units": 12,
+  "sellable_units": 10,
+  "currency": "USD",
+  "costs": [
+    {"label": "Consumed flour and water including waste", "category": "materials", "amount": "10.30"},
+    {"label": "Bags used", "category": "packaging", "amount": "2.00"},
+    {"label": "Oven allocation", "category": "utilities", "amount": "3.00"}
+  ],
+  "labor": [{"label": "Batch work", "hours": "2", "hourly_rate": "15.00"}],
+  "notes": "Invented completed production data, not verified expenses or quality evidence."
+}

@@ -1,0 +1,23 @@
+{
+  "name": "Synthetic egg production period",
+  "currency": "USD",
+  "sellable_units": 24,
+  "ingredients": [
+    {
+      "label": "Feed consumed during period",
+      "quantity": {"value": "30", "unit": "kg"},
+      "purchase_quantity": {"value": "20", "unit": "kg"},
+      "purchase_cost": "12.00",
+      "cost_recorded_on": "2026-11-01"
+    }
+  ],
+  "other_costs": [
+    {"label": "Cartons", "category": "packaging", "amount": "6.00"},
+    {"label": "Housing allocation", "category": "overhead", "amount": "4.00"}
+  ],
+  "labor": [{"label": "Daily care allocation", "hours": "2", "hourly_rate": "15.00"}],
+  "payment_fees": {"rate": "0.03", "fixed_per_order": "0.30", "units_per_order": 1},
+  "target_margin": {"minimum": "0.20", "maximum": "0.30"},
+  "proposed_prices": ["2.00", "4.00"],
+  "instructions": "Synthetic period with a yield of 24 sellable dozens, not 24 individual eggs. This does not track birds, welfare or actual production events."
+}

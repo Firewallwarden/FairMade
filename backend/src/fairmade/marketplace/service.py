@@ -4,6 +4,8 @@ from sqlalchemy import update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from fairmade.availability.query import public_availability, with_availability
+from fairmade.availability.schemas import ListingAvailability
 from fairmade.database import utcnow
 from fairmade.marketplace import projection, repository
 from fairmade.marketplace.errors import conflict, missing
@@ -151,22 +153,26 @@ def deactivate(db: Session, product_id: str) -> None:
     db.commit()
 
 
-def card(listing: MarketplaceListing) -> CatalogCard:
+def card(listing: MarketplaceListing, availability: ListingAvailability) -> CatalogCard:
     return CatalogCard(
         id=listing.id,
         published_revision=listing.published_revision,
         published_at=listing.published_at,
         payload_hash=listing.payload_hash,
         payload=listing.public_payload,
+        availability=availability,
     )
 
 
 def get_public(db: Session, listing_id: str) -> CatalogDetail:
-    listing = db.scalar(repository.visible_listings().where(MarketplaceListing.id == listing_id))
-    if listing is None:
+    row = db.execute(
+        with_availability(repository.visible_listings().where(MarketplaceListing.id == listing_id))
+    ).first()
+    if row is None:
         raise missing()
+    listing = row[0]
     publication = _publication(db, listing.product_id, listing.published_publication_id)
     return CatalogDetail(
-        **card(listing).model_dump(),
+        **card(listing, public_availability(row)).model_dump(),
         passport=PublicPublication.model_validate(publication),
     )

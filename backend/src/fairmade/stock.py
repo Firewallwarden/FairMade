@@ -40,6 +40,18 @@ def lock_for_listings(db: Session, listing_ids: list[str]) -> None:
     )
 
 
+def active_hold_conditions(now: datetime):
+    """One reservation policy shared by private balances and public availability."""
+    return (
+        Order.status == "pending_payment",
+        or_(PayPalCheckout.state.is_(None), PayPalCheckout.state != "completed"),
+        or_(
+            Order.expires_at > now,
+            PayPalCheckout.state.in_(("capture_pending", "needs_review")),
+        ),
+    )
+
+
 def balance(db: Session, product_id: str, now: datetime) -> StockBalance:
     reserved = (
         select(func.coalesce(func.sum(OrderLine.quantity), 0))
@@ -47,12 +59,7 @@ def balance(db: Session, product_id: str, now: datetime) -> StockBalance:
         .outerjoin(PayPalCheckout, PayPalCheckout.order_id == Order.id)
         .where(
             OrderLine.product_id == product_id,
-            Order.status == "pending_payment",
-            or_(PayPalCheckout.state.is_(None), PayPalCheckout.state != "completed"),
-            or_(
-                Order.expires_at > now,
-                PayPalCheckout.state.in_(("capture_pending", "needs_review")),
-            ),
+            *active_hold_conditions(now),
         )
         .scalar_subquery()
     )

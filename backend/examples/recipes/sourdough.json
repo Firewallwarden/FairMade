@@ -1,0 +1,30 @@
+{
+  "name": "Synthetic sourdough batch",
+  "currency": "USD",
+  "sellable_units": 10,
+  "ingredients": [
+    {
+      "label": "Flour including handling waste",
+      "quantity": {"value": "5000", "unit": "g"},
+      "purchase_quantity": {"value": "10", "unit": "kg"},
+      "purchase_cost": "20.00",
+      "cost_recorded_on": "2026-11-01"
+    },
+    {
+      "label": "Water",
+      "quantity": {"value": "3", "unit": "l"},
+      "purchase_quantity": {"value": "1000", "unit": "ml"},
+      "purchase_cost": "0.10",
+      "cost_recorded_on": "2026-11-01"
+    }
+  ],
+  "other_costs": [
+    {"label": "Bags", "category": "packaging", "amount": "2.00"},
+    {"label": "Oven allocation", "category": "utilities", "amount": "3.00"}
+  ],
+  "labor": [{"label": "Batch work", "hours": "2", "hourly_rate": "15.00"}],
+  "payment_fees": {"rate": "0.03", "fixed_per_order": "0.30", "units_per_order": 1},
+  "target_margin": {"minimum": "0.20", "maximum": "0.30"},
+  "proposed_prices": ["4.00", "7.00"],
+  "instructions": "Synthetic recipe for development only; no food safety or quality claims."
+}

@@ -21,10 +21,12 @@ from fairmade.favorites.routes import router as favorites_router
 from fairmade.fulfillment.routes import buyer_router as pickup_buyer_router
 from fairmade.fulfillment.routes import seller_router as pickup_seller_router
 from fairmade.inventory.routes import router as inventory_router
+from fairmade.livestock.routes import router as livestock_router
 from fairmade.marketplace.errors import ListingError
 from fairmade.marketplace.routes import listing_error_handler
 from fairmade.marketplace.routes import public_router as marketplace_public_router
 from fairmade.marketplace.routes import router as marketplace_router
+from fairmade.materials.routes import router as material_router
 from fairmade.orders.routes import router as order_router
 from fairmade.orders.routes import seller_router as seller_order_router
 from fairmade.passports.errors import PassportError
@@ -50,8 +52,10 @@ from fairmade.pricing.service import calculate
 from fairmade.product_reviews.routes import author_router as review_author_router
 from fairmade.product_reviews.routes import public_router as product_review_public_router
 from fairmade.product_reviews.routes import purchase_router as review_purchase_router
+from fairmade.production.routes import router as production_router
 from fairmade.products import router as product_router
 from fairmade.quality.routes import router as quality_router
+from fairmade.recipes.routes import router as recipe_router
 from fairmade.refunds.errors import RefundError
 from fairmade.refunds.routes import buyer_router as buyer_refund_router
 from fairmade.refunds.routes import refund_error_handler
@@ -76,7 +80,7 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
             finally:
                 application.state.engine.dispose()
 
-    application = FastAPI(title="FairMade API", version="0.20.0", lifespan=lifespan)
+    application = FastAPI(title="FairMade API", version="0.24.0", lifespan=lifespan)
     application.add_exception_handler(RefundError, refund_error_handler)
     application.add_exception_handler(PaymentError, payment_error_handler)
     application.add_exception_handler(CommerceError, commerce_error_handler)
@@ -113,6 +117,10 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
             or "/fulfillment" in request.url.path
             or request.url.path.startswith("/api/v1/account/product-reviews")
             or request.url.path.startswith("/api/v1/admin/")
+            or "/recipe" in request.url.path
+            or request.url.path.startswith("/api/v1/seller/materials")
+            or "/production-records" in request.url.path
+            or request.url.path.startswith("/api/v1/seller/livestock")
             or (
                 request.url.path.startswith("/api/v1/orders/")
                 and request.url.path.endswith("/review")
@@ -173,6 +181,10 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
     application.include_router(review_author_router)
     application.include_router(product_review_public_router)
     application.include_router(admin_review_router)
+    application.include_router(recipe_router)
+    application.include_router(material_router)
+    application.include_router(production_router)
+    application.include_router(livestock_router)
     return application
 
 
