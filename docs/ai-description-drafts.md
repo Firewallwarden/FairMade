@@ -3,6 +3,7 @@
 This feature depends on assistant PRs #38, #39 and #40. Its separate PR targets
 main and remains draft until prerequisites are integrated, the child is refreshed
 and the Review guard passes. Frontend implementation remains separate.
+Implementation: [PR #41](https://github.com/Firewallwarden/FairMade/pull/41).
 
 ## Generation and review
 
@@ -60,7 +61,8 @@ Errors use the existing standard format (and redacted 422 validation lists):
 missing/unowned resources, 409 for state/revision/request/source conflicts, 429
 for a busy inference slot, 502 for rejected model output and 503 for unavailable
 local inference. Source conflicts use DESCRIPTION_SOURCE_CHANGED; other editing/
-approval conflicts use REVISION_CONFLICT. All responses are no-store.
+approval conflicts use REVISION_CONFLICT. Successful and handled-error responses
+are no-store.
 
 ## Accuracy, privacy and limitations
 

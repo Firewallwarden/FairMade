@@ -3,6 +3,10 @@
 Scope: assistant foundation plus sales/history questions, supplier explanations
 and private reviewed description drafts. Browser work belongs to the frontend
 developer. Larger deferred AI features remain outside this work.
+Feature PRs: [#39](https://github.com/Firewallwarden/FairMade/pull/39),
+[#40](https://github.com/Firewallwarden/FairMade/pull/40) and
+[#41](https://github.com/Firewallwarden/FairMade/pull/41). Combined regression:
+1,221 tests passed, with the separate two-request continuity audit also passing.
 
 ## Finding: conversational continuity is not yet implemented
 
