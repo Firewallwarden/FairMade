@@ -29,6 +29,51 @@ def new_id() -> str:
     return str(uuid4())
 
 
+class AssistantConversation(Base):
+    __tablename__ = "assistant_conversations"
+    __table_args__ = (
+        UniqueConstraint("account_id", "request_id", name="uq_conversation_request"),
+        CheckConstraint("role IN ('buyer', 'seller')", name="ck_conversation_role"),
+        CheckConstraint("revision BETWEEN 0 AND 40", name="ck_conversation_revision"),
+        Index("ix_conversation_owner_updated", "account_id", "updated_at", "id"),
+        Index("ix_conversation_expiry", "expires_at"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"))
+    request_id: Mapped[str] = mapped_column(String(36))
+    role: Mapped[str] = mapped_column(String(6))
+    scope: Mapped[dict] = mapped_column(JSON)
+    revision: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    expires_at: Mapped[datetime] = mapped_column(DateTime)
+
+
+class AssistantTurn(Base):
+    __tablename__ = "assistant_turns"
+    __table_args__ = (
+        UniqueConstraint("conversation_id", "request_id", name="uq_conversation_turn_request"),
+        UniqueConstraint("conversation_id", "revision", name="uq_conversation_turn_revision"),
+        CheckConstraint("revision BETWEEN 1 AND 40", name="ck_conversation_turn_revision"),
+        CheckConstraint("length(question) BETWEEN 1 AND 2000", name="ck_conversation_question"),
+        CheckConstraint("context_turns BETWEEN 0 AND 6", name="ck_conversation_context_turns"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    conversation_id: Mapped[str] = mapped_column(
+        ForeignKey("assistant_conversations.id", ondelete="CASCADE")
+    )
+    request_id: Mapped[str] = mapped_column(String(36))
+    request_hash: Mapped[str] = mapped_column(String(64))
+    revision: Mapped[int] = mapped_column(Integer)
+    question: Mapped[str] = mapped_column(Text)
+    response: Mapped[dict] = mapped_column(JSON)
+    source_hash: Mapped[str] = mapped_column(String(64))
+    history_period: Mapped[dict | None] = mapped_column(JSON)
+    proposed_prices: Mapped[list] = mapped_column(JSON)
+    context_turns: Mapped[int] = mapped_column(Integer)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
 class DescriptionDraft(Base):
     __tablename__ = "description_drafts"
     __table_args__ = (

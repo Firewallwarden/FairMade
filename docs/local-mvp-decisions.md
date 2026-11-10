@@ -33,13 +33,36 @@ separate from backend availability.
 
 ## Current implementation limits to revisit
 
+### Saved conversations: DOMAIN-003
+
+The user explicitly selected option 2: saved database conversations with account
+ownership, deletion and a defined retention policy, following the three assistant
+extensions and continuity audit. [Contract and retention](assistant-conversations.md).
+This replaces the foundation's stateless-only implementation limit; the original
+independent question endpoints still remain stateless.
+
+The implementation uses SQLite, thirty-day inactivity expiry, twenty unexpired
+conversations per account, forty turns per conversation and at most six recent
+context pairs within twelve thousand bytes. These values are implementation
+limits, not individually confirmed user choices. Owners can delete; expiry blocks
+reads immediately, while physical cleanup is lazy per owner or an explicit
+operator command. No scheduling service is installed.
+
+Before hosted use, review scheduling, database/backup retention and secure erasure,
+storage protection/encryption, capacity/abuse controls, model context evaluation,
+browser token handling and end-to-end demo behavior. Durable storage was the user
+choice, not a requirement to replace it with temporary memory for production.
+Further scope/provider changes still need their own authorization.
+
 ### Local assistant decision: MVP-021
 
 [Description drafts](ai-description-drafts.md) add durable private generated copy
 and seller review, with no automatic application/publication. Generation uses
 only selected product metadata; unsupported marketing wording still needs human
 factual review. This business-record persistence does not select a conversation
-retention policy. See the [continuity audit and pending choice](assistant-continuity-audit.md).
+retention policy. The user subsequently chose saved database conversations,
+implemented separately with [defined retention](assistant-conversations.md).
+See the [updated continuity audit](assistant-continuity-audit.md).
 
 The [supplier explanation extension](assistant-supplier-explanations.md) supplies
 selected excluded quote names and failed/unknown checks to the owning seller's
@@ -52,7 +75,7 @@ analysis comparisons and existing sandbox capture-cohort summaries. English
 relative-period phrases, a thirty-date default, twenty-five saved analyses and
 the existing one-thousand-sale cap are documented implementation limits.
 These are not expense ledgers, forecasts or verified live earnings. Conversation
-retention remains a separate pending decision.
+retention is now implemented separately following the user's durable-storage choice.
 
 The user approved option 1: Ollama with Qwen3 8B locally, with no paid inference.
 Implemented and validated in [PR #38](https://github.com/Firewallwarden/FairMade/pull/38)
@@ -63,7 +86,8 @@ deterministic financial facts, cited qualitative AI explanations and explicit
 failure responses. No cloud fallback, auto-download or autonomous changes.
 Frontend integration is pending. This entry records the provider decision;
 read-only/stateless behavior, bounded evidence, single-process concurrency and
-no durable conversation history are implementation limits, not separate user choices.
+the original lack of durable conversation history were implementation limits,
+not separate user choices. Saved conversations now supersede that history limit.
 
 Real-model evaluation exposed incorrect numeric recombinations and financial
 interpretations. The foundation therefore keeps exact outcomes in server facts
@@ -73,7 +97,7 @@ required. See the contract's evaluation notes and explicit operational limits.
 
 Receipt scanning, forecasting, personalization and basket optimization are
 explicitly deferred until foundational assistants work and the schedule allows.
-They remain backlog items. Further assistant capabilities, persistence, hosted
+They remain backlog items. Further assistant capabilities, hosted
 use, a new model/provider, external retrieval and spending require their own
 scope/operational review; this entry does not activate a continuous feature cycle.
 

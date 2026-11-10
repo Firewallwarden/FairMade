@@ -1,56 +1,71 @@
 # Backend conversational-continuity audit
 
-Scope: assistant foundation plus sales/history questions, supplier explanations
-and private reviewed description drafts. Browser work belongs to the frontend
-developer. Larger deferred AI features remain outside this work.
-Feature PRs: [#39](https://github.com/Firewallwarden/FairMade/pull/39),
-[#40](https://github.com/Firewallwarden/FairMade/pull/40) and
-[#41](https://github.com/Firewallwarden/FairMade/pull/41). Combined regression:
-1,221 tests passed, with the separate two-request continuity audit also passing.
+The initial audit after assistant PRs #39, #40 and #41 found no retained
+conversation memory. Separate question calls did not replay a previous proposed
+price; business sales/history and description drafts were not dialogue memory.
 
-## Finding: conversational continuity is not yet implemented
+The user subsequently selected **option 2: saved database conversations**.
+The [conversation contract](assistant-conversations.md) documents the implemented
+API, retention limits, current-evidence protection and frontend handoff.
 
-Current seller and buyer question schemas contain no conversation identifier or
-prior-turn history. Every assistant call rebuilds evidence from the supplied
-scope and sends only that question, its current evidence and fixed system/example
-messages to the model. No previous user questions or assistant answers are loaded
-or saved as a conversation.
+## Finding: bounded backend continuity implemented
 
-Sales/history support retrieves business evidence. Description drafts preserve
-private copy and review provenance. Neither supplies earlier dialogue turns.
-Ollama keep_alive keeps model weights loaded; it does not add dialogue history.
+Seller and buyer conversations now persist scope, completed questions and
+answers, revisions, validated scenario inputs and resolved history periods.
+They survive application restarts and can resume under a later valid session
+for the same account, within retention. Each conversation is bound to its
+authenticated owner, assistant role and immutable selected scope.
 
-Consequently a follow-up such as “Why does that price lose money?” cannot reliably
-identify an earlier proposed price unless the caller repeats the price/context.
-The caller must continue providing explicit product/listing scope per request.
-Backend tests and the API schemas must not be described as confirming retained
-conversation memory.
-The two-request boundary test confirms that a previous proposed price is not
-replayed into a subsequent independent question or supplied as its scenario.
+Follow-ups include up to six recent dialogue pairs within a byte budget. A
+seller's prior explicit proposed price can be recalculated from current selected
+economics when referenced again. Exact numeric facts and financial outcomes
+remain deterministic. Buyer context remains limited to approved public evidence.
 
-## Decision needed before implementation
+The implementation reloads evidence and access before/after inference and before
+committing. Prior assistant text is omitted when its evidence or selected price
+scenarios changed; an old explanation cannot stand in for a new scenario.
+History returns null for old answers whose evidence no longer matches; withdrawn
+sources block reads and further questions. Deletion, expiry, roles and owner
+boundaries remain independent of whether Ollama keeps its weights loaded.
 
-The user was asked to choose:
+## Verification
 
-1. Temporary bounded conversations in backend memory, expiring after inactivity
-   and disappearing on restart (recommended for the local demo).
-2. Saved database conversations with ownership, deletion and a defined retention
-   policy.
+Combined backend regression: **1,251 passed, 13 opt-in checks skipped**.
+Two additional access/offline checks added after collection passed separately.
+Two real local-model two-turn/restart checks also passed separately. Ruff lint
+and formatting passed (329 Python files), along with 119 local documentation
+links, three request examples, seven PowerShell blocks and six authenticated
+conversation OpenAPI operations. Four existing framework warnings were reported;
+no test failures remained.
 
-No answer has been received at this audit. A submitted prompt is not consent.
-No retention behavior has been silently selected.
+Automated tests cover two-turn seller/buyer context, restart recovery, current
+analysis recalculation, replaced explicit prices, retained resolved history
+periods, history access and stale-answer suppression, independent endpoint
+isolation, cross-account/role boundaries, revocation, source withdrawal,
+idempotent retries, concurrent revision writes, deletion during inference,
+expiry/physical purge and transactional rollback. Migration tests check
+metadata parity, upgrade/downgrade, preservation and protected-history refusal.
 
-Whichever option is chosen, implementation must bind each conversation to its
-authenticated owner and seller/buyer role, bound turns and total context, and
-revalidate current source access/disclosures. Withdrawn public content or earlier
-private seller turns must not leak into another account or buyer conversation.
-Historical chat text cannot become authoritative financial evidence or relax
-Quality Locks. Deletion/expiry, retries and concurrent turns need defined behavior.
+Separate opt-in checks used real local Ollama/Qwen3 8B with synthetic temporary
+databases. Both seller and buyer completed a first question and a reference
+follow-up after a fresh application instance loaded the saved database.
+The seller's second answer retained the eight-dollar scenario and returned
+recalculated facts; buyer output remained within public disclosure scope.
+These checks establish bounded backend mechanics, not universal model
+understanding or a guarantee against hallucinations.
 
-Backend continuity should then be verified with real two-turn questions, scope
-changes, expiry/restart behavior, access revocation and cross-account/role tests.
-Frontend can implement the browser flow against that resulting contract.
+## Browser and backlog handoff
 
-The three feature PRs do not authorize implementing receipt scanning, forecasting,
-personalization or basket optimization before this continuity decision and later
-scope reassessment.
+The frontend developer still needs conversation selection, safe text rendering,
+paged history restore, retry/revision handling, facts/citations/notices, stale
+answer states, deletion and auth/expiry handling. Browser and screen-recorder
+integration/latency have not been tested here.
+
+Receipt scanning, forecasting, personalization and basket optimization remain
+deferred. Their next step is reassessment after the foundational browser demo
+is working and evaluated; no larger backlog item was silently started.
+
+Thirty-day inactivity expiry and history/resource caps are documented
+implementation limits. Durable storage is the confirmed user choice. Scheduled
+physical cleanup, backup retention, encryption/secure erasure and hosted operating
+controls remain follow-ups in [the decision register](local-mvp-decisions.md).
