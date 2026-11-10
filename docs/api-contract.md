@@ -21,6 +21,9 @@ exact financial facts. Frontend integration remains pending.
 Seller questions additionally support bounded sales and saved cost-history
 evidence through optional history_period and documented relative-period phrases.
 See [the sales/history extension](assistant-sales-history.md).
+Selected supplier reports now include explicit eligibility/exclusion explanations,
+current claim checks and eligible-only cost minima with ties. See
+[the supplier explanation extension](assistant-supplier-explanations.md).
 
 **Authorization change from #5:** registration now creates a buyer account.
 Private product/history endpoints require the seller role and return 403 until

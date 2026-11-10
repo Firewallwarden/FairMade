@@ -35,6 +35,12 @@ separate from backend availability.
 
 ### Local assistant decision: MVP-021
 
+The [supplier explanation extension](assistant-supplier-explanations.md) supplies
+selected excluded quote names and failed/unknown checks to the owning seller's
+local model as explicitly excluded evidence. This enables grounded failure
+explanations; exclusions never enter cost minima or authorize substitutions.
+Claims remain unverified, and product-level constraints are not waived.
+
 The [sales/history extension](assistant-sales-history.md) adds bounded saved
 analysis comparisons and existing sandbox capture-cohort summaries. English
 relative-period phrases, a thirty-date default, twenty-five saved analyses and
