@@ -2,6 +2,7 @@
 
 This additive assistant feature depends on local assistant PR #38. Its own PR
 targets main and stays draft until prerequisites are integrated and refreshed.
+Implementation: [PR #39](https://github.com/Firewallwarden/FairMade/pull/39).
 Frontend integration is a separate responsibility.
 
 POST /api/v1/assistants/seller retains its existing fields and adds optional
