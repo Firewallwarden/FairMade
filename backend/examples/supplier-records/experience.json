@@ -1,0 +1,10 @@
+{
+  "request_id": "24000000-0000-4000-8000-000000000002",
+  "expected_supplier_revision": 1,
+  "label": "Synthetic flour delivery",
+  "observed_on": "2025-05-08",
+  "rating": 4,
+  "promised_on": "2025-05-07",
+  "received_on": "2025-05-06",
+  "notes": "Private seller opinion and delivery observation, unverified."
+}

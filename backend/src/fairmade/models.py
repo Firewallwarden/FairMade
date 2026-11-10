@@ -522,6 +522,83 @@ class SupplierQuote(Base):
     details: Mapped[dict] = mapped_column(JSON)
 
 
+class SupplierProfile(Base):
+    __tablename__ = "supplier_profiles"
+    __table_args__ = (
+        UniqueConstraint("account_id", "name_key", name="uq_supplier_profile_name"),
+        CheckConstraint("revision >= 1", name="ck_supplier_profile_revision"),
+        CheckConstraint("archived IN (0, 1)", name="ck_supplier_profile_archived"),
+        Index("ix_supplier_profiles_account_created", "account_id", "created_at", "id"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"))
+    name: Mapped[str] = mapped_column(String(200))
+    name_key: Mapped[str] = mapped_column(String(600))
+    location: Mapped[str | None] = mapped_column(String(200))
+    notes: Mapped[str | None] = mapped_column(Text)
+    archived: Mapped[int] = mapped_column(Integer)
+    revision: Mapped[int] = mapped_column(Integer)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class SupplierProfileEvent(Base):
+    __tablename__ = "supplier_profile_events"
+    __table_args__ = (
+        UniqueConstraint("account_id", "request_id", name="uq_supplier_profile_event_request"),
+        UniqueConstraint("supplier_id", "revision", name="uq_supplier_profile_event_revision"),
+        CheckConstraint("revision >= 1", name="ck_supplier_profile_event_revision"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"))
+    supplier_id: Mapped[str] = mapped_column(ForeignKey("supplier_profiles.id"))
+    request_id: Mapped[str] = mapped_column(String(36))
+    revision: Mapped[int] = mapped_column(Integer)
+    reason: Mapped[str] = mapped_column(Text)
+    request: Mapped[dict] = mapped_column(JSON)
+    before: Mapped[dict | None] = mapped_column(JSON(none_as_null=True))
+    after: Mapped[dict] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class SupplierExperience(Base):
+    __tablename__ = "supplier_experiences"
+    __table_args__ = (
+        UniqueConstraint("supplier_id", "request_id", name="uq_supplier_experience_request"),
+        UniqueConstraint("corrects_experience_id", name="uq_supplier_experience_correction"),
+        CheckConstraint("supplier_revision >= 1", name="ck_supplier_experience_revision"),
+        CheckConstraint(
+            "rating IS NULL OR rating BETWEEN 1 AND 5", name="ck_supplier_experience_rating"
+        ),
+        CheckConstraint(
+            "received_on IS NULL OR received_on <= observed_on", name="ck_supplier_experience_dates"
+        ),
+        CheckConstraint(
+            "(source_quote_id IS NULL AND quote_snapshot IS NULL) OR "
+            "(source_quote_id IS NOT NULL AND quote_snapshot IS NOT NULL)",
+            name="ck_supplier_experience_quote",
+        ),
+        Index("ix_supplier_experiences_observed", "supplier_id", "observed_on", "created_at", "id"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    supplier_id: Mapped[str] = mapped_column(ForeignKey("supplier_profiles.id"))
+    request_id: Mapped[str] = mapped_column(String(36))
+    supplier_revision: Mapped[int] = mapped_column(Integer)
+    label: Mapped[str] = mapped_column(String(200))
+    observed_on: Mapped[date] = mapped_column(Date)
+    rating: Mapped[int | None] = mapped_column(Integer)
+    promised_on: Mapped[date | None] = mapped_column(Date)
+    received_on: Mapped[date | None] = mapped_column(Date)
+    source_quote_id: Mapped[str | None] = mapped_column(ForeignKey("supplier_quotes.id"))
+    corrects_experience_id: Mapped[str | None] = mapped_column(
+        ForeignKey("supplier_experiences.id")
+    )
+    supplier_snapshot: Mapped[dict] = mapped_column(JSON)
+    quote_snapshot: Mapped[dict | None] = mapped_column(JSON(none_as_null=True))
+    request: Mapped[dict] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
 class SupplierComparison(Base):
     __tablename__ = "supplier_comparisons"
     __table_args__ = (

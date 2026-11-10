@@ -66,6 +66,7 @@ from fairmade.sales.routes import router as sales_router
 from fairmade.seller_applications import router as application_router
 from fairmade.storefronts.routes import public_router as public_storefront_router
 from fairmade.storefronts.routes import router as storefront_router
+from fairmade.supplier_records.routes import router as supplier_record_router
 from fairmade.suppliers.routes import router as supplier_router
 
 
@@ -122,6 +123,7 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
             or "/production-records" in request.url.path
             or request.url.path.startswith("/api/v1/seller/livestock")
             or (request.url.path.startswith("/api/v1/products/") and "/listing" in request.url.path)
+            or request.url.path.startswith("/api/v1/seller/suppliers")
             or (
                 request.url.path.startswith("/api/v1/orders/")
                 and request.url.path.endswith("/review")
@@ -186,6 +188,7 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
     application.include_router(material_router)
     application.include_router(production_router)
     application.include_router(livestock_router)
+    application.include_router(supplier_record_router)
     return application
 
 

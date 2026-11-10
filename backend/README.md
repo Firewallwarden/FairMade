@@ -6,6 +6,11 @@ calculator remains available. Anyone can register a FairMade account and log in.
 Accounts default to buyer; only accounts with verified seller access can manage
 private products and save immutable analysis history. AI services are not called.
 PayPal sandbox calls are opt-in and disabled by default.
+Sellers can keep private supplier profiles, subjective ratings and dated delivery
+observations with immutable corrections and exact summaries that show missing data.
+Optional quote references freeze owned evidence without changing comparisons or
+Quality Locks. See the [private supplier workflow](examples/supplier-records/README.md)
+and [contract and limits](../docs/private-supplier-reliability.md).
 Private per-product recipes now save manually entered ingredient quantities and
 purchase costs, revision-safe edits and immutable costing snapshots. Each explicit
 costing also saves a normal production analysis, without changing stock or prices.
