@@ -6,6 +6,7 @@ from pydantic import TypeAdapter
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from fairmade.assistants.history import history_evidence
 from fairmade.assistants.schemas import BuyerQuestion, Evidence, SellerQuestion
 from fairmade.auth import api_error
 from fairmade.evidence import today
@@ -128,6 +129,7 @@ def seller_evidence(db: Session, account_id: str, body: SellerQuestion) -> list[
                 "warnings": result.warnings,
             },
         )
+    history_evidence(db, account_id, body, facts)
     return facts
 
 

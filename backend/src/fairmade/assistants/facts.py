@@ -1,5 +1,6 @@
 """Render exact numeric statements on the server; never ask an LLM to write arithmetic."""
 
+from fairmade.assistants.history import history_statements
 from fairmade.assistants.schemas import Evidence, Paragraph
 
 
@@ -10,6 +11,7 @@ def statements(evidence: list[Evidence]) -> list[Paragraph]:
         result.append(Paragraph(text=text, evidence_keys=[fact.key]))
 
     for fact in evidence:
+        result.extend(history_statements(fact))
         data = fact.data
         if fact.title == "Selected saved production economics":
             costs = data["result"]["costs"]

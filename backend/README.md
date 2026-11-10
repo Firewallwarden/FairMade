@@ -13,6 +13,8 @@ paragraphs; seller evidence is owner-scoped and buyers see approved disclosures
 only. No cloud fallback, automatic changes or persistent chat is added.
 See the [assistant workflow](examples/assistants/README.md) and
 [contract, evaluation and limits](../docs/local-assistants.md).
+Seller assistant sales/history questions now reuse private sandbox sales totals
+and bounded saved cost analyses. See [period semantics and limits](../docs/assistant-sales-history.md).
 Sellers can keep private supplier profiles, subjective ratings and dated delivery
 observations with immutable corrections and exact summaries that show missing data.
 Optional quote references freeze owned evidence without changing comparisons or
