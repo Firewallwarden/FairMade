@@ -1,6 +1,6 @@
 # FairMade frontend
 
-React + TypeScript + Vite + Tailwind CSS. A farmers-market homepage with distinct buyer and seller experiences, a frontend signup preview, and a backend-connected production-cost calculator.
+React + TypeScript + Vite + Tailwind CSS. A warm botanical marketplace with real account access, a guided seller workspace and a backend-connected buyer order flow.
 
 ## Run locally
 
@@ -8,36 +8,42 @@ From `frontend/`, run `npm install`, then `npm run dev`. Open the local URL Vite
 
 `npm run build` checks TypeScript and creates production files in `dist/`. `npm run preview` serves the build. `npm run lint` checks code with Oxlint.
 
-`npm test` runs service and pricing-contract tests using Node's native TypeScript support (Node 22.18+). Select **Cost calculator** in the navigation or visit `/#/pricing`. Start the API on port 8000 using the backend README; Vite proxies `/api` to it. See [the integration checklist](INTEGRATION.md) for capabilities and remaining dependencies.
+`npm test` runs service and contract tests using Node's native TypeScript support (Node 22.18+). Start the API on port 8000 using the backend README; Vite proxies `/api` to it. See [the integration checklist](INTEGRATION.md) for actual verification and remaining dependencies.
 
-## Experiences and preview boundaries
+## Experiences and local demo boundaries
 
 - The homepage defaults to buyer. Its buyer/seller switch changes the introduction, photography, marketplace content, explanations, and calls to action.
-- Switching the homepage also preselects that account type and clears form details, errors, and completion notices. Changing the signup choice does not change the homepage.
-- Header and in-page account links scroll to the signup section. The mobile menu includes account access.
-- Signup is explicitly a preview. Use invented details. Name and email are required; the preview password must be at least eight characters and match its confirmation.
-- Invalid submission shows inline errors and focuses the first invalid field. Password visibility is optional. Valid submission clears the fields and explains that no account was created.
-- Signup uses temporary component state only. There are no account API requests, credential logs, cookies, or browser-storage writes. No authentication or payment integration is implemented.
-- Products, seller descriptions, and USD prices are illustrative. They do not represent verified goods, real local availability, or authoritative price recommendations.
+- `/#/account`: real buyer registration, login/logout, seller applications and status. Passwords are 12–128 characters; signup never grants seller access.
+- Sessions use memory only, with fixed backend expiry and revocation. Reload requires login. No credentials/tokens are written to browser storage or logs.
+- `/#/seller`: private products, saved cost analyses, Quality Lock requirements/claim checks, dated price observations, comparison reports, disclosure previews, approved Passports/listings and stock.
+- `/#/market`: real approved listings, search/type/location/stock filters, product details and expandable Passports.
+- `/#/orders`: buyer and seller order views; single-product reservation with a backend-calculated subtotal, retained retry key, cancellation and stock release.
+- PayPal's sandbox SDK is loaded only when the backend public configuration enables it. Server capture/reconciliation and verified receipts determine payment success. A disabled integration is clearly labeled.
+- `/#/pricing`: anonymous stateless calculator; seller-product calculations save a private analysis.
+- Only the homepage inspiration cards use illustrative products/prices and stock photography. They are explicitly labeled and never used as checkout data.
+- No connected LLM, live market/supplier lookup, shipping/tax calculation or production seller payout is claimed.
 - Motion respects the browser's reduced-motion preference. Forms, role choices, navigation, and buttons support keyboard use.
 
 ## Organization
 
-- `components/`: header, branding, botanical artwork, role switch, product cards, and signup preview.
-- `pages/`: page layouts, currently `LandingPage.tsx`.
-- `types/`: shared frontend product and account-role types.
+- `components/`: shared layout, forms, feedback, Passports and payment interface.
+- `pages/`: account, seller/product workflow, marketplace, listing, order and calculator screens.
+- `types/`: shared pricing, product and account-role types.
 - `mock/`: replaceable illustrative product data.
-- `services/`: product data access and the central HTTP helper.
+- `services/`: typed HTTP adapters, runtime response decoders and memory-only session handling.
+- `hooks/` and `utils/`: abortable resource loading, action state, form extraction and display helpers.
 - `index.css`: Tailwind import, self-hosted fonts, theme, and responsive component styles.
 - `public/images/` and `public/fonts/`: local assets and font licenses.
 
-## Future backend connection
+## Backend connection
 
-The page reads sample products through `services/products.ts`. Integrate only after reviewing and agreeing on `../docs/api-contract.md`; centralize requests through `services/api.ts`. The preview's buyer/seller choice is a UI preference, not a proposed backend account or authentication payload.
+The frontend owner accepted the existing demo contracts on 2026-11-09. HTTP requests are centralized through `services/api.ts`, with private requests checking session validity and clearing revoked/expired sessions. The homepage buyer/seller switch is a display preference, never an authentication role.
 
 Optionally set `VITE_API_BASE_URL` in a local `.env.local` (default `/api/v1`). Include the API version prefix. Vite variables are public browser configuration: never put credentials or secrets in them. A separate API origin needs FastAPI CORS configuration. The Vite development proxy is not part of the production build; hosting needs approved API routing.
 
-Do not turn the preview into working registration without coordinating authentication, seller eligibility, error handling, and session behavior with the backend developer.
+For seller testing, use a separately provisioned administrator and the documented manual-review process in the backend examples. Use separate seller and buyer accounts; self-purchase is rejected. Do not bypass seller approval or put sandbox secrets into frontend configuration.
+
+PayPal follows the [official standard checkout integration](https://developer.paypal.com/studio/checkout/standard/integrate): create and capture through the backend. Credentialed approval/capture remains a separate test from local automated provider doubles.
 
 ## Asset credits
 

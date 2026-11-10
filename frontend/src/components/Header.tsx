@@ -2,13 +2,15 @@ import { useState } from 'react'
 import { Brand } from './Brand'
 import { LeafSprig } from './LeafSprig'
 import type { AccountRole } from '../types/account'
+import { useSession } from '../services/session'
 
 export function Header({ role }: { role: AccountRole }) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const session = useSession()
   const links = [
     {
       label: role === 'buyer' ? 'The market' : 'For our makers',
-      href: '#marketplace',
+      href: role === 'buyer' ? '#/market' : '#/seller',
     },
     { label: 'How it works', href: '#how-it-works' },
     { label: 'Our promise', href: '#our-promise' },
@@ -33,8 +35,9 @@ export function Header({ role }: { role: AccountRole }) {
           ))}
         </nav>
         <div className="header-actions">
-          <a className="button-primary header-account" href="#create-account">
-            Create an account <span aria-hidden="true">↗</span>
+          <a className="button-primary header-account" href="#/account">
+            {session ? 'My account' : 'Sign in / Join'}{' '}
+            <span aria-hidden="true">↗</span>
           </a>
           <button
             className="menu-button"
@@ -61,8 +64,8 @@ export function Header({ role }: { role: AccountRole }) {
                 {link.label}
               </a>
             ))}
-            <a href="#create-account" onClick={() => setMenuOpen(false)}>
-              Create an account ↗
+            <a href="#/account" onClick={() => setMenuOpen(false)}>
+              {session ? 'My account' : 'Sign in / Join'} ↗
             </a>
           </nav>
         )}
