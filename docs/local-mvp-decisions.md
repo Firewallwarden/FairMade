@@ -14,6 +14,23 @@ separate from backend availability.
 
 ## Confirmed user choices
 
+### Frontend demo acceptance — 2026-11-09
+
+The frontend owner selected the existing cream/sage botanical design, a guided
+create/calculate/review/publish seller journey, and summary-first Passports with
+expandable costs/evidence. They subsequently accepted the existing demo API shapes
+listed in the [contract status](api-contract.md#status-and-common-conventions),
+memory-only browser sessions, and updates to these two shared documents.
+Reloading requires login; tokens are never written to browser storage and are
+not refreshed. Backend expiry, revocation and manual seller approval still apply.
+
+The initial stateless cost calculator builds, passes lint and eight service/contract
+tests. Browser checks covered validation, errors, synthetic-response rendering,
+result invalidation and a 390px layout. These are frontend checks, not proof of
+live backend calculations or credentialed PayPal capture. Subsequent milestones
+will update actual verification evidence here. Broader backend contracts and
+production session/storage changes remain outside this acceptance.
+
 | ID | Choice and evidence | Current status and limits | Follow-up / review trigger |
 | --- | --- | --- | --- |
 | MVP-001 | Local testing/development first; hosted readiness deferred. [Backend setup and security](../backend/README.md). | Implemented as a loopback development service with SQLite/Alembic. No hosted deployment claim. | Before shared hosting: decide deployment/database needs; implement appropriate TLS, abuse controls, operational monitoring, backup/restore and recovery, and integration checks. Do not assume SQLite must be replaced without evidence. |

@@ -1,12 +1,14 @@
 # FairMade frontend
 
-React + TypeScript + Vite + Tailwind CSS. A farmers-market homepage with distinct buyer and seller experiences and a frontend signup preview.
+React + TypeScript + Vite + Tailwind CSS. A farmers-market homepage with distinct buyer and seller experiences, a frontend signup preview, and a backend-connected production-cost calculator.
 
 ## Run locally
 
 From `frontend/`, run `npm install`, then `npm run dev`. Open the local URL Vite prints. In Windows PowerShell, use `npm.cmd` if execution policy blocks `npm`.
 
 `npm run build` checks TypeScript and creates production files in `dist/`. `npm run preview` serves the build. `npm run lint` checks code with Oxlint.
+
+`npm test` runs service and pricing-contract tests using Node's native TypeScript support (Node 22.18+). Select **Cost calculator** in the navigation or visit `/#/pricing`. Start the API on port 8000 using the backend README; Vite proxies `/api` to it. See [the integration checklist](INTEGRATION.md) for capabilities and remaining dependencies.
 
 ## Experiences and preview boundaries
 
@@ -33,7 +35,7 @@ From `frontend/`, run `npm install`, then `npm run dev`. Open the local URL Vite
 
 The page reads sample products through `services/products.ts`. Integrate only after reviewing and agreeing on `../docs/api-contract.md`; centralize requests through `services/api.ts`. The preview's buyer/seller choice is a UI preference, not a proposed backend account or authentication payload.
 
-Optionally set `VITE_API_BASE_URL` in a local `.env.local` (default `/api`). Vite variables are public browser configuration: never put credentials or secrets in them. A separate API origin needs FastAPI CORS configuration.
+Optionally set `VITE_API_BASE_URL` in a local `.env.local` (default `/api/v1`). Include the API version prefix. Vite variables are public browser configuration: never put credentials or secrets in them. A separate API origin needs FastAPI CORS configuration. The Vite development proxy is not part of the production build; hosting needs approved API routing.
 
 Do not turn the preview into working registration without coordinating authentication, seller eligibility, error handling, and session behavior with the backend developer.
 

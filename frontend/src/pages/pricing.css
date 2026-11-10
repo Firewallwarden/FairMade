@@ -1,0 +1,48 @@
+.calculator-main { padding-block: 40px 80px; max-width: 1080px; }
+.calculator-nav { display: flex; gap: 24px; flex-wrap: wrap; }
+.calculator-nav a { text-underline-offset: 5px; }
+.calculator-intro { max-width: 720px; margin-bottom: 32px; }
+.calculator-intro h1 { font-size: clamp(2.8rem, 6vw, 4.7rem); line-height: 1.04; margin: 18px 0; }
+.calculator-intro p, .calculator-panel p, .calculator-results > p { line-height: 1.7; }
+.calculator-notice { background: var(--color-sage); padding: 20px 24px; border-radius: 16px; line-height: 1.65; margin-block: 24px; }
+.calculator-form { border: 0; padding: 0; margin: 0; min-width: 0; }
+.calculator-panel { padding-block: 32px; border-bottom: 1px solid #d4d7ca; }
+.calculator-panel h2, .calculator-results h2 { font-size: clamp(2rem, 4vw, 3rem); margin: 10px 0; }
+.calculator-panel > p { max-width: 760px; }
+.calculator-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin-top: 24px; }
+.calculator-field { display: flex; flex-direction: column; gap: 10px; font-size: .9rem; font-weight: 600; min-width: 0; }
+.calculator-field input, .calculator-field select { background: #fffdf8; border: 1px solid #9da594; padding: 12px; border-radius: 8px; font: inherit; font-weight: 400; color: var(--color-forest); min-height: 48px; min-width: 0; width: 100%; }
+.calculator-row { display: grid; grid-template-columns: 1.4fr 1fr 1fr auto; align-items: end; gap: 16px; margin-block: 20px; border: 1px solid #d4d7ca; border-radius: 14px; padding: 18px; min-width: 0; }
+.calculator-row legend { padding-inline: 8px; }
+.calculator-remove { color: var(--color-maroon); min-height: 48px; text-decoration: underline; text-underline-offset: 4px; background: none; border: 0; }
+.calculator-secondary { background: transparent; color: var(--color-forest); border: 1px solid currentColor; padding: 12px 20px; border-radius: 24px; min-height: 48px; }
+.calculator-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 20px; padding-block: 32px; }
+.calculator-actions span { font-size: .85rem; }
+.calculator-form:disabled { opacity: .65; }
+.calculator-form button:disabled { cursor: wait; }
+.calculator-error { border: 1px solid var(--color-maroon); background: #f6e9e7; border-radius: 14px; padding: 24px; overflow-wrap: anywhere; }
+.calculator-error h2 { font-size: 2rem; margin: 0; }
+.calculator-feedback { scroll-margin-top: 32px; }
+.calculator-results { background: #fffdf8; border: 1px solid #d4d7ca; border-radius: 20px; padding: clamp(20px, 4vw, 40px); }
+.calculator-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-block: 28px; }
+.calculator-metrics > div { padding: 24px; background: var(--color-sage); border-radius: 12px; }
+.calculator-metrics dt { font-size: .9rem; }
+.calculator-metrics dd { font-size: clamp(1.8rem, 4vw, 2.6rem); font-family: var(--font-display); margin: 8px 0 0; overflow-wrap: anywhere; }
+.calculator-metrics .calculator-range { grid-column: 1 / -1; background: var(--color-forest); color: var(--color-cream); }
+.calculator-results details { padding-block: 20px; border-top: 1px solid #d4d7ca; line-height: 1.7; }
+.calculator-results summary { cursor: pointer; font-weight: 600; }
+.calculator-breakdown > div { display: flex; justify-content: space-between; gap: 20px; padding-block: 8px; }
+.calculator-breakdown dt { text-transform: capitalize; }
+.calculator-breakdown dd { margin: 0; }
+.calculator-table-scroll { overflow-x: auto; margin-block: 24px; }
+.calculator-table-scroll table { width: 100%; border-collapse: collapse; text-align: left; }
+.calculator-table-scroll caption { text-align: left; font-weight: 600; padding-bottom: 16px; }
+.calculator-table-scroll th, .calculator-table-scroll td { padding: 12px; border-bottom: 1px solid #d4d7ca; white-space: nowrap; }
+.calculator-footer { padding-block: 24px; border-top: 1px solid #d4d7ca; font-size: .85rem; line-height: 1.7; }
+@media (max-width: 720px) {
+  .calculator-grid, .calculator-row { grid-template-columns: 1fr; }
+  .calculator-shell .site-header { flex-wrap: wrap; gap: 24px; }
+  .calculator-metrics { grid-template-columns: 1fr; }
+  .calculator-remove { justify-self: start; }
+  .calculator-nav { gap: 16px; font-size: .9rem; }
+}

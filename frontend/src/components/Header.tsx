@@ -12,6 +12,7 @@ export function Header({ role }: { role: AccountRole }) {
     },
     { label: 'How it works', href: '#how-it-works' },
     { label: 'Our promise', href: '#our-promise' },
+    { label: 'Cost calculator', href: '#/pricing' },
   ]
   return (
     <>
