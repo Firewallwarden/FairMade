@@ -3,6 +3,9 @@
 The user approved Ollama with Qwen3 8B locally, without paid inference or a
 cloud fallback. This implements the read-only backend foundation for both
 assistants. Frontend acceptance and browser integration remain pending.
+Implementation: [PR #38](https://github.com/Firewallwarden/FairMade/pull/38).
+Validation: 1,173 backend tests passed, plus eight opt-in real local-model
+evaluations run separately. Lint, formatting, examples and contract checks passed.
 
 ## Scope
 

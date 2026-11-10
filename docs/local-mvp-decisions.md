@@ -36,6 +36,8 @@ separate from backend availability.
 ### Local assistant decision: MVP-021
 
 The user approved option 1: Ollama with Qwen3 8B locally, with no paid inference.
+Implemented and validated in [PR #38](https://github.com/Firewallwarden/FairMade/pull/38)
+(1,173 backend tests and eight separate real local-model evaluations).
 The [assistant foundation](local-assistants.md) implements separate owner-scoped
 seller and approved-public buyer contexts, validated proposed-price extraction,
 deterministic financial facts, cited qualitative AI explanations and explicit
