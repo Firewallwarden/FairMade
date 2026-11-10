@@ -1,7 +1,9 @@
 # Saved seller and buyer conversations
 
 Implemented backend proposal; frontend acceptance and browser integration are
-pending. After the [continuity audit](assistant-continuity-audit.md), the user
+pending. [Implementation PR #42](https://github.com/Firewallwarden/FairMade/pull/42)
+is a main-targeted draft depending on #38, #39, #40 and #41; it is not integrated
+into main. After the [continuity audit](assistant-continuity-audit.md), the user
 chose saved database conversations (option 2), ownership, deletion and a defined
 retention policy.
 

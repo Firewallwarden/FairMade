@@ -38,6 +38,8 @@ separate from backend availability.
 The user explicitly selected option 2: saved database conversations with account
 ownership, deletion and a defined retention policy, following the three assistant
 extensions and continuity audit. [Contract and retention](assistant-conversations.md).
+[Implementation #42](https://github.com/Firewallwarden/FairMade/pull/42) is draft,
+dependent on #38-#41, and not yet integrated on main.
 This replaces the foundation's stateless-only implementation limit; the original
 independent question endpoints still remain stateless.
 

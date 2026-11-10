@@ -7,6 +7,8 @@ price; business sales/history and description drafts were not dialogue memory.
 The user subsequently selected **option 2: saved database conversations**.
 The [conversation contract](assistant-conversations.md) documents the implemented
 API, retention limits, current-evidence protection and frontend handoff.
+[PR #42](https://github.com/Firewallwarden/FairMade/pull/42) contains this follow-up
+and remains draft pending prerequisite #38-#41 integration and branch refresh.
 
 ## Finding: bounded backend continuity implemented
 
