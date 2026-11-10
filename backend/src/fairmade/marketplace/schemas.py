@@ -12,6 +12,7 @@ from fairmade.photos.schemas import PhotoSelection, PublicPhoto
 from fairmade.pricing.schemas import Contract, Label
 from fairmade.publication import Revision
 from fairmade.schemas import UTCResponse
+from fairmade.unit_pricing.schemas import SellingQuantity, StandardUnitPrice
 
 
 class ListingContent(Contract):
@@ -20,6 +21,7 @@ class ListingContent(Contract):
     location: Label | None = None
     summary: Annotated[str, Field(min_length=1, max_length=1000)] | None = None
     photos: Annotated[list[PhotoSelection], Field(max_length=6)] | None = None
+    selling_quantity: SellingQuantity | None = None
 
     @field_validator("photos")
     @classmethod
@@ -55,6 +57,8 @@ class CatalogContent(Contract):
     passport_payload_hash: str
     notices: list[str]
     photos: list[PublicPhoto] | None = None
+    selling_quantity: SellingQuantity | None = None
+    unit_price: StandardUnitPrice | None = None
 
 
 class ListingPreview(Contract):
@@ -62,6 +66,7 @@ class ListingPreview(Contract):
     revision: int
     preview_hash: str
     payload: CatalogContent
+    publication_blockers: list[Literal["SELLING_QUANTITY_REQUIRED"]] = Field(default_factory=list)
 
 
 class CatalogCard(UTCResponse):

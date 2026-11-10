@@ -109,6 +109,7 @@ def market_record(market_source):
 def listing_content(market_record):
     return {
         "passport_publication_id": market_record["publication"]["id"],
+        "selling_quantity": {"value": "1", "unit": "item"},
         "seller_display_name": "Example bakery",
         "location": "Exampletown",
         "summary": "Synthetic listing for local testing.",

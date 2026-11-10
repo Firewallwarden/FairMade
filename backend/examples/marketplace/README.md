@@ -14,6 +14,7 @@ Never put real bearer tokens in checked-in scripts or transcripts.
 $listingUrl = "$api/products/$($product.id)/listing"
 $listingContent = @{
     passport_publication_id = $published.id
+    selling_quantity = @{ value = '1'; unit = 'loaf' }
     seller_display_name = "Example bakery"
     location = "Exampletown"
     summary = "Synthetic local-development listing."
@@ -24,7 +25,7 @@ $listing = Invoke-RestMethod -Method Post -Uri $listingUrl -Headers $authHeaders
 # Private draft: no public listing exists until this exact preview is approved.
 $preview = Invoke-RestMethod -Uri "$listingUrl/preview" -Headers $authHeaders
 $preview.payload | ConvertTo-Json -Depth 20
-# Inspect the projected title, price, display name, location, summary and notices.
+# Inspect the quantity, calculated unit price, title, display fields and notices.
 $approval = @{
     expected_revision = $preview.revision
     preview_hash = $preview.preview_hash

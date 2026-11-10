@@ -5,6 +5,8 @@ isolated development database through 0016. `$headers` is an authenticated verif
 seller Authorization header. `$productId` is their existing product with a listing
 and approved Passport. `$imagePath` points to a synthetic local JPEG or PNG.
 These commands upload/publish only; they never grant seller access or place orders.
+The listing draft must already include an explicit selling_quantity. Update
+legacy drafts with that quantity before approving a new photo/listing publication.
 
 ```powershell
 $base = 'http://127.0.0.1:8000'
@@ -16,6 +18,7 @@ $draft = Invoke-RestMethod "$productPath/listing" -Headers $headers
 $body = @{
     expected_revision = $draft.revision
     passport_publication_id = $draft.content.passport_publication_id
+    selling_quantity = $draft.content.selling_quantity
     seller_display_name = $draft.content.seller_display_name
     location = $draft.content.location
     summary = $draft.content.summary

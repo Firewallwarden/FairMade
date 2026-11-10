@@ -374,6 +374,7 @@ def test_multiline_total_and_all_or_nothing_reservation(
         headers=market_headers,
         json={
             "passport_publication_id": other["publication"]["id"],
+            "selling_quantity": {"value": "1", "unit": "item"},
             "seller_display_name": "Example",
         },
     ).json()
@@ -536,6 +537,7 @@ def test_order_amount_limit_rolls_back_all_reservations(
         headers=market_headers,
         json={
             "passport_publication_id": record["publication"]["id"],
+            "selling_quantity": {"value": "1", "unit": "item"},
             "seller_display_name": "Example",
         },
     ).json()
@@ -584,6 +586,7 @@ def test_one_seller_per_order_and_buyer_scoped_idempotency(
         headers=second_seller,
         json={
             "passport_publication_id": record["publication"]["id"],
+            "selling_quantity": {"value": "1", "unit": "item"},
             "seller_display_name": "Other",
         },
     ).json()

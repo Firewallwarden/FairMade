@@ -287,6 +287,7 @@ def test_storefront_lists_only_owners_visible_listings_and_keeps_approved_names(
         headers=other_headers,
         json={
             "passport_publication_id": other["publication"]["id"],
+            "selling_quantity": {"value": "1", "unit": "item"},
             "seller_display_name": "Other",
         },
     )

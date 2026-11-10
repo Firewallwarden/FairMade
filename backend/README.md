@@ -44,6 +44,11 @@ explicit approval, public snapshots, and withdrawal with hidden-by-default discl
 Marketplace listing drafts add explicit activation/deactivation and anonymous
 browse/detail APIs; approved Passports supply the public product identity and price.
 See the [synthetic listing workflow](examples/marketplace/README.md).
+New and updated listing publications require explicit selling quantities. The
+seller approves the declaration and calculated price per kg/l/egg/loaf/item;
+older approved snapshots remain visible with unknown unit pricing. Checkout
+still charges per selling unit. See the [unit-pricing workflow](examples/unit-pricing/README.md)
+and [contract and frontend impact](../docs/standardized-unit-pricing.md).
 Public listings now include exact recorded available quantities after active
 reservations, with availability filters for catalog, storefront and nearby
 listing searches. Saved-product cards share the live projection. Unknown or

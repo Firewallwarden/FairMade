@@ -21,12 +21,14 @@ from fairmade.marketplace.schemas import (
 )
 from fairmade.ownership import require_owned_product
 from fairmade.pagination import Limit, Offset
+from fairmade.private_http import NoStoreRoute
 from fairmade.publication import PublishApproval
 from fairmade.schemas import ErrorResponse, Page, ProductType
 
 router = APIRouter(
     prefix="/api/v1/products/{product_id}/listing",
     tags=["seller listings"],
+    route_class=NoStoreRoute,
     responses={
         **AUTH_ERRORS,
         403: {"model": ErrorResponse},

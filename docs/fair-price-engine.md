@@ -221,6 +221,13 @@ approval, not source verification, certification, or an objective fairness verdi
 
 Each milestone is a separate issue or feature worktree and reviewed PR.
 
+New/updated listing publication now requires a seller-declared quantity for one
+selling unit and approval of its normalized unit-price display. Mass, volume and
+named count dimensions remain distinct; old approved listings remain visible
+with unknown unit pricing. Checkout still charges the original selling-unit
+price. See [the unit-pricing contract](standardized-unit-pricing.md), including
+the frontend publication-validation change and grandfathered snapshots.
+
 Private supplier profiles now support seller-reported ratings and delivery
 observations, immutable correction history and exact known/unknown summary
 denominators. Optional quote references preserve private evidence without changing
