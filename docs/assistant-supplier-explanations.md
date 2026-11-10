@@ -2,6 +2,7 @@
 
 This feature builds on assistant foundation #38 and history extension #39.
 Its main-targeted PR remains draft while prerequisites are unmerged.
+Implementation: [PR #40](https://github.com/Firewallwarden/FairMade/pull/40).
 
 The existing seller question's supplier_report_id selects one owned report.
 No extra request fields or new public endpoint are introduced. Selected quote
