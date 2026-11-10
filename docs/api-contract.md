@@ -93,6 +93,46 @@ not silently sum overlapping reports. Pricing, public disclosures, stock and
 payments remain separate. Migration 0023 follows completed-production 0022;
 frontend acceptance and integration remain pending.
 
+## Private supplier profiles and reliability
+
+Implemented backend proposal: [full contract](private-supplier-reliability.md).
+All paths under /api/v1/seller/suppliers require bearer authentication, current
+seller access and owner scope; there are no public or shared-seller ratings.
+
+| Path under /api/v1/seller/suppliers | Methods / success |
+| --- | --- |
+| (base) | POST 201 ProfileEventResponse (exact retry 200); GET 200 Page of ProfileResponse |
+| /{supplier_id} | GET 200 profile; PUT 200 immutable ProfileEventResponse |
+| /{supplier_id}/history | GET 200 Page of ProfileEventResponse |
+| /{supplier_id}/experiences | POST 201 immutable ExperienceResponse (exact retry 200); GET 200 Page of ExperienceSummary |
+| /{supplier_id}/experiences/{experience_id} | GET 200 immutable detail |
+| /{supplier_id}/reliability | GET 200 exact, evidence-limited ReliabilityResponse |
+
+Profile create: request_id, name, optional location/notes and archived=false.
+PUT is a full metadata replacement adding expected_revision and a nonblank reason.
+Writes atomically save before/after history; name uniqueness and retry keys are
+seller-scoped. Experience POST requires request_id, expected_supplier_revision,
+label and nonfuture observed_on, plus a rating (strict whole 1..5), delivery date
+or notes. promised_on/received_on are individually optional; receipt cannot follow
+observation. Optional source_quote_id explicitly freezes an owned quote without
+changing it. Correction fields corrects_experience_id/correction_reason create a
+single linked successor, preserving historical supplier identity/revision.
+
+Lists use shared pagination bounds. Profiles optionally filter archived;
+experience lists/summaries optionally filter observed_from/observed_until.
+Corrected predecessors are excluded before date filtering; include_corrected=true
+is available on history lists. Summary counts distinguish all experiences, rated
+records, paired-date deliveries and unknown timing. Decimal-string averages and
+on-time fractions use exact integer sums/counts with six-place rounding; missing
+denominators yield null. Opinions never establish verified reliability or relax a
+Quality Lock. Private responses/errors use no-store and validation omits raw input.
+
+401/403 enforce session/seller access, 404 hides missing/cross-owner references,
+409 covers REVISION_CONFLICT, IDEMPOTENCY_CONFLICT, SUPPLIER_EXISTS and
+EXPERIENCE_ALREADY_CORRECTED. Reversed date ranges give 422 INVALID_DATE_RANGE.
+Migration 0024 follows 0023. Existing quote/comparison, inventory, price, payment,
+public listing and Passport APIs are unchanged. Frontend acceptance is pending.
+
 ## Accounts and sessions
 
 | Method and path | JSON request | Success |
@@ -869,6 +909,7 @@ Creation takes only:
 ```json
 {
   "passport_publication_id": "60000000-0000-4000-8000-000000000001",
+  "selling_quantity": {"value": "500", "unit": "g"},
   "seller_display_name": "Example bakery",
   "location": "Exampletown",
   "summary": "Synthetic local-development listing."
@@ -881,6 +922,8 @@ public text (1..200 characters), never populated from account email. Location is
 optional seller-entered label (1..200), not a verified address or geospatial search.
 Summary is optional text (1..1000). Optional fields may be null. Whitespace is
 trimmed; unknown fields, including client price/type/state fields, return 422.
+selling_quantity is optional/null for saving a private draft but required for a
+new publication; see the approved policy and compatibility details below.
 
 The private response has id, product_id, revision, state (draft/active/inactive),
 created_at, updated_at, nullable published_revision, and content. It starts at
@@ -889,13 +932,53 @@ PUT requires the complete content and strict expected_revision, with the same
 bounds as Passport drafts; it increments revision. Stale edits return 409.
 Draft edits do not change the current approved public content or searchable fields.
 
-Preview returns listing_id, revision, preview_hash, and payload. The allowlisted
+Preview returns listing_id, revision, preview_hash, payload and publication_blockers.
+The allowlisted
 payload contains listing_version marketplace-listing-v1, product and price copied
 from the approved Passport, explicit seller_display_name, optional location/summary,
 passport_id, passport_payload_hash, and mandatory notices. No private account,
 product, review, source, or draft IDs are included. The price is a USD decimal string
 in whole cents; the backend also stores authoritative integer cents internally.
 Clients must render seller content as text.
+
+### Standardized selling quantities and unit prices
+
+The user approved requiring quantity/unit before new or updated publication.
+This changes activation validation for older clients. Frontend forms must submit
+selling_quantity and preserve it during full listing/photo replacements; frontend
+acceptance/integration is pending. Incomplete draft saves remain supported.
+
+selling_quantity is {value: decimal string, unit: g|kg|ml|l|egg|dozen|loaf|item} and
+describes contents of one selling unit. Value is finite/positive, at most one
+billion, six decimal places and 64 input characters. Count bases must be whole;
+0.5 dozen is allowed as six eggs. Named egg/dozen/loaf units must match the
+approved product type, otherwise 409 SELLING_QUANTITY_MISMATCH. Labels, private
+cost inputs and comparison targets never supply guessed quantities.
+
+New approved payloads add selling_quantity and server-calculated unit_price with
+calculation_version standard-unit-pricing-v1, currency USD, status, nullable amount,
+reference_unit (kg/l/egg/loaf/item), reference_quantity "1" and unverified basis.
+Decimal arithmetic uses exact conversion factors and six-place half-up display
+rounding. A positive result rounded to zero gives below_display_precision with
+null/omitted amount; an actual zero price gives calculated/"0.000000". Both fields
+and relevant notices participate in the seller's exact preview/hash approval.
+
+Missing quantity produces publication_blockers=[SELLING_QUANTITY_REQUIRED] when
+a new approval is needed, and activation gives 409 SELLING_QUANTITY_REQUIRED.
+An unchanged active legacy revision can still retry its exact approval. Existing
+approved payloads/hashes/timestamps remain unchanged and visible, with missing
+quantity/price interpreted as unknown. New revisions or reactivation require the
+declaration. Draft edits stay private until activation. Public catalog, storefront,
+nearby and saved-product views use the same approved fields.
+
+No schema migration or backfill occurs. Cart/inventory counts and original
+selling prices remain authoritative for commerce. Order items[].unit_price is the
+charge price; items[].listing.unit_price is comparison metadata. No density,
+loaf-weight, generic-item equivalence, quality certification or fairness verdict
+is inferred. See the [full unit-pricing contract](standardized-unit-pricing.md)
+and [synthetic workflow](../backend/examples/unit-pricing/README.md).
+
+### Activation, visibility and browsing
 
 Activation requires the same expected_revision/preview_hash/approved:true body
 as Passport publication. The server serializes the write, recomputes the current

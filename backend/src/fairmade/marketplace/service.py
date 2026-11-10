@@ -22,6 +22,8 @@ from fairmade.passports.schemas import PublicPublication
 from fairmade.photos import repository as photo_repository
 from fairmade.photos.service import selected
 from fairmade.publication import PublishApproval, public_digest
+from fairmade.unit_pricing.schemas import SellingQuantity
+from fairmade.units import named_unit_matches
 
 
 def get_listing(db: Session, product_id: str) -> MarketplaceListing:
@@ -31,17 +33,29 @@ def get_listing(db: Session, product_id: str) -> MarketplaceListing:
     return listing
 
 
-def _publication(db: Session, product_id: str, publication_id: str):
+def _publication(
+    db: Session,
+    product_id: str,
+    publication_id: str,
+    selling_quantity: SellingQuantity | None = None,
+):
     publication = visible_publication(db, publication_id)
     if publication is None or publication.product_id != product_id:
         raise missing()
+    if selling_quantity is not None and not named_unit_matches(
+        publication.payload["product"]["product_type"], selling_quantity.unit
+    ):
+        raise conflict(
+            "SELLING_QUANTITY_MISMATCH",
+            "Named quantity units must match the approved product type.",
+        )
     return publication
 
 
 def create(db: Session, product_id: str, content: ListingContent) -> MarketplaceListing:
     photo_repository.reserve_product(db, product_id)
     selected(db, product_id, content.photos)
-    _publication(db, product_id, str(content.passport_publication_id))
+    _publication(db, product_id, str(content.passport_publication_id), content.selling_quantity)
     if repository.for_product(db, product_id) is not None:
         raise conflict("LISTING_EXISTS", "This product already has a listing.")
     listing = MarketplaceListing(
@@ -66,7 +80,7 @@ def replace(db: Session, product_id: str, body: ReplaceListing) -> MarketplaceLi
     content = ListingContent.model_validate(
         body.model_dump(mode="json", exclude={"expected_revision"})
     )
-    _publication(db, product_id, str(content.passport_publication_id))
+    _publication(db, product_id, str(content.passport_publication_id), content.selling_quantity)
     photo_repository.reserve_product(db, product_id)
     selected(db, product_id, content.photos)
     changed = db.execute(
@@ -88,7 +102,9 @@ def replace(db: Session, product_id: str, body: ReplaceListing) -> MarketplaceLi
 def preview(db: Session, product_id: str) -> ListingPreview:
     listing = get_listing(db, product_id)
     content = ListingContent.model_validate(listing.content)
-    publication = _publication(db, product_id, str(content.passport_publication_id))
+    publication = _publication(
+        db, product_id, str(content.passport_publication_id), content.selling_quantity
+    )
     payload = projection.project(
         content,
         PublicPublication.model_validate(publication),
@@ -99,6 +115,12 @@ def preview(db: Session, product_id: str) -> ListingPreview:
         revision=listing.revision,
         preview_hash=public_digest(payload),
         payload=payload,
+        publication_blockers=(
+            ["SELLING_QUANTITY_REQUIRED"]
+            if content.selling_quantity is None
+            and not (listing.state == "active" and listing.published_revision == listing.revision)
+            else []
+        ),
     )
 
 
@@ -118,6 +140,11 @@ def activate(
     if listing.state == "active" and listing.published_revision == checked.revision:
         db.commit()
         return listing
+    if checked.payload.selling_quantity is None:
+        raise conflict(
+            "SELLING_QUANTITY_REQUIRED",
+            "Provide the quantity and measurement unit in one selling unit before publication.",
+        )
     # All searchable fields come from this approved snapshot, never the mutable draft.
     payload = checked.payload
     photo_repository.replace_public_links(
@@ -173,6 +200,6 @@ def get_public(db: Session, listing_id: str) -> CatalogDetail:
     listing = row[0]
     publication = _publication(db, listing.product_id, listing.published_publication_id)
     return CatalogDetail(
-        **card(listing, public_availability(row)).model_dump(),
+        **card(listing, public_availability(row)).model_dump(mode="json"),
         passport=PublicPublication.model_validate(publication),
     )

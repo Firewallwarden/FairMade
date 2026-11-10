@@ -6,6 +6,11 @@ calculator remains available. Anyone can register a FairMade account and log in.
 Accounts default to buyer; only accounts with verified seller access can manage
 private products and save immutable analysis history. AI services are not called.
 PayPal sandbox calls are opt-in and disabled by default.
+Sellers can keep private supplier profiles, subjective ratings and dated delivery
+observations with immutable corrections and exact summaries that show missing data.
+Optional quote references freeze owned evidence without changing comparisons or
+Quality Locks. See the [private supplier workflow](examples/supplier-records/README.md)
+and [contract and limits](../docs/private-supplier-reliability.md).
 Private per-product recipes now save manually entered ingredient quantities and
 purchase costs, revision-safe edits and immutable costing snapshots. Each explicit
 costing also saves a normal production analysis, without changing stock or prices.
@@ -39,6 +44,11 @@ explicit approval, public snapshots, and withdrawal with hidden-by-default discl
 Marketplace listing drafts add explicit activation/deactivation and anonymous
 browse/detail APIs; approved Passports supply the public product identity and price.
 See the [synthetic listing workflow](examples/marketplace/README.md).
+New and updated listing publications require explicit selling quantities. The
+seller approves the declaration and calculated price per kg/l/egg/loaf/item;
+older approved snapshots remain visible with unknown unit pricing. Checkout
+still charges per selling unit. See the [unit-pricing workflow](examples/unit-pricing/README.md)
+and [contract and frontend impact](../docs/standardized-unit-pricing.md).
 Public listings now include exact recorded available quantities after active
 reservations, with availability filters for catalog, storefront and nearby
 listing searches. Saved-product cards share the live projection. Unknown or

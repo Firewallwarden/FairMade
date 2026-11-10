@@ -278,6 +278,7 @@ def test_new_passport_requires_new_listing_approval(
                 **listing_content,
                 "expected_revision": 1,
                 "passport_publication_id": publication["id"],
+                "selling_quantity": {"value": "1", "unit": "item"},
             },
         ).status_code
         == 200
@@ -383,6 +384,7 @@ def test_other_sellers_cannot_manage_or_link_private_products(
                 **listing_content,
                 "expected_revision": 1,
                 "passport_publication_id": another["publication"]["id"],
+                "selling_quantity": {"value": "1", "unit": "item"},
             },
         ).status_code
         == 404
@@ -443,6 +445,7 @@ def test_search_filters_literal_wildcards_pagination_and_stable_order(
             headers=market_headers,
             json={
                 "passport_publication_id": record["publication"]["id"],
+                "selling_quantity": {"value": "1", "unit": "item"},
                 "seller_display_name": "Example Bakery" if i < 2 else "Example Farm",
                 "location": "Springfield" if i < 2 else "Elsewhere",
             },
@@ -615,6 +618,7 @@ def test_public_price_minor_units_are_exact(
         headers=market_headers,
         json={
             "passport_publication_id": record["publication"]["id"],
+            "selling_quantity": {"value": "1", "unit": "item"},
             "seller_display_name": "Example",
         },
     )
