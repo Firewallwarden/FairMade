@@ -80,6 +80,46 @@ not silently sum overlapping reports. Pricing, public disclosures, stock and
 payments remain separate. Migration 0023 follows completed-production 0022;
 frontend acceptance and integration remain pending.
 
+## Private supplier profiles and reliability
+
+Implemented backend proposal: [full contract](private-supplier-reliability.md).
+All paths under /api/v1/seller/suppliers require bearer authentication, current
+seller access and owner scope; there are no public or shared-seller ratings.
+
+| Path under /api/v1/seller/suppliers | Methods / success |
+| --- | --- |
+| (base) | POST 201 ProfileEventResponse (exact retry 200); GET 200 Page of ProfileResponse |
+| /{supplier_id} | GET 200 profile; PUT 200 immutable ProfileEventResponse |
+| /{supplier_id}/history | GET 200 Page of ProfileEventResponse |
+| /{supplier_id}/experiences | POST 201 immutable ExperienceResponse (exact retry 200); GET 200 Page of ExperienceSummary |
+| /{supplier_id}/experiences/{experience_id} | GET 200 immutable detail |
+| /{supplier_id}/reliability | GET 200 exact, evidence-limited ReliabilityResponse |
+
+Profile create: request_id, name, optional location/notes and archived=false.
+PUT is a full metadata replacement adding expected_revision and a nonblank reason.
+Writes atomically save before/after history; name uniqueness and retry keys are
+seller-scoped. Experience POST requires request_id, expected_supplier_revision,
+label and nonfuture observed_on, plus a rating (strict whole 1..5), delivery date
+or notes. promised_on/received_on are individually optional; receipt cannot follow
+observation. Optional source_quote_id explicitly freezes an owned quote without
+changing it. Correction fields corrects_experience_id/correction_reason create a
+single linked successor, preserving historical supplier identity/revision.
+
+Lists use shared pagination bounds. Profiles optionally filter archived;
+experience lists/summaries optionally filter observed_from/observed_until.
+Corrected predecessors are excluded before date filtering; include_corrected=true
+is available on history lists. Summary counts distinguish all experiences, rated
+records, paired-date deliveries and unknown timing. Decimal-string averages and
+on-time fractions use exact integer sums/counts with six-place rounding; missing
+denominators yield null. Opinions never establish verified reliability or relax a
+Quality Lock. Private responses/errors use no-store and validation omits raw input.
+
+401/403 enforce session/seller access, 404 hides missing/cross-owner references,
+409 covers REVISION_CONFLICT, IDEMPOTENCY_CONFLICT, SUPPLIER_EXISTS and
+EXPERIENCE_ALREADY_CORRECTED. Reversed date ranges give 422 INVALID_DATE_RANGE.
+Migration 0024 follows 0023. Existing quote/comparison, inventory, price, payment,
+public listing and Passport APIs are unchanged. Frontend acceptance is pending.
+
 ## Accounts and sessions
 
 | Method and path | JSON request | Success |
