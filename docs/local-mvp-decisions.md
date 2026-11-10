@@ -33,6 +33,29 @@ separate from backend availability.
 
 ## Current implementation limits to revisit
 
+### Local assistant decision: MVP-021
+
+The user approved option 1: Ollama with Qwen3 8B locally, with no paid inference.
+The [assistant foundation](local-assistants.md) implements separate owner-scoped
+seller and approved-public buyer contexts, validated proposed-price extraction,
+deterministic financial facts, cited qualitative AI explanations and explicit
+failure responses. No cloud fallback, auto-download or autonomous changes.
+Frontend integration is pending. This entry records the provider decision;
+read-only/stateless behavior, bounded evidence, single-process concurrency and
+no durable conversation history are implementation limits, not separate user choices.
+
+Real-model evaluation exposed incorrect numeric recombinations and financial
+interpretations. The foundation therefore keeps exact outcomes in server facts
+and supplies qualitative context to the explanation model. Schema/citation and
+numeric-prose checks are not proofs of semantic correctness; review remains
+required. See the contract's evaluation notes and explicit operational limits.
+
+Receipt scanning, forecasting, personalization and basket optimization are
+explicitly deferred until foundational assistants work and the schedule allows.
+They remain backlog items. Further assistant capabilities, persistence, hosted
+use, a new model/provider, external retrieval and spending require their own
+scope/operational review; this entry does not activate a continuous feature cycle.
+
 These are documented boundaries, not claims that the user individually selected
 each detail or approved a production replacement.
 
@@ -40,7 +63,7 @@ each detail or approved a production replacement.
 | --- | --- | --- | --- |
 | MVP-008 | Original account foundation recorded pending seller intent only, with verification/role decisions deferred. [Account workflow](../backend/README.md). | Superseded by approved manual-review MVP-017; retain this entry as history of the initial boundary. No automatic decisions or evidence were backfilled. | Production verification standards, evidence, audit/revocation/recovery and onboarding controls remain subject to the follow-up in MVP-017. |
 | MVP-009 | USD-only deterministic economics; explicit modeled fees; limited unit conversions and bounded requests/reports. [Economics formulas and limits](fair-price-engine.md). | Implemented. Taxes, shipping, discounts and multi-currency settlement are not modeled in checkout totals. | Before broader commerce: agree tax/shipping/discount rules and supported currencies/units, exact rounding and provider reconciliation. Do not invent fees or exchange rates. |
-| MVP-010 | Manually entered unverified market/supplier evidence and deterministic quality checks; no external price retrieval, source verification or LLM provider. [Engine roadmap](fair-price-engine.md). | Implemented provenance/freshness rules, Quality Locks, reports and seller-approved Passports. A passing claim check or publication is not certification or an objective fairness verdict. | Review approved evidence sources, verification, freshness and quality equivalence before external integrations/recommendations. AI/provider spending and new infrastructure need approval. |
+| MVP-010 | Manually entered unverified market/supplier evidence and deterministic quality checks; external price retrieval and verification deferred. [Engine roadmap](fair-price-engine.md). | Implemented provenance/freshness, Quality Locks, reports and approved Passports. Original no-LLM boundary is superseded only by approved local assistant MVP-021. A passing claim check or publication is not certification or objective fairness. | Review approved sources, verification, freshness and quality equivalence before external integrations/recommendations. New provider spending/infrastructure still require approval. |
 | MVP-011 | Sellable-product stock/holds are implemented, but raw-material inventory, production consumption, fulfillment and return restocking are separate. [Order/inventory contract](api-contract.md). | Implemented local commerce foundation. Refunds do not automatically reverse production costs or restock. | Define production and fulfillment workflows and stock reconciliation before coupling these features. Test concurrency, expiry, retries and recovery at the intended usage level. |
 | MVP-012 | Backend JSON APIs/examples exist; shared frontend contract acceptance and real browser/end-to-end integration remain pending. [API contract status](api-contract.md). | Backend-tested local implementation; this register does not claim a working frontend or successful provider/browser checkout. | Coordinate frontend acceptance, browser session/CORS/payment behavior and end-to-end checks before calling a user journey complete. |
 | MVP-013 | Nearby search uses manually chosen points at most two decimal places, straight-line spherical distance, a 1..500 km radius, and a 1,000-candidate bounding-box limit. [Discovery #26](https://github.com/Firewallwarden/FairMade/pull/26). | Integrated into main by #26. No maps/geocoding service or buyer-location storage. Results do not guarantee travel distance, pickup address, anonymity or stock. A too-broad query errors explicitly rather than returning a truncated nearest-first page. | Improve location entry and spatial search as usage grows; review radius/precision policy and disclosure UX with the frontend. Choose any provider/infrastructure separately. Keep privacy, bounded requests and current publication/authorization checks when replacing this implementation. |

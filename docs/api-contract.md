@@ -7,6 +7,18 @@ below are implemented by the backend for **local development**. Their shared int
 **proposed; frontend acceptance and browser integration are pending**. No frontend
 changes are included. The existing stateless calculator retains its #2 behavior.
 
+Local seller and buyer assistant endpoints are also implemented as an opt-in
+backend foundation. Their additive HTTP proposal, source boundaries, response
+fields, error codes and frontend rendering requirements are specified in
+[the local assistant contract](local-assistants.md).
+POST /api/v1/assistants/seller accepts question, product_id and optional
+analysis_id/supplier_report_id. POST /api/v1/assistants/buyer accepts question
+and one to four unique listing_ids. Both require bearer authentication; seller
+questions additionally require verified seller access and product ownership.
+Responses separate deterministic facts from cited qualitative AI paragraphs
+and return allowlisted evidence and notices. Model prose must not replace the
+exact financial facts. Frontend integration remains pending.
+
 **Authorization change from #5:** registration now creates a buyer account.
 Private product/history endpoints require the seller role and return 403 until
 that access is granted after verification. Account responses add `roles`; the
