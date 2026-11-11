@@ -35,6 +35,9 @@ separate from backend availability.
 
 ### Private messages for existing orders: DOMAIN-008
 
+[Implementation PR #48](https://github.com/Firewallwarden/FairMade/pull/48)
+is a main-targeted draft dependent on #38 through #45; not yet integrated.
+
 The user confirmed option 1: order-bound buyer–seller messages, and explicitly
 asked to record option 2 (pre-purchase product/storefront inquiries) as a later
 improvement. [Messaging contract and frontend handoff](order-messaging.md).

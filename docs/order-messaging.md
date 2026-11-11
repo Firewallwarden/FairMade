@@ -1,5 +1,9 @@
 # Private order messaging
 
+[Implementation PR #48](https://github.com/Firewallwarden/FairMade/pull/48)
+targets main and remains draft behind #38 through #45. It is not integrated
+into main; refresh dependent branches after prerequisite squash merges.
+
 Backend implementation and additive frontend contract proposal. The user chose
 option 1: buyer–seller messages tied to an existing order. Option 2,
 pre-purchase product/storefront inquiries, is explicitly a later improvement;
