@@ -30,6 +30,7 @@ class SellerQuestion(Contract):
     analysis_id: UUID | None = None
     supplier_report_id: UUID | None = None
     history_period: HistoryPeriod | None = None
+    pricing_review_id: UUID | None = None
 
 
 class BuyerQuestion(Contract):

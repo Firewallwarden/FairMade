@@ -6,6 +6,7 @@ from decimal import Decimal
 from fairmade.assistants.history import history_context
 from fairmade.assistants.schemas import Evidence
 from fairmade.assistants.supplier_explanations import supplier_context
+from fairmade.price_advice.integration import context as price_advice_context
 
 DIGITS = re.compile(r"[-+]?\d+(?:,\d{3})*(?:\.\d+)?")
 QUESTION_AMOUNTS = re.compile(r"(?:USD\s*|\$)?[-+]?\d+(?:,\d{3})*(?:\.\d+)?")
@@ -35,6 +36,8 @@ def model_evidence(evidence: list[Evidence]) -> list[dict]:
         data = history_context(fact)
         if data is None:
             data = supplier_context(fact)
+        if data is None:
+            data = price_advice_context(fact)
         if data is None:
             data = fact.data
         if fact.title == "Selected saved production economics":

@@ -13,6 +13,8 @@ from fairmade.evidence import today
 from fairmade.marketplace.service import get_public
 from fairmade.models import Analysis, QualityLockSet
 from fairmade.ownership import require_owned_product
+from fairmade.price_advice.integration import TITLE as PRICE_ADVICE_TITLE
+from fairmade.price_advice.service import recommend as price_advice
 from fairmade.pricing.schemas import PricingRequest, PricingResponse
 from fairmade.pricing.service import calculate
 
@@ -23,6 +25,15 @@ def add(facts: list[Evidence], title: str, data: dict, basis="seller_reported_un
 
 def seller_evidence(db: Session, account_id: str, body: SellerQuestion) -> list[Evidence]:
     product = require_owned_product(db, account_id, body.product_id)
+    advice = (
+        price_advice(db, account_id, product.id, body.pricing_review_id)
+        if body.pricing_review_id
+        else None
+    )
+    if advice and body.analysis_id and body.analysis_id != advice.pricing_analysis_id:
+        raise api_error(
+            409, "PRICING_SOURCE_MISMATCH", "Use the pricing review's selected analysis."
+        )
     facts: list[Evidence] = []
     add(
         facts,
@@ -35,8 +46,9 @@ def seller_evidence(db: Session, account_id: str, body: SellerQuestion) -> list[
         },
     )
     statement = select(Analysis).where(Analysis.product_id == product.id)
-    if body.analysis_id:
-        statement = statement.where(Analysis.id == str(body.analysis_id))
+    selected_id = advice.pricing_analysis_id if advice else body.analysis_id
+    if selected_id:
+        statement = statement.where(Analysis.id == str(selected_id))
     analysis = db.scalar(
         statement.order_by(Analysis.created_at.desc(), Analysis.id.desc()).limit(1)
     )
@@ -82,6 +94,8 @@ def seller_evidence(db: Session, account_id: str, body: SellerQuestion) -> list[
             supplier_details(db, product.id, body.supplier_report_id, today()),
         )
     history_evidence(db, account_id, body, facts)
+    if advice is not None:
+        add(facts, PRICE_ADVICE_TITLE, advice.model_dump(mode="json"))
     return facts
 
 
