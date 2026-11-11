@@ -7,6 +7,7 @@ from uuid import UUID
 
 from pydantic import Field
 
+from fairmade.money_changes import AmountChange
 from fairmade.pricing.schemas import Contract
 from fairmade.receipts.aggregates import ExpenseTotals
 
@@ -22,11 +23,6 @@ class InsightRequest(InsightOptions):
 class Window(Contract):
     start_date: date
     end_date: date
-
-
-class AmountChange(Contract):
-    change: Decimal | None
-    relative_change: Decimal | None
 
 
 class ExpenseComparison(Contract):

@@ -2,6 +2,13 @@
 
 ## Status and common conventions
 
+Saved cost calendars are an additive backend proposal at POST
+/api/v1/products/{product_id}/cost-calendar, with strict months one through
+thirty-six (default twenty-four). Seller questions/saved scopes accept optional
+cost_calendar. Closed save-month snapshots and annual comparisons are descriptive;
+validated seasonality is not claimed. See
+[the exact scope, missing evidence and handoff](saved-cost-calendar.md).
+
 Conditional price recommendations are an additive backend proposal at POST
 /api/v1/products/{product_id}/pricing-recommendations with an owned review_id.
 Seller questions/saved scopes accept pricing_review_id, pinning its analysis.

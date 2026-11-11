@@ -1,32 +1,16 @@
 """Deterministic comparisons and cautious review opportunities, never invented savings."""
 
-from decimal import ROUND_HALF_UP, Decimal, localcontext
+from decimal import Decimal, localcontext
 
+from fairmade.money_changes import difference, displayed
 from fairmade.seller_insights.records import CostObservation
 from fairmade.seller_insights.schemas import (
-    AmountChange,
     CostComparison,
     InsightAlert,
     InsightReport,
     MaterialWaste,
     ProductionOutput,
 )
-
-
-def displayed(value: Decimal) -> Decimal:
-    return value.quantize(Decimal("0.000001"), rounding=ROUND_HALF_UP)
-
-
-def difference(previous: Decimal | None, current: Decimal | None) -> AmountChange:
-    if previous is None or current is None:
-        return AmountChange(change=None, relative_change=None)
-    with localcontext() as context:
-        context.prec = 50
-        delta = current - previous
-        return AmountChange(
-            change=displayed(delta),
-            relative_change=displayed(delta / previous) if previous else None,
-        )
 
 
 def cost_comparison(

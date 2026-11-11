@@ -12,6 +12,8 @@ from fairmade.auth import api_error
 from fairmade.baskets.integration import evidence as basket_evidence
 from fairmade.bundles.integration import evidence as bundle_evidence
 from fairmade.composition.integration import recipe_evidence
+from fairmade.cost_calendar.integration import TITLE as CALENDAR_TITLE
+from fairmade.cost_calendar.service import report as calendar_report
 from fairmade.evidence import today
 from fairmade.forecasting.integration import TITLE as FORECAST_TITLE
 from fairmade.forecasting.service import forecast
@@ -105,6 +107,13 @@ def seller_evidence(db: Session, account_id: str, body: SellerQuestion) -> list[
             supplier_details(db, product.id, body.supplier_report_id, today()),
         )
     history_evidence(db, account_id, body, facts)
+    if body.cost_calendar is not None:
+        add(
+            facts,
+            CALENDAR_TITLE,
+            calendar_report(db, account_id, product.id, body.cost_calendar).model_dump(mode="json"),
+            "seller_recorded_save_month_not_actual_expenses",
+        )
     if advice is not None:
         add(facts, PRICE_ADVICE_TITLE, advice.model_dump(mode="json"))
     if body.include_recipe_inputs:

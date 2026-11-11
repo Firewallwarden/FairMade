@@ -11,6 +11,7 @@ from fairmade.baskets.integration import context as basket_context
 from fairmade.bundles.integration import context as bundle_context
 from fairmade.composition.integration import context as recipe_context
 from fairmade.composition.integration import public_context as composition_context
+from fairmade.cost_calendar.integration import context as calendar_context
 from fairmade.forecasting.integration import context as forecast_context
 from fairmade.personalization.integration import context as personalization_context
 from fairmade.price_advice.integration import context as price_advice_context
@@ -47,6 +48,8 @@ def model_evidence(evidence: list[Evidence]) -> list[dict]:
             data = expense_context(fact)
         if data is None:
             data = insight_context(fact)
+        if data is None:
+            data = calendar_context(fact)
         if data is None:
             data = supplier_context(fact)
         if data is None:

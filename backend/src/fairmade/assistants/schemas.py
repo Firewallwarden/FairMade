@@ -8,6 +8,7 @@ from pydantic import Field, StrictBool, model_validator
 
 from fairmade.baskets.schemas import BasketRequest
 from fairmade.bundles.schemas import BundleRequest
+from fairmade.cost_calendar.schemas import CalendarOptions
 from fairmade.evidence import Amount
 from fairmade.forecasting.schemas import ForecastRequest
 from fairmade.pricing.schemas import Contract
@@ -46,6 +47,7 @@ class SellerQuestion(Contract):
         return self
 
     insights: InsightOptions | None = None
+    cost_calendar: CalendarOptions | None = None
     forecast: ForecastRequest | None = None
     bundles: BundleRequest | None = None
 

@@ -13,6 +13,7 @@ from fairmade.assistants.schemas import (
     SellerQuestion,
 )
 from fairmade.bundles.schemas import BundleRequest
+from fairmade.cost_calendar.schemas import CalendarOptions
 from fairmade.forecasting.schemas import ForecastRequest
 from fairmade.pricing.schemas import Contract
 from fairmade.schemas import UTCResponse
@@ -39,6 +40,7 @@ class SellerScope(Contract):
         return self
 
     insights: InsightOptions | None = None
+    cost_calendar: CalendarOptions | None = None
     forecast: ForecastRequest | None = None
     bundles: BundleRequest | None = None
 
