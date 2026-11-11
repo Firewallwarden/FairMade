@@ -1,0 +1,8 @@
+{
+  "supplier_report_id": "9f6f34cc-6e55-4275-92b3-75812f949f03",
+  "mode": "balanced",
+  "cost_objective": "purchase_outlay",
+  "preferences": [
+    { "key": "preferred_grade", "label": "Preferred grade claim", "type": "choice", "allowed_values": ["premium"] }
+  ]
+}

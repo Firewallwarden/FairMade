@@ -36,6 +36,20 @@ def visible_listings():
     )
 
 
+def filtered_listings(*, query: str | None, product_type: str | None, location: str | None):
+    statement = visible_listings()
+    if query:
+        # Treat %, _ and / literally rather than as SQL LIKE patterns.
+        statement = statement.where(
+            MarketplaceListing.search_text.contains(query.casefold(), autoescape=True)
+        )
+    if product_type:
+        statement = statement.where(MarketplaceListing.product_type == product_type)
+    if location:
+        statement = statement.where(MarketplaceListing.location_key == location.casefold())
+    return statement
+
+
 def browse(
     db: Session,
     *,
@@ -46,16 +60,14 @@ def browse(
     offset: int,
     availability: AvailabilityStatus | None = None,
 ):
-    statement = with_availability(visible_listings(), availability)
-    if query:
-        # Treat %, _ and / literally rather than as SQL LIKE patterns.
-        statement = statement.where(
-            MarketplaceListing.search_text.contains(query.casefold(), autoescape=True)
-        )
-    if product_type:
-        statement = statement.where(MarketplaceListing.product_type == product_type)
-    if location:
-        statement = statement.where(MarketplaceListing.location_key == location.casefold())
+    statement = with_availability(
+        filtered_listings(
+            query=query,
+            product_type=product_type,
+            location=location,
+        ),
+        availability,
+    )
     return db.execute(
         statement.order_by(MarketplaceListing.published_at.desc(), MarketplaceListing.id.desc())
         .limit(limit)

@@ -5,9 +5,10 @@ from decimal import Decimal
 from typing import Annotated, Literal, Self
 from uuid import UUID
 
-from pydantic import Field, StrictBool, model_validator
+from pydantic import ConfigDict, Field, StrictBool, model_validator
 
 from fairmade.comparisons.schemas import Amount, Quantity
+from fairmade.composition.schemas import CompositionDisclosure
 from fairmade.pricing.schemas import Contract, CostCategory, Label
 from fairmade.publication import PublishApproval as PublishApproval
 from fairmade.publication import Revision as Revision
@@ -27,6 +28,7 @@ class DisclosurePolicy(Contract):
     include_quality_requirements: StrictBool = False
     include_quality_summary: StrictBool = False
     include_market_context: StrictBool = False
+    include_composition: StrictBool = False
 
     @model_validator(mode="after")
     def unique_categories(self) -> Self:
@@ -36,11 +38,21 @@ class DisclosurePolicy(Contract):
 
 
 class DraftContent(Contract):
+    # Preserve the existing OpenAPI component name when nested quantity schemas differ by mode.
+    model_config = ConfigDict(json_schema_mode_override="validation")
+
     review_id: UUID
     title: Label
     price: SellerPrice
     public_description: PublicDescription | None = None
     disclosures: DisclosurePolicy = Field(default_factory=DisclosurePolicy)
+    composition: CompositionDisclosure | None = None
+
+    @model_validator(mode="after")
+    def composition_disclosure_needs_data(self) -> Self:
+        if self.disclosures.include_composition and self.composition is None:
+            raise ValueError("Provide composition before enabling its disclosure")
+        return self
 
 
 class ReplaceDraft(DraftContent):
@@ -106,6 +118,7 @@ class PublicPassport(Contract):
     quality_requirements: list[Rule] | None = None
     quality_summary: PublicQualitySummary | None = None
     market_context: PublicMarketContext | None = None
+    composition: CompositionDisclosure | None = None
     notices: list[str]
 
 

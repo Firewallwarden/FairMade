@@ -2,19 +2,23 @@ from datetime import datetime
 from typing import Annotated, Literal
 from uuid import UUID
 
-from pydantic import Field, field_validator
+from pydantic import Field, StrictBool, field_validator, model_validator
 
 from fairmade.assistants.schemas import (
     AssistantResponse,
     BuyerQuestion,
+    BuyerSelection,
     HistoryPeriod,
     Question,
     SellerQuestion,
 )
+from fairmade.bundles.schemas import BundleRequest
 from fairmade.cost_calendar.schemas import CalendarOptions
+from fairmade.forecasting.schemas import ForecastRequest
 from fairmade.pricing.schemas import Contract
 from fairmade.schemas import UTCResponse
 from fairmade.seller_insights.schemas import InsightOptions
+from fairmade.supplier_recommendations.schemas import RecommendationOptions
 
 ConversationRevision = Annotated[int, Field(strict=True, ge=0, le=40)]
 
@@ -25,20 +29,24 @@ class SellerScope(Contract):
     analysis_id: UUID | None = None
     supplier_report_id: UUID | None = None
     history_period: HistoryPeriod | None = None
+    pricing_review_id: UUID | None = None
+    include_recipe_inputs: StrictBool = False
+    recommendations: RecommendationOptions | None = None
+
+    @model_validator(mode="after")
+    def selected_supplier_report(self):
+        if self.recommendations is not None and self.supplier_report_id is None:
+            raise ValueError("Select supplier_report_id for recommendation options")
+        return self
+
     insights: InsightOptions | None = None
     cost_calendar: CalendarOptions | None = None
+    forecast: ForecastRequest | None = None
+    bundles: BundleRequest | None = None
 
 
-class BuyerScope(Contract):
+class BuyerScope(BuyerSelection):
     role: Literal["buyer"]
-    listing_ids: Annotated[list[UUID], Field(min_length=1, max_length=4)]
-
-    @field_validator("listing_ids")
-    @classmethod
-    def unique_listings(cls, values):
-        if len(set(values)) != len(values):
-            raise ValueError("Select each listing only once")
-        return values
 
 
 Scope = Annotated[SellerScope | BuyerScope, Field(discriminator="role")]
