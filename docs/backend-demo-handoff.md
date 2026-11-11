@@ -73,10 +73,17 @@ Checks completed:
 - All 35 example JSON files and 230 existing local documentation links passed;
   the two handoff documents passed 29 local-link checks separately.
 
-The full suite is rerunning with persistent JUnit/text output under
-`backend/.pytest_cache/combined-validation.xml` and `combined-validation.log`.
-An interrupted tool session lost access to the earlier run's final summary;
-its result is not claimed. The final captured result will replace this note.
+The full suite passed: **1,604 passed, 27 skipped, zero failures or errors**
+(1,631 collected cases). All 99 test files were covered exactly once in four
+disjoint groups; every worker exited zero. Persistent JUnit/text output is under
+`backend/.pytest_cache/combined-group-{0..3}.xml` and matching `.log` files.
+The file lists are saved as `test-group-{0..3}.json` in that directory; worker
+exit codes are saved separately. Group pass/skip totals were 472/4, 393/7,
+342/14 and 397/2. The slowest group took about twenty-two minutes. Each group
+reported the existing Starlette/httpx TestClient deprecation warning.
+Interrupted attached runs are not included in these results. Opt-in model
+evaluations are distinguished from the seven real dialogues reported above;
+these results do not establish real image OCR or credentialed PayPal readiness.
 
 The integration check reproduced one interaction issue: with a newer analysis
 present, price advice selected the saved review's analysis while the insight
