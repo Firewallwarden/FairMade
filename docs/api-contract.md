@@ -2,6 +2,13 @@
 
 ## Status and common conventions
 
+Order-bound buyer/seller messages are an additive backend proposal at
+/api/v1/orders/{order_id}/messages (GET/POST): private participant access,
+retry-safe sends and cursor history. Apply migration 0029 after 0028. See
+[message schemas, privacy, limits and frontend handoff](order-messaging.md).
+Pre-purchase inquiries are explicitly a later improvement; frontend acceptance
+remains pending. Messages do not change commerce state or feed AI memory.
+
 Opt-in buyer personalization is an additive backend proposal at
 /api/v1/buyer/personalization (GET/PUT/DELETE), /suggestions (POST) and /remember
 (POST). Confirmed profile memory, current favorites and verified sandbox
