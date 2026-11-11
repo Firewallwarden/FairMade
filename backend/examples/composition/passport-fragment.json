@@ -1,0 +1,14 @@
+{
+  "disclosures": { "include_composition": true },
+  "composition": {
+    "completeness": "partial",
+    "items": [
+      {
+        "label": "Seller-declared flour", "kind": "ingredient",
+        "reported_role": "Seller's structure claim", "reported_specification": "Seller-reported flour grade",
+        "declared_quantity": { "value": "400", "unit": "g" }
+      },
+      { "label": "Paper wrap", "kind": "packaging", "reported_role": "Packaging declaration" }
+    ]
+  }
+}

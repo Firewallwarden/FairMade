@@ -9,10 +9,11 @@ from fastapi.responses import JSONResponse
 from fairmade.auth import AUTH_ERRORS, DB, VerifiedSeller
 from fairmade.availability.query import public_availability
 from fairmade.availability.schemas import AvailabilityStatus
+from fairmade.catalog_ordering import service as ordering
+from fairmade.catalog_ordering.schemas import OrderedCatalogPage, SortMode
 from fairmade.marketplace import repository, service
 from fairmade.marketplace.errors import ListingError
 from fairmade.marketplace.schemas import (
-    CatalogCard,
     CatalogDetail,
     ListingContent,
     ListingPreview,
@@ -23,7 +24,8 @@ from fairmade.ownership import require_owned_product
 from fairmade.pagination import Limit, Offset
 from fairmade.private_http import NoStoreRoute
 from fairmade.publication import PublishApproval
-from fairmade.schemas import ErrorResponse, Page, ProductType
+from fairmade.schemas import ErrorResponse, ProductType
+from fairmade.unit_pricing.schemas import ReferenceUnit
 
 router = APIRouter(
     prefix="/api/v1/products/{product_id}/listing",
@@ -39,6 +41,8 @@ router = APIRouter(
 public_router = APIRouter(
     prefix="/api/v1/marketplace/listings",
     tags=["public marketplace"],
+    route_class=NoStoreRoute,
+    responses={409: {"model": ErrorResponse}},
 )
 
 
@@ -87,7 +91,7 @@ def deactivate(product_id: UUID, db: DB, seller: VerifiedSeller):
     return Response(status_code=204)
 
 
-@public_router.get("", response_model=Page[CatalogCard], response_model_exclude_none=True)
+@public_router.get("", response_model=OrderedCatalogPage, response_model_exclude_none=True)
 def browse(
     db: DB,
     response: Response,
@@ -97,8 +101,22 @@ def browse(
     product_type: ProductType | None = None,
     location: Annotated[str | None, Query(min_length=1, max_length=200)] = None,
     availability: AvailabilityStatus | None = None,
+    sort: SortMode | None = None,
+    reference_unit: ReferenceUnit | None = None,
 ):
     response.headers["Cache-Control"] = "no-store"
+    if sort is not None:
+        return ordering.catalog(
+            db,
+            ordering.options(sort, product_type, reference_unit),
+            q.strip() if q else None,
+            location.strip() if location else None,
+            availability,
+            limit,
+            offset,
+        )
+    if reference_unit is not None:
+        ordering.options("newest", product_type, reference_unit)
     items = repository.browse(
         db,
         query=q.strip() if q else None,
