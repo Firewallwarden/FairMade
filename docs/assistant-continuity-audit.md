@@ -67,8 +67,12 @@ The user restarted the continuous cycle and approved local Tesseract plus Qwen3
 for receipts. [Receipt review](receipt-expenses.md) and
 [receipt-expense questions](assistant-receipt-expenses.md) now have backend
 implementations. Tesseract installation and full image OCR validation remain
-pending. Forecasting, personalization and basket optimization remain follow-ups
-with their own data/design requirements; browser integration is still pending.
+pending. [Opt-in buyer personalization](buyer-personalization.md) now connects
+confirmed profile preferences, favorites and verified sandbox purchases to buyer
+answers. Remembered-preference proposals read owned saved buyer questions and
+require confirmation. Profile erasure clears derived answer copies while
+original user messages have separate conversation deletion controls.
+Forecasting and basket optimization remain follow-ups; browser integration is pending.
 
 Thirty-day inactivity expiry and history/resource caps are documented
 implementation limits. Durable storage is the confirmed user choice. Scheduled

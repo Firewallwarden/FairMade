@@ -174,8 +174,9 @@ checks remain pending.
 
 Receipt extraction/review and approved expense questions now have separate
 [backend implementations](receipt-expenses.md), with real image OCR validation
-pending. Demand/inventory forecasting, personalized recommendations and basket
-optimization remain follow-ups. Revisit them after foundation
+pending. [Opt-in personalization](buyer-personalization.md) adds confirmed profile
+memory, favorites and verified sandbox purchase signals to buyer answers.
+Demand/inventory forecasting and basket optimization remain follow-ups. Revisit them after foundation
 integration/evaluation and as the submission schedule permits. Further work
 includes richer supplier suggestions, sales/history questions, bundles,
 description generation and alerts. No automatic background feature cycle or

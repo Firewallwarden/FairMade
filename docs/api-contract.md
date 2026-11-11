@@ -2,6 +2,13 @@
 
 ## Status and common conventions
 
+Opt-in buyer personalization is an additive backend proposal at
+/api/v1/buyer/personalization (GET/PUT/DELETE), /suggestions (POST) and /remember
+(POST). Confirmed profile memory, current favorites and verified sandbox
+purchase signals now inform buyer answers. See
+[consent, memory, ranking and frontend handoff](buyer-personalization.md).
+Migration 0028 is required; frontend integration remains pending.
+
 Receipt extraction/review is an additive backend proposal under
 /api/v1/seller/receipt-drafts, with owner GET /api/v1/seller/expenses.
 Drafts require explicit seller approval before an immutable expense is recorded.

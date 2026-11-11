@@ -33,6 +33,30 @@ separate from backend availability.
 
 ## Current implementation limits to revisit
 
+### Buyer personalization and profile memory: DOMAIN-005
+
+The user selected option 2: opt-in activity-based personalization using favorites
+and purchase history alongside stated preferences, explicitly emphasizing saved
+assistant memory. [Contract and controls](buyer-personalization.md).
+Buyer conversations now consume confirmed profile memory; saved buyer questions
+can propose budget/type updates for confirmation. Account defaults remain off.
+Seller conversations/private records and inferred sensitive traits are excluded.
+
+Thirty-day expiry from the last confirmed update, ninety-day sandbox purchase
+signals, two hundred activity rows, one hundred matching candidates, four
+suggestions, per-listed-unit USD budgets, published location labels and simple
+affinity ordering are implementation limits, not individual confirmed choices.
+Disable/delete clears preferences and profile-derived saved answer copies.
+Minimal revision tombstones prevent stale-tab restoration; user messages,
+favorites and orders have separate deletion/retention policies.
+
+Before hosting, review retention/backup/erasure, scheduled cleanup, larger data
+windows, granular consent/monitoring, historical variant semantics, safety
+evidence and frontend/browser evaluation. Basket budgets and multi-seller
+optimization need separate design. Persistent personalization is the chosen
+foundation, not an automatically temporary feature to replace with stateless
+behavior after MVP.
+
 ### Receipt OCR and expenses: DOMAIN-004
 
 After restarting the continuous cycle, the user chose option 1: free local
@@ -122,7 +146,8 @@ required. See the contract's evaluation notes and explicit operational limits.
 
 Receipt scanning was initially deferred; after restarting the continuous cycle
 the user selected the implementation tracked in DOMAIN-004 above. Forecasting,
-personalization and basket optimization remain backlog items. Further assistant capabilities, hosted
+and basket optimization remain backlog items. Personalization is implemented
+under DOMAIN-005 above. Further assistant capabilities, hosted
 use, a new model/provider, external retrieval and spending require their own
 scope/operational review; this entry does not activate a continuous feature cycle.
 

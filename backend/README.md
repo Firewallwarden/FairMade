@@ -7,6 +7,10 @@ Accounts default to buyer; only accounts with verified seller access can manage
 private products and save immutable analysis history. Local Qwen3 8B assistants
 are opt-in and disabled by default; the core calculators never call AI.
 PayPal sandbox calls are opt-in and disabled by default.
+Buyer personalization supports explicit opt-in, remembered preferences, favorites
+and verified sandbox purchase signals. Buyer conversations reload that memory;
+preference proposals from saved questions require confirmation. Apply migration
+0028 and see [the buyer memory workflow](../docs/buyer-personalization.md).
 Receipt images can now become private OCR/AI drafts and explicitly reviewed
 expense records. Run migration 0027 and configure local Tesseract plus the
 existing Qwen3 model. See [receipt setup, review and limits](../docs/receipt-expenses.md).
