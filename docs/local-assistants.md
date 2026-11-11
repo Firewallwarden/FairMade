@@ -164,11 +164,13 @@ Ollama references: [chat API](https://docs.ollama.com/api/chat),
 
 ## Follow-up
 
-The foundation is stateless: a follow-up question must include scope again.
-There is no durable chat history, company-wide financial retrieval or autonomous
-action system. Hosted inference, another model/provider, external sources,
-retention, monitoring and broader scaling need separate review. Frontend
-implementation and end-to-end browser checks remain pending.
+The original question endpoints remain stateless. The separate
+[saved conversation API](assistant-conversations.md) retains bounded dialogue
+and scope following the user's durable storage choice. There is no company-wide
+financial retrieval or autonomous action system. Hosted inference, another
+model/provider, external sources, backup retention, monitoring and broader
+scaling need separate review. Frontend implementation and end-to-end browser
+checks remain pending.
 
 Receipt scanning, demand/inventory forecasting, personalized recommendations and
 basket optimization are deferred, not removed. Revisit them after foundation

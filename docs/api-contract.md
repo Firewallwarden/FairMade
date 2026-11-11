@@ -29,6 +29,13 @@ Private AI description generation and exact seller review use separate
 or publishes a product; explicit approval applies only the private description.
 See [the draft/review contract](ai-description-drafts.md).
 
+Saved owner-bound seller/buyer conversations are an additive backend proposal
+under /api/v1/assistants/conversations: create/list/get/delete, plus POST/GET
+/{id}/turns. Scope is fixed, retries and revisions are explicit, and current
+evidence is revalidated. Apply migration 0026. See
+[the full conversation contract and browser handoff](assistant-conversations.md).
+The original question endpoints remain stateless; frontend acceptance is pending.
+
 **Authorization change from #5:** registration now creates a buyer account.
 Private product/history endpoints require the seller role and return 403 until
 that access is granted after verification. Account responses add `roles`; the

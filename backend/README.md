@@ -10,7 +10,11 @@ PayPal sandbox calls are opt-in and disabled by default.
 Seller and buyer assistant endpoints now explain scoped evidence through local
 Ollama. Exact financial facts are rendered by the backend separately from AI
 paragraphs; seller evidence is owner-scoped and buyers see approved disclosures
-only. No cloud fallback, automatic changes or persistent chat is added.
+only. No cloud fallback or automatic business changes are added.
+Saved owner-bound conversations now support follow-ups across restarts, current
+evidence checks, deletion and thirty-day inactivity expiry. Run migration 0026;
+see [the conversation contract and frontend handoff](../docs/assistant-conversations.md).
+The original independent question endpoints remain stateless.
 See the [assistant workflow](examples/assistants/README.md) and
 [contract, evaluation and limits](../docs/local-assistants.md).
 Seller assistant sales/history questions now reuse private sandbox sales totals

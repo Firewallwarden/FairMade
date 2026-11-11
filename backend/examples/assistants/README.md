@@ -1,5 +1,9 @@
 # Synthetic local assistant workflow
 
+For saved two-turn dialogue and restart recovery, use the
+[conversation contract and handoff](../../../docs/assistant-conversations.md).
+The independent question examples below remain stateless.
+
 Use the [backend setup](../../README.md) and create synthetic seller product,
 analysis, approved Passport and listing records with the
 [marketplace workflow](../marketplace/README.md). These requests do not invent

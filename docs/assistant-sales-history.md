@@ -72,5 +72,6 @@ contract, cache/error protections, read-only behavior and disabled-by-default
 local provider still apply. See [the foundation](local-assistants.md).
 
 Conversational memory is separate: history-aware questions do not themselves
-retain prior turns. Temporary versus durable conversation retention is awaiting
-the user's decision. No broader backlog or continuous cycle is enabled here.
+retain prior turns. Saved conversations are now implemented separately after
+the user's durable storage choice. See [continuity and retention](assistant-conversations.md).
+No broader backlog or continuous cycle is enabled here.
