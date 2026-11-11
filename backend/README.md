@@ -1,5 +1,10 @@
 # FairMade backend
 
+Buyer and seller product pair suggestions now use current same-storefront prices,
+stock and quality exclusions. Buyers can use confirmed preferences; seller
+co-purchase counts remain private. Both saved assistants can explain current
+suggestions. See [contract and deeper bundle follow-up](../docs/product-bundle-suggestions.md).
+
 The Fair Price Engine calculates batch and unit costs, fee-aware break-even
 prices, seller-selected margin ranges, and profit simulations. The stateless
 calculator remains available. Anyone can register a FairMade account and log in.
@@ -11,6 +16,21 @@ Seller product forecasts now provide a read-only observed-sales-rate baseline
 and conditional stock coverage from verified sandbox sales, with explicit
 insufficient-history results. Saved seller conversations can explain the same
 fresh calculation. See [formulas, source limits and handoff](../docs/observed-sales-forecast.md).
+
+Buyers can plan a single-storefront basket from explicit quantities and acceptable
+alternatives, with exact subtotals and confirmed preferences. Plans support saved
+assistant explanations but create no order or reservation. See the
+[basket contract and later multi-seller enhancement](../docs/buyer-basket-optimization.md).
+Buyer personalization supports explicit opt-in, remembered preferences, favorites
+and verified sandbox purchase signals. Buyer conversations reload that memory;
+preference proposals from saved questions require confirmation. Apply migration
+0028 and see [the buyer memory workflow](../docs/buyer-personalization.md).
+Receipt images can now become private OCR/AI drafts and explicitly reviewed
+expense records. Run migration 0027 and configure local Tesseract plus the
+existing Qwen3 model. See [receipt setup, review and limits](../docs/receipt-expenses.md).
+Receipt expenses do not automatically change production costs or inventory.
+Seller assistant history questions can explain approved receipt totals by period
+and category. See [scope and double-counting limits](../docs/assistant-receipt-expenses.md).
 Seller and buyer assistant endpoints now explain scoped evidence through local
 Ollama. Exact financial facts are rendered by the backend separately from AI
 paragraphs; seller evidence is owner-scoped and buyers see approved disclosures

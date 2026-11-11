@@ -9,6 +9,36 @@ are read-only and use backend-verified sandbox sales only. See
 [source limits, formulas, memory and frontend handoff](observed-sales-forecast.md).
 No new migration is required beyond 0026; frontend acceptance remains pending.
 
+Read-only product pair suggestions are an additive backend proposal at POST
+/api/v1/buyer/bundles/suggest and POST /api/v1/seller/bundles/suggest. Buyer
+questions/scopes accept exactly one listing_ids, basket or bundles scope;
+seller questions/scopes accept optional bundles anchored to their owned product.
+See [prices, ranking, privacy, memory and handoff](product-bundle-suggestions.md).
+No new migration or automatic promotion/purchase is introduced.
+
+Single-storefront basket planning is an additive backend proposal at
+POST /api/v1/buyer/baskets/optimize. Buyer assistant questions and saved buyer
+scopes now accept either the existing listing_ids or a basket request. See
+[quantities, exact optimization, memory, exclusions and handoff](buyer-basket-optimization.md).
+No new migration is required beyond 0028. Frontend acceptance remains pending;
+multi-seller shopping plans are explicitly deferred for later enhancement.
+
+Opt-in buyer personalization is an additive backend proposal at
+/api/v1/buyer/personalization (GET/PUT/DELETE), /suggestions (POST) and /remember
+(POST). Confirmed profile memory, current favorites and verified sandbox
+purchase signals now inform buyer answers. See
+[consent, memory, ranking and frontend handoff](buyer-personalization.md).
+Migration 0028 is required; frontend integration remains pending.
+
+Receipt extraction/review is an additive backend proposal under
+/api/v1/seller/receipt-drafts, with owner GET /api/v1/seller/expenses.
+Drafts require explicit seller approval before an immutable expense is recorded.
+See [the receipt contract, local setup and frontend handoff](receipt-expenses.md).
+Migration 0027 is required. Frontend acceptance and real image OCR validation
+remain pending; existing cost and sales APIs are unchanged.
+Seller history questions now add owner-only reviewed receipt expense aggregates.
+See [scope, period and double-counting limits](assistant-receipt-expenses.md).
+
 The account, seller-application, product, saved-analysis, quality, comparison, review, Passport, marketplace, inventory, order, sandbox-payment, refund, supplier-sourcing, seller-sales, favorite, and storefront endpoints
 below are implemented by the backend for **local development**. Their shared integration contract is
 **proposed; frontend acceptance and browser integration are pending**. No frontend
@@ -20,7 +50,7 @@ fields, error codes and frontend rendering requirements are specified in
 [the local assistant contract](local-assistants.md).
 POST /api/v1/assistants/seller accepts question, product_id and optional
 analysis_id/supplier_report_id. POST /api/v1/assistants/buyer accepts question
-and one to four unique listing_ids. Both require bearer authentication; seller
+and either one to four unique listing_ids or a basket scope. Both require bearer authentication; seller
 questions additionally require verified seller access and product ownership.
 Responses separate deterministic facts from cited qualitative AI paragraphs
 and return allowlisted evidence and notices. Model prose must not replace the

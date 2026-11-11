@@ -6,6 +6,8 @@ from uuid import UUID
 
 from pydantic import Field, model_validator
 
+from fairmade.baskets.schemas import BasketRequest
+from fairmade.bundles.schemas import BundleRequest
 from fairmade.evidence import Amount
 from fairmade.forecasting.schemas import ForecastRequest
 from fairmade.pricing.schemas import Contract
@@ -32,17 +34,25 @@ class SellerQuestion(Contract):
     supplier_report_id: UUID | None = None
     history_period: HistoryPeriod | None = None
     forecast: ForecastRequest | None = None
+    bundles: BundleRequest | None = None
 
 
-class BuyerQuestion(Contract):
-    question: Question
-    listing_ids: Annotated[list[UUID], Field(min_length=1, max_length=4)]
+class BuyerSelection(Contract):
+    listing_ids: Annotated[list[UUID], Field(max_length=4)] = Field(default_factory=list)
+    basket: BasketRequest | None = None
+    bundles: BundleRequest | None = None
 
     @model_validator(mode="after")
     def unique_listings(self) -> Self:
         if len(set(self.listing_ids)) != len(self.listing_ids):
             raise ValueError("Select each listing only once")
+        if sum((bool(self.listing_ids), self.basket is not None, self.bundles is not None)) != 1:
+            raise ValueError("Choose exactly one listing_ids, basket or bundles scope")
         return self
+
+
+class BuyerQuestion(BuyerSelection):
+    question: Question
 
 
 class ScenarioPlan(Contract):

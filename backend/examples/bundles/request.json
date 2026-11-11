@@ -1,0 +1,9 @@
+{
+  "storefront_id": "10a466d2-3a96-424a-8aee-89dd8819df20",
+  "candidates": [
+    { "listing_id": "68d29540-15ee-42b8-b6e3-c85376cc2784", "expected_listing_revision": 1 },
+    { "listing_id": "f224b503-bea5-4a9c-bf82-e9d8acbcb020", "expected_listing_revision": 1 }
+  ],
+  "budget": "25.00",
+  "limit": 3
+}
