@@ -102,6 +102,12 @@ def project(review: dict, content: DraftContent) -> PublicPassport:
             "or local-market fairness; "
             "taxes, shipping and discounts are not reconciled. Quantity bases may differ.",
         )
+    if policy.include_composition:
+        notices.append(
+            "Composition, roles, specifications, quantities "
+            "and completeness are seller declarations. "
+            "They do not establish verified contents, allergens, safety, nutrition or suitability."
+        )
     with localcontext() as context:
         context.prec = 60
         price = content.price.quantize(Decimal("0.01"))
@@ -118,6 +124,7 @@ def project(review: dict, content: DraftContent) -> PublicPassport:
         quality_requirements=requirements,
         quality_summary=_quality_summary(review) if policy.include_quality_summary else None,
         market_context=_market_context(review) if policy.include_market_context else None,
+        composition=content.composition if policy.include_composition else None,
         notices=notices,
     )
 

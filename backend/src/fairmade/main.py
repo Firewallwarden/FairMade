@@ -92,7 +92,7 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
             finally:
                 application.state.engine.dispose()
 
-    application = FastAPI(title="FairMade API", version="0.41.0", lifespan=lifespan)
+    application = FastAPI(title="FairMade API", version="0.42.0", lifespan=lifespan)
     application.add_exception_handler(RefundError, refund_error_handler)
     application.add_exception_handler(PaymentError, payment_error_handler)
     application.add_exception_handler(CommerceError, commerce_error_handler)
@@ -128,6 +128,7 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
             or request.url.path.startswith("/api/v1/buyer/baskets")
             or request.url.path.endswith("/bundles/suggest")
             or "/description-drafts" in request.url.path
+            or "/passports" in request.url.path
             or request.url.path.startswith("/api/v1/seller/receipt-drafts")
             or "/paypal-checkout" in request.url.path
             or "/refund-request" in request.url.path

@@ -9,6 +9,8 @@ from fairmade.assistants.schemas import Evidence
 from fairmade.assistants.supplier_explanations import supplier_context
 from fairmade.baskets.integration import context as basket_context
 from fairmade.bundles.integration import context as bundle_context
+from fairmade.composition.integration import context as recipe_context
+from fairmade.composition.integration import public_context as composition_context
 from fairmade.forecasting.integration import context as forecast_context
 from fairmade.personalization.integration import context as personalization_context
 from fairmade.seller_insights.integration import context as insight_context
@@ -46,6 +48,8 @@ def model_evidence(evidence: list[Evidence]) -> list[dict]:
             data = insight_context(fact)
         if data is None:
             data = supplier_context(fact)
+        if data is None:
+            data = recipe_context(fact)
         if data is None:
             data = recommendation_context(fact)
         if data is None:
@@ -91,6 +95,7 @@ def model_evidence(evidence: list[Evidence]) -> list[dict]:
                 "unit_cost_disclosed": costs.get("unit_cost") is not None,
                 "quality_requirements": passport.get("quality_requirements"),
                 "quality_summary": passport.get("quality_summary"),
+                "composition": composition_context(passport),
                 "market_context_disclosed": passport.get("market_context") is not None,
                 "policy": (
                     "Exact selling and comparison prices appear in calculated facts. "

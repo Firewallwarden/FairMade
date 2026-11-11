@@ -11,6 +11,7 @@ from fairmade.assistants.supplier_explanations import supplier_details
 from fairmade.auth import api_error
 from fairmade.baskets.integration import evidence as basket_evidence
 from fairmade.bundles.integration import evidence as bundle_evidence
+from fairmade.composition.integration import recipe_evidence
 from fairmade.evidence import today
 from fairmade.forecasting.integration import TITLE as FORECAST_TITLE
 from fairmade.forecasting.service import forecast
@@ -92,6 +93,10 @@ def seller_evidence(db: Session, account_id: str, body: SellerQuestion) -> list[
             supplier_details(db, product.id, body.supplier_report_id, today()),
         )
     history_evidence(db, account_id, body, facts)
+    if body.include_recipe_inputs:
+        fact = recipe_evidence(db, product)
+        fact.key = f"e{len(facts) + 1}"
+        facts.append(fact)
     if body.recommendations is not None:
         add(
             facts,

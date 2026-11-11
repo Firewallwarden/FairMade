@@ -33,6 +33,33 @@ separate from backend availability.
 
 ## Current implementation limits to revisit
 
+### Ingredient/material explanations and composition disclosure: DOMAIN-013
+
+The user delegated recommended designs during the continuous cycle, requesting
+deeper alternatives be retained for later. The implementation uses manually
+authored composition declarations behind an explicit Passport disclosure flag
+and normal exact-preview publication approval. Buyer explanations use approved
+declarations only. Sellers can separately opt into bounded private recipe-input
+explanations; production inputs are never inferred as finished contents.
+See [the contract, privacy and compatibility](composition-explanations.md).
+[Implementation #53](https://github.com/Firewallwarden/FairMade/pull/53) is a
+main-targeted draft dependent on #38 through #42; frontend integration is pending.
+These fields, source projections and limits are implementation choices under
+delegation, not individually confirmed user preferences.
+
+Existing hidden/legacy public payloads and hashes remain unchanged. Claims about
+roles, specifications, quantities and completeness remain seller-reported;
+allergens, nutrition, safety, health benefits and suitability are not inferred.
+No recipe, stock, pricing, Quality Lock or publication is changed by an assistant.
+There is no new migration, provider or infrastructure.
+
+Later optional depth: reviewed recipe-to-declaration proposals distinguishing
+production inputs, independently supported ingredient/material evidence, curated
+source-backed explanations, richer taxonomy/localization and completeness or
+correction workflows. Safety/allergen/nutrition verification requires its own
+evidence and policy. New disclosure policy, paid services and infrastructure
+still require separately authorized scope.
+
 ### Supplier recommendation modes: DOMAIN-012
 
 The user delegated recommended design choices during the continuous cycle and

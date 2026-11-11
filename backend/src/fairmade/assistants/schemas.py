@@ -4,7 +4,7 @@ from datetime import date, datetime
 from typing import Annotated, Literal, Self
 from uuid import UUID
 
-from pydantic import Field, model_validator
+from pydantic import Field, StrictBool, model_validator
 
 from fairmade.baskets.schemas import BasketRequest
 from fairmade.bundles.schemas import BundleRequest
@@ -35,6 +35,7 @@ class SellerQuestion(Contract):
     analysis_id: UUID | None = None
     supplier_report_id: UUID | None = None
     history_period: HistoryPeriod | None = None
+    include_recipe_inputs: StrictBool = False
     recommendations: RecommendationOptions | None = None
 
     @model_validator(mode="after")

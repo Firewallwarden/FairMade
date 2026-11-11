@@ -2,6 +2,13 @@
 
 ## Status and common conventions
 
+Ingredient/material explanations are an additive backend proposal. Passport
+drafts accept optional composition and disclosures.include_composition, hidden
+by default and published only through exact-preview approval. Buyer answers use
+approved declarations; seller questions/scopes can opt into include_recipe_inputs
+for private production-input explanations. See
+[the fields, privacy, compatibility and frontend handoff](composition-explanations.md).
+
 Supplier review recommendations are an additive backend proposal at POST
 /api/v1/products/{product_id}/supplier-recommendations. Seller questions and
 saved scopes accept recommendations alongside supplier_report_id. Mandatory
