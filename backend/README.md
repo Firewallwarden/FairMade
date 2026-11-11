@@ -1,5 +1,10 @@
 # FairMade backend
 
+Seller opportunities and on-demand alerts now combine private modeled margins,
+saved cost changes, reviewed expenses, production output and material waste.
+The deterministic report works without AI; optional saved seller conversations
+can explain its current evidence. See [scope and frontend handoff](../docs/seller-insights.md).
+
 Buyer and seller product pair suggestions now use current same-storefront prices,
 stock and quality exclusions. Buyers can use confirmed preferences; seller
 co-purchase counts remain private. Both saved assistants can explain current

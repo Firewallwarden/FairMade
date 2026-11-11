@@ -73,6 +73,7 @@ from fairmade.reviews.routes import router as review_router
 from fairmade.sales.routes import cost_router as sales_cost_router
 from fairmade.sales.routes import router as sales_router
 from fairmade.seller_applications import router as application_router
+from fairmade.seller_insights.routes import router as insight_router
 from fairmade.storefronts.routes import public_router as public_storefront_router
 from fairmade.storefronts.routes import router as storefront_router
 from fairmade.supplier_records.routes import router as supplier_record_router
@@ -115,6 +116,7 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
     async def safe_validation(request: Request, exc: RequestValidationError):
         if (
             request.url.path.startswith("/api/v1/auth/")
+            or request.url.path.endswith("/insights")
             or request.url.path.startswith("/api/v1/marketplace/listings")
             or request.url.path.startswith("/api/v1/storefronts")
             or request.url.path.startswith("/api/v1/assistants")
@@ -171,6 +173,7 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
         return calculate(request)
 
     application.include_router(auth_router)
+    application.include_router(insight_router)
     application.include_router(forecast_router)
     application.include_router(personalization_router)
     application.include_router(basket_router)

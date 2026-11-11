@@ -2,6 +2,13 @@
 
 ## Status and common conventions
 
+Seller insight reports are an additive backend proposal at POST
+/api/v1/products/{product_id}/insights. Seller questions and saved scopes accept
+optional insights with a bounded period_days. Reports cover current modeled
+margin warnings, saved cost changes, reviewed expenses, production output and
+recorded material waste; they do not mutate business data or send notifications.
+See [the insight contract, privacy and limits](seller-insights.md).
+
 Public listing pages now propose optional sort modes newest, price_asc,
 price_desc, quality, unit_price and value across catalog, storefront listings
 and nearby listing search. Unit/value ordering requires a product type and
