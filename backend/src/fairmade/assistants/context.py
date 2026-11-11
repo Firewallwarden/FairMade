@@ -3,9 +3,15 @@
 import re
 from decimal import Decimal
 
+from fairmade.assistants.expenses import expense_context
 from fairmade.assistants.history import history_context
 from fairmade.assistants.schemas import Evidence
 from fairmade.assistants.supplier_explanations import supplier_context
+from fairmade.baskets.integration import context as basket_context
+from fairmade.bundles.integration import context as bundle_context
+from fairmade.forecasting.integration import context as forecast_context
+from fairmade.personalization.integration import context as personalization_context
+from fairmade.seller_insights.integration import context as insight_context
 from fairmade.supplier_recommendations.integration import context as recommendation_context
 
 DIGITS = re.compile(r"[-+]?\d+(?:,\d{3})*(?:\.\d+)?")
@@ -35,9 +41,21 @@ def model_evidence(evidence: list[Evidence]) -> list[dict]:
     for fact in evidence:
         data = history_context(fact)
         if data is None:
+            data = expense_context(fact)
+        if data is None:
+            data = insight_context(fact)
+        if data is None:
             data = supplier_context(fact)
         if data is None:
             data = recommendation_context(fact)
+        if data is None:
+            data = forecast_context(fact)
+        if data is None:
+            data = personalization_context(fact)
+        if data is None:
+            data = basket_context(fact)
+        if data is None:
+            data = bundle_context(fact)
         if data is None:
             data = fact.data
         if fact.title == "Selected saved production economics":

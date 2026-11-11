@@ -14,6 +14,10 @@ products, Quality Locks or payments. The existing /assistants/seller and
 
 ## HTTP contract
 
+Buyer scopes additionally support a reviewed basket request instead of listing_ids.
+See [basket quantities, budgets, source rechecks and scope limits](buyer-basket-optimization.md).
+This uses the same owner, retention, retry, deletion and follow-up mechanics.
+
 Paths start with /api/v1/assistants/conversations, without a trailing slash on
 the collection. All operations require bearer authentication and return
 Cache-Control: no-store, including errors. UUIDs are strings, money uses decimal
@@ -246,6 +250,9 @@ The frontend developer should:
 5. Demonstrate seller price/follow-up and buyer disclosure/follow-up flows, then
    check browser/recorder latency before recording the demo.
 
-Browser work is not implemented here. Receipt scanning, forecasting,
-personalization and basket optimization remain deferred pending reassessment.
+Browser work is not implemented here. Receipt extraction and
+[opt-in buyer personalization](buyer-personalization.md) now have separate backend
+implementations. Buyer profile memory can propose preferences from saved buyer
+questions, then use confirmed settings across conversations. Forecasting and
+basket optimization remain follow-ups.
 This feature does not activate autonomous development or change provider approval.

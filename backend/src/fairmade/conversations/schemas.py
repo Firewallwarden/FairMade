@@ -7,12 +7,16 @@ from pydantic import Field, field_validator, model_validator
 from fairmade.assistants.schemas import (
     AssistantResponse,
     BuyerQuestion,
+    BuyerSelection,
     HistoryPeriod,
     Question,
     SellerQuestion,
 )
+from fairmade.bundles.schemas import BundleRequest
+from fairmade.forecasting.schemas import ForecastRequest
 from fairmade.pricing.schemas import Contract
 from fairmade.schemas import UTCResponse
+from fairmade.seller_insights.schemas import InsightOptions
 from fairmade.supplier_recommendations.schemas import RecommendationOptions
 
 ConversationRevision = Annotated[int, Field(strict=True, ge=0, le=40)]
@@ -32,17 +36,13 @@ class SellerScope(Contract):
             raise ValueError("Select supplier_report_id for recommendation options")
         return self
 
+    insights: InsightOptions | None = None
+    forecast: ForecastRequest | None = None
+    bundles: BundleRequest | None = None
 
-class BuyerScope(Contract):
+
+class BuyerScope(BuyerSelection):
     role: Literal["buyer"]
-    listing_ids: Annotated[list[UUID], Field(min_length=1, max_length=4)]
-
-    @field_validator("listing_ids")
-    @classmethod
-    def unique_listings(cls, values):
-        if len(set(values)) != len(values):
-            raise ValueError("Select each listing only once")
-        return values
 
 
 Scope = Annotated[SellerScope | BuyerScope, Field(discriminator="role")]

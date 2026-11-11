@@ -9,12 +9,20 @@ from fairmade.assistants.history import history_evidence
 from fairmade.assistants.schemas import BuyerQuestion, Evidence, SellerQuestion
 from fairmade.assistants.supplier_explanations import supplier_details
 from fairmade.auth import api_error
+from fairmade.baskets.integration import evidence as basket_evidence
+from fairmade.bundles.integration import evidence as bundle_evidence
 from fairmade.evidence import today
+from fairmade.forecasting.integration import TITLE as FORECAST_TITLE
+from fairmade.forecasting.service import forecast
 from fairmade.marketplace.service import get_public
 from fairmade.models import Analysis, QualityLockSet
 from fairmade.ownership import require_owned_product
+from fairmade.personalization.constants import TITLE as PROFILE_TITLE
+from fairmade.personalization.service import buyer_profile_data
 from fairmade.pricing.schemas import PricingRequest, PricingResponse
 from fairmade.pricing.service import calculate
+from fairmade.seller_insights.integration import TITLE as INSIGHT_TITLE
+from fairmade.seller_insights.service import report as insight_report
 from fairmade.supplier_recommendations.integration import TITLE as RECOMMENDATION_TITLE
 from fairmade.supplier_recommendations.service import recommend
 
@@ -92,6 +100,26 @@ def seller_evidence(db: Session, account_id: str, body: SellerQuestion) -> list[
                 db, account_id, product.id, body.supplier_report_id, body.recommendations
             ).model_dump(mode="json"),
         )
+    if body.insights is not None:
+        add(
+            facts,
+            INSIGHT_TITLE,
+            insight_report(db, account_id, product.id, body.insights, body.analysis_id).model_dump(
+                mode="json"
+            ),
+            "seller_recorded_unverified_and_deterministic_modeled_inputs",
+        )
+    if body.forecast is not None:
+        add(
+            facts,
+            FORECAST_TITLE,
+            forecast(db, account_id, product.id, body.forecast).model_dump(mode="json"),
+            "calculated_from_backend_verified_sandbox_sales_and_seller_recorded_stock",
+        )
+    if body.bundles is not None:
+        for fact in bundle_evidence(db, account_id, body.bundles, product_id=product.id):
+            fact.key = f"e{len(facts) + 1}"
+            facts.append(fact)
     return facts
 
 
@@ -123,7 +151,17 @@ def scenario_evidence(
     )
 
 
-def buyer_evidence(db: Session, body: BuyerQuestion) -> list[Evidence]:
+def buyer_evidence(
+    db: Session, body: BuyerQuestion, account_id: str | None = None
+) -> list[Evidence]:
+    if body.bundles is not None:
+        if account_id is None:
+            raise api_error(401, "UNAUTHORIZED", "A valid bearer token is required.")
+        return bundle_evidence(db, account_id, body.bundles)
+    if body.basket is not None:
+        if account_id is None:
+            raise api_error(401, "UNAUTHORIZED", "A valid bearer token is required.")
+        return basket_evidence(db, account_id, body.basket)
     facts: list[Evidence] = []
     listings = []
     for listing_id in body.listing_ids:
@@ -184,4 +222,13 @@ def buyer_evidence(db: Session, body: BuyerQuestion) -> list[Evidence]:
         },
         "application_policy",
     )
+    if account_id is not None:
+        personalization = buyer_profile_data(db, account_id, listings)
+        if personalization is not None:
+            add(
+                facts,
+                PROFILE_TITLE,
+                personalization,
+                "buyer_confirmed_preferences_and_private_activity",
+            )
     return facts
