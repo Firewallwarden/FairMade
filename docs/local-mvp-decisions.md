@@ -35,6 +35,12 @@ separate from backend availability.
 
 ### Local assistant decision: MVP-021
 
+[Description drafts](ai-description-drafts.md) add durable private generated copy
+and seller review, with no automatic application/publication. Generation uses
+only selected product metadata; unsupported marketing wording still needs human
+factual review. This business-record persistence does not select a conversation
+retention policy. See the [continuity audit and pending choice](assistant-continuity-audit.md).
+
 The [supplier explanation extension](assistant-supplier-explanations.md) supplies
 selected excluded quote names and failed/unknown checks to the owning seller's
 local model as explicitly excluded evidence. This enables grounded failure

@@ -24,6 +24,10 @@ See [the sales/history extension](assistant-sales-history.md).
 Selected supplier reports now include explicit eligibility/exclusion explanations,
 current claim checks and eligible-only cost minima with ties. See
 [the supplier explanation extension](assistant-supplier-explanations.md).
+Private AI description generation and exact seller review use separate
+/api/v1/products/{product_id}/description-drafts routes. Generation never edits
+or publishes a product; explicit approval applies only the private description.
+See [the draft/review contract](ai-description-drafts.md).
 
 **Authorization change from #5:** registration now creates a buyer account.
 Private product/history endpoints require the seller role and return 403 until
