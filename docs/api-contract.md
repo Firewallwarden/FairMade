@@ -9,6 +9,27 @@ retry-safe sends and cursor history. Apply migration 0029 after 0028. See
 Pre-purchase inquiries are explicitly a later improvement; frontend acceptance
 remains pending. Messages do not change commerce state or feed AI memory.
 
+Observed-sales forecasting is an additive backend proposal at
+POST /api/v1/products/{product_id}/forecasts. Seller questions and saved seller
+scopes add optional forecast: {lookback_days, horizon_days}; exact unit baselines
+are read-only and use backend-verified sandbox sales only. See
+[source limits, formulas, memory and frontend handoff](observed-sales-forecast.md).
+No new migration is required beyond 0026; frontend acceptance remains pending.
+
+Read-only product pair suggestions are an additive backend proposal at POST
+/api/v1/buyer/bundles/suggest and POST /api/v1/seller/bundles/suggest. Buyer
+questions/scopes accept exactly one listing_ids, basket or bundles scope;
+seller questions/scopes accept optional bundles anchored to their owned product.
+See [prices, ranking, privacy, memory and handoff](product-bundle-suggestions.md).
+No new migration or automatic promotion/purchase is introduced.
+
+Single-storefront basket planning is an additive backend proposal at
+POST /api/v1/buyer/baskets/optimize. Buyer assistant questions and saved buyer
+scopes now accept either the existing listing_ids or a basket request. See
+[quantities, exact optimization, memory, exclusions and handoff](buyer-basket-optimization.md).
+No new migration is required beyond 0028. Frontend acceptance remains pending;
+multi-seller shopping plans are explicitly deferred for later enhancement.
+
 Opt-in buyer personalization is an additive backend proposal at
 /api/v1/buyer/personalization (GET/PUT/DELETE), /suggestions (POST) and /remember
 (POST). Confirmed profile memory, current favorites and verified sandbox
@@ -36,7 +57,7 @@ fields, error codes and frontend rendering requirements are specified in
 [the local assistant contract](local-assistants.md).
 POST /api/v1/assistants/seller accepts question, product_id and optional
 analysis_id/supplier_report_id. POST /api/v1/assistants/buyer accepts question
-and one to four unique listing_ids. Both require bearer authentication; seller
+and either one to four unique listing_ids or a basket scope. Both require bearer authentication; seller
 questions additionally require verified seller access and product ownership.
 Responses separate deterministic facts from cited qualitative AI paragraphs
 and return allowlisted evidence and notices. Model prose must not replace the

@@ -164,6 +164,11 @@ Ollama references: [chat API](https://docs.ollama.com/api/chat),
 
 ## Follow-up
 
+Verified-sales [forecasting](observed-sales-forecast.md) now supports read-only
+product unit baselines and conditional inventory planning in seller conversations.
+See the [feature completion audit](feature-completion-audit.md) for the original
+wishlist, open PRs and remaining core versus expanded-assistant work.
+
 The original question endpoints remain stateless. The separate
 [saved conversation API](assistant-conversations.md) retains bounded dialogue
 and scope following the user's durable storage choice. There is no company-wide
@@ -172,12 +177,9 @@ model/provider, external sources, backup retention, monitoring and broader
 scaling need separate review. Frontend implementation and end-to-end browser
 checks remain pending.
 
-Receipt extraction/review and approved expense questions now have separate
-[backend implementations](receipt-expenses.md), with real image OCR validation
-pending. [Opt-in personalization](buyer-personalization.md) adds confirmed profile
-memory, favorites and verified sandbox purchase signals to buyer answers.
-Demand/inventory forecasting and basket optimization remain follow-ups. Revisit them after foundation
-integration/evaluation and as the submission schedule permits. Further work
-includes richer supplier suggestions, sales/history questions, bundles,
-description generation and alerts. No automatic background feature cycle or
+Receipt review, approved expense questions, personalization, single-storefront
+basket and bundle plans, and verified-sales forecasting have backend implementations.
+Real image OCR and browser checks remain pending. See the
+[feature audit](feature-completion-audit.md) for status and deeper limits.
+No automatic background feature cycle or
 unapproved spending is enabled by this document.

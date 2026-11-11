@@ -13,6 +13,8 @@ from fastapi.responses import JSONResponse
 from fairmade.admin_review.routes import router as admin_review_router
 from fairmade.assistants.routes import router as assistant_router
 from fairmade.auth import router as auth_router
+from fairmade.baskets.routes import router as basket_router
+from fairmade.bundles.routes import router as bundle_router
 from fairmade.commerce_errors import CommerceError
 from fairmade.commerce_http import commerce_error_handler
 from fairmade.comparisons.routes import router as comparison_router
@@ -21,6 +23,7 @@ from fairmade.database import database_url, make_engine
 from fairmade.description_drafts.routes import router as description_router
 from fairmade.discovery.routes import router as discovery_router
 from fairmade.favorites.routes import router as favorites_router
+from fairmade.forecasting.routes import router as forecast_router
 from fairmade.fulfillment.routes import buyer_router as pickup_buyer_router
 from fairmade.fulfillment.routes import seller_router as pickup_seller_router
 from fairmade.inventory.routes import router as inventory_router
@@ -87,7 +90,7 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
             finally:
                 application.state.engine.dispose()
 
-    application = FastAPI(title="FairMade API", version="0.37.0", lifespan=lifespan)
+    application = FastAPI(title="FairMade API", version="0.40.0", lifespan=lifespan)
     application.add_exception_handler(RefundError, refund_error_handler)
     application.add_exception_handler(PaymentError, payment_error_handler)
     application.add_exception_handler(CommerceError, commerce_error_handler)
@@ -113,8 +116,11 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
         if (
             request.url.path.startswith("/api/v1/auth/")
             or request.url.path.startswith("/api/v1/assistants")
+            or request.url.path.endswith("/forecasts")
             or request.url.path.startswith("/api/v1/buyer/personalization")
             or request.url.path.endswith("/messages")
+            or request.url.path.startswith("/api/v1/buyer/baskets")
+            or request.url.path.endswith("/bundles/suggest")
             or "/description-drafts" in request.url.path
             or request.url.path.startswith("/api/v1/seller/receipt-drafts")
             or "/paypal-checkout" in request.url.path
@@ -163,7 +169,10 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
         return calculate(request)
 
     application.include_router(auth_router)
+    application.include_router(forecast_router)
     application.include_router(personalization_router)
+    application.include_router(basket_router)
+    application.include_router(bundle_router)
     application.include_router(description_router)
     application.include_router(receipt_router)
     application.include_router(assistant_router)
