@@ -8,8 +8,8 @@ from fairmade.assistants.history import history_context
 from fairmade.assistants.schemas import Evidence
 from fairmade.assistants.supplier_explanations import supplier_context
 from fairmade.cost_calendar.integration import context as calendar_context
-from fairmade.seller_insights.integration import context as insight_context
 from fairmade.price_advice.integration import context as price_advice_context
+from fairmade.seller_insights.integration import context as insight_context
 
 DIGITS = re.compile(r"[-+]?\d+(?:,\d{3})*(?:\.\d+)?")
 QUESTION_AMOUNTS = re.compile(r"(?:USD\s*|\$)?[-+]?\d+(?:,\d{3})*(?:\.\d+)?")

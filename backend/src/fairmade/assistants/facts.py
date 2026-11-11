@@ -5,8 +5,8 @@ from fairmade.assistants.history import history_statements
 from fairmade.assistants.schemas import Evidence, Paragraph
 from fairmade.assistants.supplier_explanations import supplier_statements
 from fairmade.cost_calendar.integration import statements as calendar_statements
-from fairmade.seller_insights.integration import statements as insight_statements
 from fairmade.price_advice.integration import statements as price_advice_statements
+from fairmade.seller_insights.integration import statements as insight_statements
 
 
 def statements(evidence: list[Evidence]) -> list[Paragraph]:

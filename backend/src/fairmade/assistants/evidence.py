@@ -109,7 +109,7 @@ def seller_evidence(db: Session, account_id: str, body: SellerQuestion) -> list[
         add(
             facts,
             INSIGHT_TITLE,
-            insight_report(db, account_id, product.id, body.insights, body.analysis_id).model_dump(
+            insight_report(db, account_id, product.id, body.insights, selected_id).model_dump(
                 mode="json"
             ),
             "seller_recorded_unverified_and_deterministic_modeled_inputs",
