@@ -2,6 +2,13 @@
 
 ## Status and common conventions
 
+Ingredient/material explanations are an additive backend proposal. Passport
+drafts accept optional composition and disclosures.include_composition, hidden
+by default and published only through exact-preview approval. Buyer answers use
+approved declarations; seller questions/scopes can opt into include_recipe_inputs
+for private production-input explanations. See
+[the fields, privacy, compatibility and frontend handoff](composition-explanations.md).
+
 The account, seller-application, product, saved-analysis, quality, comparison, review, Passport, marketplace, inventory, order, sandbox-payment, refund, supplier-sourcing, seller-sales, favorite, and storefront endpoints
 below are implemented by the backend for **local development**. Their shared integration contract is
 **proposed; frontend acceptance and browser integration are pending**. No frontend

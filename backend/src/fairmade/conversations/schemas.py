@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Annotated, Literal
 from uuid import UUID
 
-from pydantic import Field, field_validator
+from pydantic import Field, StrictBool, field_validator
 
 from fairmade.assistants.schemas import (
     AssistantResponse,
@@ -23,6 +23,7 @@ class SellerScope(Contract):
     analysis_id: UUID | None = None
     supplier_report_id: UUID | None = None
     history_period: HistoryPeriod | None = None
+    include_recipe_inputs: StrictBool = False
 
 
 class BuyerScope(Contract):

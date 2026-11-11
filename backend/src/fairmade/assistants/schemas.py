@@ -4,7 +4,7 @@ from datetime import date, datetime
 from typing import Annotated, Literal, Self
 from uuid import UUID
 
-from pydantic import Field, model_validator
+from pydantic import Field, StrictBool, model_validator
 
 from fairmade.evidence import Amount
 from fairmade.pricing.schemas import Contract
@@ -30,6 +30,7 @@ class SellerQuestion(Contract):
     analysis_id: UUID | None = None
     supplier_report_id: UUID | None = None
     history_period: HistoryPeriod | None = None
+    include_recipe_inputs: StrictBool = False
 
 
 class BuyerQuestion(Contract):

@@ -1,5 +1,11 @@
 # FairMade backend
 
+Sellers can author ingredient/material declarations in Passport drafts and
+explicitly approve their disclosure. Buyer explanations use those approved
+claims; sellers can separately opt into private recipe-input explanations.
+Private recipes never automatically become public composition. See
+[the contract and frontend handoff](../docs/composition-explanations.md).
+
 The Fair Price Engine calculates batch and unit costs, fee-aware break-even
 prices, seller-selected margin ranges, and profit simulations. The stateless
 calculator remains available. Anyone can register a FairMade account and log in.
