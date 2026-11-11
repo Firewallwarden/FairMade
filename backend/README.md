@@ -15,6 +15,8 @@ See the [assistant workflow](examples/assistants/README.md) and
 [contract, evaluation and limits](../docs/local-assistants.md).
 Seller assistant sales/history questions now reuse private sandbox sales totals
 and bounded saved cost analyses. See [period semantics and limits](../docs/assistant-sales-history.md).
+Selected supplier reports now explain current checks and exclusion reasons while
+preserving eligible-only cost minima. See [supplier explanations](../docs/assistant-supplier-explanations.md).
 Sellers can keep private supplier profiles, subjective ratings and dated delivery
 observations with immutable corrections and exact summaries that show missing data.
 Optional quote references freeze owned evidence without changing comparisons or

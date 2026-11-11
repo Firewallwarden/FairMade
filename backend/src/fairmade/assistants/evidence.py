@@ -2,22 +2,19 @@
 
 from decimal import Decimal, localcontext
 
-from pydantic import TypeAdapter
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from fairmade.assistants.history import history_evidence
 from fairmade.assistants.schemas import BuyerQuestion, Evidence, SellerQuestion
+from fairmade.assistants.supplier_explanations import supplier_details
 from fairmade.auth import api_error
 from fairmade.evidence import today
 from fairmade.marketplace.service import get_public
-from fairmade.models import Analysis, QualityLockSet, SourcingInput, SupplierComparison
+from fairmade.models import Analysis, QualityLockSet
 from fairmade.ownership import require_owned_product
 from fairmade.pricing.schemas import PricingRequest, PricingResponse
 from fairmade.pricing.service import calculate
-from fairmade.quality.schemas import Rule
-from fairmade.suppliers.schemas import SupplierComparisonRequest, SupplierQuoteSnapshot
-from fairmade.suppliers.service import compare_suppliers
 
 
 def add(facts: list[Evidence], title: str, data: dict, basis="seller_reported_unverified"):
@@ -79,55 +76,10 @@ def seller_evidence(db: Session, account_id: str, body: SellerQuestion) -> list[
         },
     )
     if body.supplier_report_id:
-        report = db.scalar(
-            select(SupplierComparison)
-            .join(SourcingInput, SourcingInput.id == SupplierComparison.sourcing_input_id)
-            .where(
-                SupplierComparison.id == str(body.supplier_report_id),
-                SourcingInput.product_id == product.id,
-            )
-        )
-        if report is None:
-            raise api_error(404, "NOT_FOUND", "Resource not found.")
-        sourcing = db.get(SourcingInput, report.sourcing_input_id)
-        if report.comparison_version != "supplier-comparison-v1":
-            raise api_error(409, "UNSUPPORTED_EVIDENCE_VERSION", "Unsupported supplier version.")
-        # Re-evaluate selected quote snapshots against today's date AND current input rules.
-        result = compare_suppliers(
-            SupplierComparisonRequest.model_validate(report.request_snapshot),
-            [
-                SupplierQuoteSnapshot.model_validate(
-                    {"id": row["quote_id"], "details": row["details"]}
-                )
-                for row in report.result["rows"]
-            ],
-            TypeAdapter(list[Rule]).validate_python(sourcing.rules),
-            sourcing.rule_revision,
-            today(),
-        )
-        eligible = [row for row in result.rows if row.eligible_for_cost_comparison]
         add(
             facts,
             "Current supplier comparison of selected saved quote evidence",
-            {
-                "report_id": report.id,
-                "as_of_date": result.as_of_date.isoformat(),
-                "rule_revision": sourcing.rule_revision,
-                "eligible": [
-                    {
-                        "quote_id": str(row.quote_id),
-                        "supplier_name": row.details.supplier_name,
-                        "cost": row.cost.model_dump(mode="json"),
-                    }
-                    for row in eligible
-                ],
-                "excluded_count": len(result.rows) - len(eligible),
-                "policy": (
-                    "Excluded or unknown alternatives are not acceptable savings. "
-                    "No substitution is authorized."
-                ),
-                "warnings": result.warnings,
-            },
+            supplier_details(db, product.id, body.supplier_report_id, today()),
         )
     history_evidence(db, account_id, body, facts)
     return facts

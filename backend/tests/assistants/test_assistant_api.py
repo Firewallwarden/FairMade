@@ -397,7 +397,10 @@ def test_supplier_evidence_rechecks_current_rules_and_freshness(
     assert result.status_code == 200, result.text
     fact = result.json()["evidence"][-1]["data"]
     assert len(fact["eligible"]) == 1 and fact["excluded_count"] == 1
-    assert "EXCLUDED_SUPPLIER" not in json.dumps(ai_gateway.calls)
+    context = json.loads(ai_gateway.calls[-1]["messages"][-1]["content"])["EVIDENCE"][-1]["data"]
+    assert context["eligible_alternatives"][0]["supplier_name"] == "Eligible supplier"
+    assert context["excluded_alternatives"][0]["supplier_name"] == "EXCLUDED_SUPPLIER"
+    assert "EXCLUDED" in context["excluded_alternatives"][0]["status"]
     monkeypatch.setattr(
         "fairmade.assistants.evidence.today", lambda: utcnow().date() + timedelta(days=31)
     )
