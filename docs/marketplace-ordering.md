@@ -1,5 +1,8 @@
 # Public marketplace ordering
 
+[Implementation PR #49](https://github.com/Firewallwarden/FairMade/pull/49)
+targets main and has no unmerged prerequisites. It is not integrated into main.
+
 Implemented additive backend proposal; frontend acceptance and browser integration
 remain pending. The user chose transparent ordering from public quality-check
 disclosures and comparable unit prices. Buyer-selected criteria/weights are

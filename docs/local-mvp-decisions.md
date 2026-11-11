@@ -35,6 +35,9 @@ separate from backend availability.
 
 ### Transparent public-evidence ordering: DOMAIN-009
 
+[Implementation PR #49](https://github.com/Firewallwarden/FairMade/pull/49)
+targets main independently; not yet integrated.
+
 The user selected option 1: disclosed quality-check status and comparable unit
 prices, with unknowns/unverified claims clearly labeled; buyer-defined criteria
 and weights (option 2) are explicitly a later improvement.
