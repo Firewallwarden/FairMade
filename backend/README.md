@@ -1,5 +1,10 @@
 # FairMade backend
 
+Seller opportunities and on-demand alerts now combine private modeled margins,
+saved cost changes, reviewed expenses, production output and material waste.
+The deterministic report works without AI; optional saved seller conversations
+can explain its current evidence. See [scope and frontend handoff](../docs/seller-insights.md).
+
 The Fair Price Engine calculates batch and unit costs, fee-aware break-even
 prices, seller-selected margin ranges, and profit simulations. The stateless
 calculator remains available. Anyone can register a FairMade account and log in.

@@ -4,6 +4,7 @@ from fairmade.assistants.expenses import expense_statements
 from fairmade.assistants.history import history_statements
 from fairmade.assistants.schemas import Evidence, Paragraph
 from fairmade.assistants.supplier_explanations import supplier_statements
+from fairmade.seller_insights.integration import statements as insight_statements
 
 
 def statements(evidence: list[Evidence]) -> list[Paragraph]:
@@ -15,6 +16,7 @@ def statements(evidence: list[Evidence]) -> list[Paragraph]:
     for fact in evidence:
         result.extend(history_statements(fact))
         result.extend(expense_statements(fact))
+        result.extend(insight_statements(fact))
         result.extend(supplier_statements(fact))
         data = fact.data
         if fact.title == "Selected saved production economics":

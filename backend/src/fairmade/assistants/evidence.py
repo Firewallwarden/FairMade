@@ -15,6 +15,8 @@ from fairmade.models import Analysis, QualityLockSet
 from fairmade.ownership import require_owned_product
 from fairmade.pricing.schemas import PricingRequest, PricingResponse
 from fairmade.pricing.service import calculate
+from fairmade.seller_insights.integration import TITLE as INSIGHT_TITLE
+from fairmade.seller_insights.service import report as insight_report
 
 
 def add(facts: list[Evidence], title: str, data: dict, basis="seller_reported_unverified"):
@@ -82,6 +84,15 @@ def seller_evidence(db: Session, account_id: str, body: SellerQuestion) -> list[
             supplier_details(db, product.id, body.supplier_report_id, today()),
         )
     history_evidence(db, account_id, body, facts)
+    if body.insights is not None:
+        add(
+            facts,
+            INSIGHT_TITLE,
+            insight_report(db, account_id, product.id, body.insights, body.analysis_id).model_dump(
+                mode="json"
+            ),
+            "seller_recorded_unverified_and_deterministic_modeled_inputs",
+        )
     return facts
 
 

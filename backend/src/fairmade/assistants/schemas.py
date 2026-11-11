@@ -8,6 +8,7 @@ from pydantic import Field, model_validator
 
 from fairmade.evidence import Amount
 from fairmade.pricing.schemas import Contract
+from fairmade.seller_insights.schemas import InsightOptions
 
 Question = Annotated[str, Field(min_length=1, max_length=2000)]
 EvidenceKey = Annotated[str, Field(pattern=r"^e[1-9][0-9]?$")]
@@ -30,6 +31,7 @@ class SellerQuestion(Contract):
     analysis_id: UUID | None = None
     supplier_report_id: UUID | None = None
     history_period: HistoryPeriod | None = None
+    insights: InsightOptions | None = None
 
 
 class BuyerQuestion(Contract):

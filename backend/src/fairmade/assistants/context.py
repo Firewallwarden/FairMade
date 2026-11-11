@@ -7,6 +7,7 @@ from fairmade.assistants.expenses import expense_context
 from fairmade.assistants.history import history_context
 from fairmade.assistants.schemas import Evidence
 from fairmade.assistants.supplier_explanations import supplier_context
+from fairmade.seller_insights.integration import context as insight_context
 
 DIGITS = re.compile(r"[-+]?\d+(?:,\d{3})*(?:\.\d+)?")
 QUESTION_AMOUNTS = re.compile(r"(?:USD\s*|\$)?[-+]?\d+(?:,\d{3})*(?:\.\d+)?")
@@ -36,6 +37,8 @@ def model_evidence(evidence: list[Evidence]) -> list[dict]:
         data = history_context(fact)
         if data is None:
             data = expense_context(fact)
+        if data is None:
+            data = insight_context(fact)
         if data is None:
             data = supplier_context(fact)
         if data is None:

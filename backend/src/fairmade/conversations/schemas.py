@@ -13,6 +13,7 @@ from fairmade.assistants.schemas import (
 )
 from fairmade.pricing.schemas import Contract
 from fairmade.schemas import UTCResponse
+from fairmade.seller_insights.schemas import InsightOptions
 
 ConversationRevision = Annotated[int, Field(strict=True, ge=0, le=40)]
 
@@ -23,6 +24,7 @@ class SellerScope(Contract):
     analysis_id: UUID | None = None
     supplier_report_id: UUID | None = None
     history_period: HistoryPeriod | None = None
+    insights: InsightOptions | None = None
 
 
 class BuyerScope(Contract):

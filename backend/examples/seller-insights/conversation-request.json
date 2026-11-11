@@ -1,0 +1,8 @@
+{
+  "request_id": "4c56151b-e801-4898-bbe7-f6604a93db94",
+  "scope": {
+    "role": "seller",
+    "product_id": "59a9818e-37a5-47c0-9302-b1b54ab67514",
+    "insights": { "period_days": 30 }
+  }
+}

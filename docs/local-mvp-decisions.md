@@ -33,6 +33,28 @@ separate from backend availability.
 
 ## Current implementation limits to revisit
 
+### Seller insights and on-demand alerts: DOMAIN-010
+
+The user delegated recommended design choices during the continuous cycle and
+asked that deeper alternatives be retained as future improvements. This
+implementation chooses on-demand, read-only reports from existing seller margin
+targets, complete UTC comparison periods, approved receipt totals, effective
+production output and recorded material waste. These mechanics are implementation
+choices under that delegation, not separately confirmed user preferences.
+See [the contract, rules, source bounds and handoff](seller-insights.md).
+Backend implementation is under review; frontend integration remains pending.
+
+Missing evidence stays unknown. Receipt spending is seller-wide and is never
+deducted from modeled profit again. Warnings are not verified profits, causes,
+guaranteed savings or autonomous changes. Quality Locks stay binding.
+There is no new provider, migration, scheduler or delivery infrastructure.
+
+Later optional depth: configurable thresholds and category baselines, persistent
+alert acknowledgement/deduplication, notification delivery, waste cause evidence,
+confirmed material/product links and actual-cost reconciliation. Evaluate data
+coverage and false positives before proactive alerts. Future infrastructure,
+paid services and new disclosure policies still require their own authorization.
+
 ### Receipt OCR and expenses: DOMAIN-004
 
 After restarting the continuous cycle, the user chose option 1: free local
