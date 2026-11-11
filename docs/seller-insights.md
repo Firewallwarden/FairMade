@@ -5,6 +5,10 @@ are pending. This feature is read-only and does not need the local model to run
 its deterministic report. AI explanations use the existing opt-in local model.
 No new dependency, migration, notification service or automatic action is added.
 
+[Implementation #50](https://github.com/Firewallwarden/FairMade/pull/50) is a
+main-targeted draft dependent on #38 through #44. Refresh and revalidate against
+main after prerequisite integration before presenting it as ready for review.
+
 ## HTTP contract
 
 POST `/api/v1/products/{product_id}/insights` requires a bearer session, current

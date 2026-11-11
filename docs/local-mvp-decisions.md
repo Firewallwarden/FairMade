@@ -42,7 +42,8 @@ targets, complete UTC comparison periods, approved receipt totals, effective
 production output and recorded material waste. These mechanics are implementation
 choices under that delegation, not separately confirmed user preferences.
 See [the contract, rules, source bounds and handoff](seller-insights.md).
-Backend implementation is under review; frontend integration remains pending.
+Backend implementation is in [draft #50](https://github.com/Firewallwarden/FairMade/pull/50),
+dependent on #38 through #44; frontend integration remains pending.
 
 Missing evidence stays unknown. Receipt spending is seller-wide and is never
 deducted from modeled profit again. Warnings are not verified profits, causes,
