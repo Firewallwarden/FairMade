@@ -5,6 +5,10 @@ pending. The deterministic selector works without AI. Saved seller assistants
 can explain its current evidence with the existing opt-in local Qwen model.
 No new migration, provider, infrastructure or automatic business action is added.
 
+[Implementation #52](https://github.com/Firewallwarden/FairMade/pull/52) is a
+main-targeted draft dependent on #38 through #42. Refresh and revalidate against
+verified main after prerequisite integration before review readiness.
+
 ## Endpoint and options
 
 POST /api/v1/products/{product_id}/supplier-recommendations requires a bearer

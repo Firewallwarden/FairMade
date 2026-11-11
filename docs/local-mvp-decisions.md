@@ -42,7 +42,8 @@ explicit optional preferences. Savings minimizes the chosen cost objective;
 quality follows ordered known matches then cost; balanced preserves non-dominated
 cost/preference tradeoffs, without invented weights or quality grades.
 See [the contract and limitations](supplier-recommendation-modes.md).
-Implementation is under review; frontend acceptance/integration is pending.
+[Implementation #52](https://github.com/Firewallwarden/FairMade/pull/52) is a
+main-targeted draft dependent on #38 through #42; frontend integration is pending.
 The algorithms and limits are implementation choices under that delegation,
 not separately confirmed user settings.
 
