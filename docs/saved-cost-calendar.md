@@ -5,6 +5,10 @@ are pending. This is a read-only view of saved production-cost models. It does
 not establish actual expense timing, inflation, causes or validated seasonality.
 No new migration, provider or infrastructure is introduced.
 
+[Implementation #55](https://github.com/Firewallwarden/FairMade/pull/55) is a
+main-targeted draft dependent on #38 through #44 and #50. Refresh and revalidate
+against verified main after prerequisite integration before review readiness.
+
 ## Endpoint and calendar scope
 
 POST /api/v1/products/{product_id}/cost-calendar requires a bearer session,

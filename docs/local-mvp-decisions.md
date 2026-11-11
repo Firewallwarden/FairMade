@@ -41,8 +41,9 @@ UTC save-month production-cost snapshots, latest-per-month source selection,
 same-calendar-month annual differences and descriptive cross-year bounds.
 The default twenty-four months, maximum thirty-six months and thousand-source
 bound are implementation choices, not individually confirmed user preferences.
-See [the scope and limits](saved-cost-calendar.md). Backend implementation is
-under review; frontend acceptance/integration is pending.
+See [the scope and limits](saved-cost-calendar.md).
+[Implementation #55](https://github.com/Firewallwarden/FairMade/pull/55) is a
+main-targeted draft dependent on #38 through #44 and #50; frontend integration is pending.
 
 Unknowns remain null; changed basis/unsupported latest snapshots are not replaced
 by older convenient values. Record-save time does not establish expense timing,
