@@ -115,6 +115,8 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
     async def safe_validation(request: Request, exc: RequestValidationError):
         if (
             request.url.path.startswith("/api/v1/auth/")
+            or request.url.path.startswith("/api/v1/marketplace/listings")
+            or request.url.path.startswith("/api/v1/storefronts")
             or request.url.path.startswith("/api/v1/assistants")
             or request.url.path.endswith("/forecasts")
             or request.url.path.startswith("/api/v1/buyer/personalization")

@@ -2,6 +2,13 @@
 
 ## Status and common conventions
 
+Public listing pages now propose optional sort modes newest, price_asc,
+price_desc, quality, unit_price and value across catalog, storefront listings
+and nearby listing search. Unit/value ordering requires a product type and
+reference unit, and ordered pages add explicit public-evidence metadata.
+See [ordering policy, unknowns, bounds and frontend handoff](marketplace-ordering.md).
+No migration is required; shared frontend acceptance remains pending.
+
 Order-bound buyer/seller messages are an additive backend proposal at
 /api/v1/orders/{order_id}/messages (GET/POST): private participant access,
 retry-safe sends and cursor history. Apply migration 0029 after 0028. See
