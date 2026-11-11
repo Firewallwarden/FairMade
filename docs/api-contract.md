@@ -2,6 +2,13 @@
 
 ## Status and common conventions
 
+Read-only product pair suggestions are an additive backend proposal at POST
+/api/v1/buyer/bundles/suggest and POST /api/v1/seller/bundles/suggest. Buyer
+questions/scopes accept exactly one listing_ids, basket or bundles scope;
+seller questions/scopes accept optional bundles anchored to their owned product.
+See [prices, ranking, privacy, memory and handoff](product-bundle-suggestions.md).
+No new migration or automatic promotion/purchase is introduced.
+
 Single-storefront basket planning is an additive backend proposal at
 POST /api/v1/buyer/baskets/optimize. Buyer assistant questions and saved buyer
 scopes now accept either the existing listing_ids or a basket request. See
