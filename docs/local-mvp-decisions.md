@@ -60,52 +60,6 @@ Those deeper findings are not implied by descriptive saved-model comparisons.
 Paid services, new infrastructure and disclosure policy still require separate
 authorization. No production price or demand guarantee is made.
 
-### Seller insights and on-demand alerts: DOMAIN-010
-
-The user delegated recommended design choices during the continuous cycle and
-asked that deeper alternatives be retained as future improvements. This
-implementation chooses on-demand, read-only reports from existing seller margin
-targets, complete UTC comparison periods, approved receipt totals, effective
-production output and recorded material waste. These mechanics are implementation
-choices under that delegation, not separately confirmed user preferences.
-See [the contract, rules, source bounds and handoff](seller-insights.md).
-Backend implementation is in [draft #50](https://github.com/Firewallwarden/FairMade/pull/50),
-dependent on #38 through #44; frontend integration remains pending.
-
-Missing evidence stays unknown. Receipt spending is seller-wide and is never
-deducted from modeled profit again. Warnings are not verified profits, causes,
-guaranteed savings or autonomous changes. Quality Locks stay binding.
-There is no new provider, migration, scheduler or delivery infrastructure.
-
-Later optional depth: configurable thresholds and category baselines, persistent
-alert acknowledgement/deduplication, notification delivery, waste cause evidence,
-confirmed material/product links and actual-cost reconciliation. Evaluate data
-coverage and false positives before proactive alerts. Future infrastructure,
-paid services and new disclosure policies still require their own authorization.
-
-### Receipt OCR and expenses: DOMAIN-004
-
-After restarting the continuous cycle, the user chose option 1: free local
-Tesseract OCR plus the existing Qwen3 text model for receipt scanning and
-expense extraction. [Contract, setup and retention](receipt-expenses.md).
-This adds private drafts and exact seller approval to immutable unverified
-expense snapshots, without stock, recipe or production-cost side effects.
-Approved aggregates now support [seller receipt-expense questions](assistant-receipt-expenses.md);
-the assistant sees totals/coverage, not OCR, merchants or item descriptions.
-
-English OCR, JPEG/PNG input, five MiB/twelve million pixels, ISO-only automatic
-date parsing, explicit USD extraction, two-place money, fifty items, two hundred
-retained receipts, best-effort redaction and persistent business evidence are
-implementation limits, not individually confirmed user choices. Ambiguous
-fields require seller review. Images are transient; approved records have no
-automatic expiry or correction/void workflow. Chat retention does not apply.
-
-Before broader use, review localized dates/currencies, discounts/returns,
-semantic duplicate detection, record corrections/voids, expense allocation and
-assistant retrieval, retention/erasure/backup policy, isolated OCR/decoding,
-abuse/resource controls and frontend integration. The local installer was
-canceled; real full image OCR evaluation remains pending until configured.
-
 ### Conditional pricing recommendations: DOMAIN-014
 
 The user delegated recommended designs during the continuous cycle and asked
@@ -132,6 +86,258 @@ coverage/confidence, cost freshness/completeness, actual-cost reconciliation,
 validated demand/seasonal effects and a reviewed price-application workflow.
 These need evidence and separately authorized scope; they are not automatic
 production requirements or permission for paid services or new infrastructure.
+
+### Ingredient/material explanations and composition disclosure: DOMAIN-013
+
+The user delegated recommended designs during the continuous cycle, requesting
+deeper alternatives be retained for later. The implementation uses manually
+authored composition declarations behind an explicit Passport disclosure flag
+and normal exact-preview publication approval. Buyer explanations use approved
+declarations only. Sellers can separately opt into bounded private recipe-input
+explanations; production inputs are never inferred as finished contents.
+See [the contract, privacy and compatibility](composition-explanations.md).
+[Implementation #53](https://github.com/Firewallwarden/FairMade/pull/53) is a
+main-targeted draft dependent on #38 through #42; frontend integration is pending.
+These fields, source projections and limits are implementation choices under
+delegation, not individually confirmed user preferences.
+
+Existing hidden/legacy public payloads and hashes remain unchanged. Claims about
+roles, specifications, quantities and completeness remain seller-reported;
+allergens, nutrition, safety, health benefits and suitability are not inferred.
+No recipe, stock, pricing, Quality Lock or publication is changed by an assistant.
+There is no new migration, provider or infrastructure.
+
+Later optional depth: reviewed recipe-to-declaration proposals distinguishing
+production inputs, independently supported ingredient/material evidence, curated
+source-backed explanations, richer taxonomy/localization and completeness or
+correction workflows. Safety/allergen/nutrition verification requires its own
+evidence and policy. New disclosure policy, paid services and infrastructure
+still require separately authorized scope.
+
+### Supplier recommendation modes: DOMAIN-012
+
+The user delegated recommended design choices during the continuous cycle and
+asked to retain deeper alternatives for later. This implementation uses existing
+saved quote evidence, current sourcing-input requirements and up to eight
+explicit optional preferences. Savings minimizes the chosen cost objective;
+quality follows ordered known matches then cost; balanced preserves non-dominated
+cost/preference tradeoffs, without invented weights or quality grades.
+See [the contract and limitations](supplier-recommendation-modes.md).
+[Implementation #52](https://github.com/Firewallwarden/FairMade/pull/52) is a
+main-targeted draft dependent on #38 through #42; frontend integration is pending.
+The algorithms and limits are implementation choices under that delegation,
+not separately confirmed user settings.
+
+Every mode excludes mandatory failures/unknowns and ineligible price/availability
+evidence before selection. Input-review selection does not establish finished
+product compatibility, certification or a realized saving. Product Quality Locks
+remain binding. No supplier purchase, recipe edit, stock or price change occurs.
+The deterministic report does not require AI or a new migration/provider.
+
+Later optional depth: seller-reviewed weighted preferences, evidence confidence
+and verification, explicitly chosen private reliability signals, confirmed
+recipe/substitution effects and input links, actual savings baselines, and
+reviewed proposals for applying changes. New infrastructure, paid services and
+disclosure-policy changes require separate scope authorization.
+
+### Seller insights and on-demand alerts: DOMAIN-010
+
+The user delegated recommended design choices during the continuous cycle and
+asked that deeper alternatives be retained as future improvements. This
+implementation chooses on-demand, read-only reports from existing seller margin
+targets, complete UTC comparison periods, approved receipt totals, effective
+production output and recorded material waste. These mechanics are implementation
+choices under that delegation, not separately confirmed user preferences.
+See [the contract, rules, source bounds and handoff](seller-insights.md).
+Backend implementation is in [draft #50](https://github.com/Firewallwarden/FairMade/pull/50),
+dependent on #38 through #44; frontend integration remains pending.
+
+Missing evidence stays unknown. Receipt spending is seller-wide and is never
+deducted from modeled profit again. Warnings are not verified profits, causes,
+guaranteed savings or autonomous changes. Quality Locks stay binding.
+There is no new provider, migration, scheduler or delivery infrastructure.
+
+Later optional depth: configurable thresholds and category baselines, persistent
+alert acknowledgement/deduplication, notification delivery, waste cause evidence,
+confirmed material/product links and actual-cost reconciliation. Evaluate data
+coverage and false positives before proactive alerts. Future infrastructure,
+paid services and new disclosure policies still require their own authorization.
+
+### Transparent public-evidence ordering: DOMAIN-009
+
+[Implementation PR #49](https://github.com/Firewallwarden/FairMade/pull/49)
+targets main independently; not yet integrated.
+
+The user selected option 1: disclosed quality-check status and comparable unit
+prices, with unknowns/unverified claims clearly labeled; buyer-defined criteria
+and weights (option 2) are explicitly a later improvement.
+[Contract and ordering rules](marketplace-ordering.md).
+The user subsequently delegated recommended in-scope design choices during
+the continuous cycle and requested deeper alternatives be recorded for later.
+
+The backend implements optional catalog/storefront/nearby listing ordering
+without changing approved listing payloads, prices or stock. Quality states
+remain seller-reported; value is an explicit quality/availability/unit-price
+sequence, not an objective score or certification. Not-compared items remain
+visible in a separate trailing group, with reasons.
+
+One thousand full candidates, published six-place unit-price displays,
+recency/UUID ties, required type/reference-unit scope for unit/value modes
+and the exact group precedence are implementation choices rather than
+individual user selections. Frontend acceptance/integration remains pending.
+
+Revisit buyer-configurable criteria/weights with explicit evidence/consent,
+missing-data behavior and non-negotiable quality constraints. Other optional
+improvements are larger indexed exact sorting, stable snapshot pagination,
+richer public evidence and freshness semantics. No paid source, infrastructure
+or broader scoring policy is authorized by this follow-up.
+
+### Private messages for existing orders: DOMAIN-008
+
+[Implementation PR #48](https://github.com/Firewallwarden/FairMade/pull/48)
+is a main-targeted draft dependent on #38 through #45; not yet integrated.
+
+The user confirmed option 1: order-bound buyer–seller messages, and explicitly
+asked to record option 2 (pre-purchase product/storefront inquiries) as a later
+improvement. [Messaging contract and frontend handoff](order-messaging.md).
+The backend provides private participant-only plain-text sends and cursor
+history, with safe retries, current seller authorization and no commerce or
+AI-memory side effects. Existing unpaid/cancelled/refunded orders remain in scope.
+
+Two thousand characters per message, one thousand messages per order, ten new
+messages per account/minute across orders, read-only history and HTTP polling
+are implementation limits, not individual user choices. Messages are retained
+with their order without automatic expiry, edit or deletion; this is separate
+from AI chat retention and profile erasure. SQLite append serialization needs
+review if moving to a database with different write concurrency.
+
+Revisit pre-purchase inquiries with explicit eligibility, contact consent,
+privacy, reporting/blocking, retention and abuse policies. Separately review
+message erasure/export, backups, inbox/unread state, attachments, read receipts
+and notifications. This future entry does not authorize providers, infrastructure
+or a broader messaging/contact scope. Browser integration remains pending.
+
+### Verified FairMade sales-rate forecasting: DOMAIN-007
+
+[Implementation PR #47](https://github.com/Firewallwarden/FairMade/pull/47)
+is a main-targeted draft dependent on #38 through #42; not yet integrated.
+
+The user confirmed option 1: backend-verified FairMade sales only, and explicitly
+asked to record option 2 (seller-entered offline history) as a potential later
+implementation. [Forecast contract](observed-sales-forecast.md).
+The backend now provides read-only observed unit rates, conditional inventory
+coverage/whole-unit planning and saved seller follow-up explanations. It adds
+no order, stock or production effects and does not establish future demand.
+
+Fourteen-to-ninety-day lookback, one-to-thirty-day horizon, a fourteen-complete-date
+and three-sale-date minimum, one thousand captured product lines, calendar-day
+zero observations, six-place displays, all-refund-request exclusions and matching
+historical product/unit labels are implementation limits, not individual user
+choices or statistical confidence. Unknown inventory and insufficient history
+remain null. Only complete UTC dates after product creation are counted.
+
+Offline/manual imports remain a possible later enhancement requiring explicit
+provenance, validation, correction, deduplication and retention policy. Separately
+review stockout/publication exposure, refunds, variants, lead times, seasonality,
+calibration and raw-material mapping. No provider, infrastructure or new source
+is authorized by this follow-up. Browser integration remains separate.
+
+### Buyer/seller bundle suggestions: DOMAIN-011
+
+The user delegated recommended design choices during the continuous cycle,
+requesting deeper alternatives be logged for later. This implementation chooses
+read-only pairs of two approved products from one published storefront, one
+selling unit each, exact existing prices, current stock/quality exclusions and
+explicit total budgets. Buyers use consented preference/activity affinity;
+seller co-purchase counts use bounded verified sandbox captures and stay private.
+See [the bundle contract and limits](product-bundle-suggestions.md).
+[Implementation #51](https://github.com/Firewallwarden/FairMade/pull/51) is a
+main-targeted draft dependent on #38 through #46; frontend integration is pending.
+These mechanics are implementation choices, not separately confirmed preferences.
+
+No new price, promotion, bundle SKU, purchase or reservation is created. Suggestions
+do not establish ingredient compatibility, safety, complementarity, savings or
+future demand. Confirmed buyer constraints and mandatory Quality Locks stay binding.
+Saved scope is retained and recomputed; profile erasure removes derived answers.
+
+Later optional depth: larger/configurable bundles, seller-reviewed bundle SKUs,
+evidence-backed complementary uses, revision-specific patterns and confidence
+evaluation, cost/fee-aware promotion budgets and approved discounts, and
+multi-seller plans. Evaluate evidence and commerce effects before implementation;
+paid services, new infrastructure and disclosure changes require separate scope.
+
+### Single-storefront basket optimization: DOMAIN-006
+
+[Implementation PR #46](https://github.com/Firewallwarden/FairMade/pull/46)
+is a main-targeted draft depending on #38 through #45; not yet integrated.
+
+The user confirmed option 1: one seller/storefront per basket, and explicitly
+asked to revisit option 2 (multi-seller shopping plans) as a later enhancement.
+The [basket contract](buyer-basket-optimization.md) implements minimum merchandise
+subtotals for buyer-specified quantities and acceptable, compatible alternatives.
+Confirmed profile memory is binding; affinity breaks equal-cost ties only.
+Existing saved buyer conversations can explain recalculated plans. No order,
+reservation, price change or payment occurs during planning.
+
+Four needs, four disjoint alternatives per need, fixed quantities, identical
+declared contents within each comparison, USD merchandise-only budgets and
+no inferred safety suitability are current implementation boundaries. They
+were not individually chosen by the user. Browser integration remains pending.
+
+Revisit multi-seller plans grouped into separate orders and pickups, with
+transparent merchandise/travel limitations; decide any combined checkout or
+payout behavior separately. Optional later improvements include package/unit
+normalization, splitting quantities, optional/prioritized needs, larger scopes
+and reviewed scope editing. A later-enhancement entry does not authorize these
+changes or imply they are automatically required for production hosting.
+
+### Buyer personalization and profile memory: DOMAIN-005
+
+The user selected option 2: opt-in activity-based personalization using favorites
+and purchase history alongside stated preferences, explicitly emphasizing saved
+assistant memory. [Contract and controls](buyer-personalization.md).
+Buyer conversations now consume confirmed profile memory; saved buyer questions
+can propose budget/type updates for confirmation. Account defaults remain off.
+Seller conversations/private records and inferred sensitive traits are excluded.
+
+Thirty-day expiry from the last confirmed update, ninety-day sandbox purchase
+signals, two hundred activity rows, one hundred matching candidates, four
+suggestions, per-listed-unit USD budgets, published location labels and simple
+affinity ordering are implementation limits, not individual confirmed choices.
+Disable/delete clears preferences and profile-derived saved answer copies.
+Minimal revision tombstones prevent stale-tab restoration; user messages,
+favorites and orders have separate deletion/retention policies.
+
+Before hosting, review retention/backup/erasure, scheduled cleanup, larger data
+windows, granular consent/monitoring, historical variant semantics, safety
+evidence and frontend/browser evaluation. Basket budgets are addressed by
+DOMAIN-006; multi-seller plans remain its explicitly deferred enhancement.
+Persistent personalization is the chosen
+foundation, not an automatically temporary feature to replace with stateless
+behavior after MVP.
+
+### Receipt OCR and expenses: DOMAIN-004
+
+After restarting the continuous cycle, the user chose option 1: free local
+Tesseract OCR plus the existing Qwen3 text model for receipt scanning and
+expense extraction. [Contract, setup and retention](receipt-expenses.md).
+This adds private drafts and exact seller approval to immutable unverified
+expense snapshots, without stock, recipe or production-cost side effects.
+Approved aggregates now support [seller receipt-expense questions](assistant-receipt-expenses.md);
+the assistant sees totals/coverage, not OCR, merchants or item descriptions.
+
+English OCR, JPEG/PNG input, five MiB/twelve million pixels, ISO-only automatic
+date parsing, explicit USD extraction, two-place money, fifty items, two hundred
+retained receipts, best-effort redaction and persistent business evidence are
+implementation limits, not individually confirmed user choices. Ambiguous
+fields require seller review. Images are transient; approved records have no
+automatic expiry or correction/void workflow. Chat retention does not apply.
+
+Before broader use, review localized dates/currencies, discounts/returns,
+semantic duplicate detection, record corrections/voids, expense allocation and
+assistant retrieval, retention/erasure/backup policy, isolated OCR/decoding,
+abuse/resource controls and frontend integration. The local installer was
+canceled; real full image OCR evaluation remains pending until configured.
 
 ### Saved conversations: DOMAIN-003
 
@@ -197,9 +403,9 @@ and supplies qualitative context to the explanation model. Schema/citation and
 numeric-prose checks are not proofs of semantic correctness; review remains
 required. See the contract's evaluation notes and explicit operational limits.
 
-Receipt scanning was initially deferred; after restarting the continuous cycle
-the user selected the implementation tracked in DOMAIN-004 above. Forecasting,
-personalization and basket optimization remain backlog items. Further assistant capabilities, hosted
+Receipt scanning, forecasting, personalization and basket optimization were
+initially deferred and now have implementations under DOMAIN-004 through
+DOMAIN-007 above. Further assistant capabilities, hosted
 use, a new model/provider, external retrieval and spending require their own
 scope/operational review; this entry does not activate a continuous feature cycle.
 

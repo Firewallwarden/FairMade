@@ -13,6 +13,8 @@ from fastapi.responses import JSONResponse
 from fairmade.admin_review.routes import router as admin_review_router
 from fairmade.assistants.routes import router as assistant_router
 from fairmade.auth import router as auth_router
+from fairmade.baskets.routes import router as basket_router
+from fairmade.bundles.routes import router as bundle_router
 from fairmade.commerce_errors import CommerceError
 from fairmade.commerce_http import commerce_error_handler
 from fairmade.comparisons.routes import router as comparison_router
@@ -22,6 +24,7 @@ from fairmade.database import database_url, make_engine
 from fairmade.description_drafts.routes import router as description_router
 from fairmade.discovery.routes import router as discovery_router
 from fairmade.favorites.routes import router as favorites_router
+from fairmade.forecasting.routes import router as forecast_router
 from fairmade.fulfillment.routes import buyer_router as pickup_buyer_router
 from fairmade.fulfillment.routes import seller_router as pickup_seller_router
 from fairmade.inventory.routes import router as inventory_router
@@ -31,6 +34,7 @@ from fairmade.marketplace.routes import listing_error_handler
 from fairmade.marketplace.routes import public_router as marketplace_public_router
 from fairmade.marketplace.routes import router as marketplace_router
 from fairmade.materials.routes import router as material_router
+from fairmade.order_messages.routes import router as order_message_router
 from fairmade.orders.routes import router as order_router
 from fairmade.orders.routes import seller_router as seller_order_router
 from fairmade.passports.errors import PassportError
@@ -49,6 +53,7 @@ from fairmade.payments.routes import payment_error_handler
 from fairmade.payments.routes import public_router as paypal_config_router
 from fairmade.payments.routes import router as payment_router
 from fairmade.payments.routes import seller_router as seller_payment_router
+from fairmade.personalization.routes import router as personalization_router
 from fairmade.photos.routes import public_router as public_photo_router
 from fairmade.photos.routes import router as photo_router
 from fairmade.price_advice.routes import router as price_advice_router
@@ -73,6 +78,7 @@ from fairmade.seller_applications import router as application_router
 from fairmade.seller_insights.routes import router as insight_router
 from fairmade.storefronts.routes import public_router as public_storefront_router
 from fairmade.storefronts.routes import router as storefront_router
+from fairmade.supplier_recommendations.routes import router as recommendation_router
 from fairmade.supplier_records.routes import router as supplier_record_router
 from fairmade.suppliers.routes import router as supplier_router
 
@@ -115,10 +121,19 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
             request.url.path.startswith("/api/v1/auth/")
             or request.url.path.endswith("/insights")
             or request.url.path.endswith("/cost-calendar")
+            or request.url.path.endswith("/supplier-recommendations")
             or request.url.path.endswith("/pricing-recommendations")
             or request.url.path.startswith("/api/v1/assistants")
+            or request.url.path.startswith("/api/v1/buyer/personalization")
+            or request.url.path.startswith("/api/v1/buyer/baskets")
+            or request.url.path.endswith("/bundles/suggest")
+            or request.url.path.endswith("/forecasts")
+            or request.url.path.endswith("/messages")
             or "/description-drafts" in request.url.path
             or request.url.path.startswith("/api/v1/seller/receipt-drafts")
+            or request.url.path.startswith("/api/v1/marketplace/listings")
+            or request.url.path.startswith("/api/v1/storefronts")
+            or "/passports" in request.url.path
             or "/paypal-checkout" in request.url.path
             or "/refund-request" in request.url.path
             or "/sourcing-inputs" in request.url.path
@@ -167,6 +182,11 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
     application.include_router(auth_router)
     application.include_router(insight_router)
     application.include_router(calendar_router)
+    application.include_router(personalization_router)
+    application.include_router(basket_router)
+    application.include_router(bundle_router)
+    application.include_router(forecast_router)
+    application.include_router(recommendation_router)
     application.include_router(price_advice_router)
     application.include_router(description_router)
     application.include_router(receipt_router)
@@ -183,6 +203,7 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
     application.include_router(marketplace_public_router)
     application.include_router(inventory_router)
     application.include_router(order_router)
+    application.include_router(order_message_router)
     application.include_router(seller_order_router)
     application.include_router(payment_router)
     application.include_router(seller_payment_router)

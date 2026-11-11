@@ -1,5 +1,9 @@
 # Seller assistant sales and cost-history questions
 
+Optional [product-unit forecasting](observed-sales-forecast.md) now uses a separate
+closed-day sales baseline and current stock projection. It does not replace
+this seller-wide financial history or infer demand from analysis save dates.
+
 History answers also provide [reviewed receipt expense aggregates](assistant-receipt-expenses.md).
 These are seller-wide recorded spending evidence, separate from product costs
 and sandbox capture-cohort profit. Unapproved drafts and raw OCR are excluded.

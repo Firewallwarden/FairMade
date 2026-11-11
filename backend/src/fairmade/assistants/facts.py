@@ -4,9 +4,15 @@ from fairmade.assistants.expenses import expense_statements
 from fairmade.assistants.history import history_statements
 from fairmade.assistants.schemas import Evidence, Paragraph
 from fairmade.assistants.supplier_explanations import supplier_statements
+from fairmade.baskets.integration import statements as basket_statements
+from fairmade.bundles.integration import statements as bundle_statements
+from fairmade.composition.integration import statements as composition_statements
 from fairmade.cost_calendar.integration import statements as calendar_statements
+from fairmade.forecasting.integration import statements as forecast_statements
+from fairmade.personalization.integration import statements as personalization_statements
 from fairmade.price_advice.integration import statements as price_advice_statements
 from fairmade.seller_insights.integration import statements as insight_statements
+from fairmade.supplier_recommendations.integration import statements as recommendation_statements
 
 
 def statements(evidence: list[Evidence]) -> list[Paragraph]:
@@ -21,6 +27,12 @@ def statements(evidence: list[Evidence]) -> list[Paragraph]:
         result.extend(insight_statements(fact))
         result.extend(calendar_statements(fact))
         result.extend(supplier_statements(fact))
+        result.extend(personalization_statements(fact))
+        result.extend(basket_statements(fact))
+        result.extend(bundle_statements(fact))
+        result.extend(forecast_statements(fact))
+        result.extend(recommendation_statements(fact))
+        result.extend(composition_statements(fact))
         result.extend(price_advice_statements(fact))
         data = fact.data
         if fact.title == "Selected saved production economics":

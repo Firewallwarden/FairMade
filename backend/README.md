@@ -5,16 +5,32 @@ model snapshots and same-month annual comparisons. Saved seller conversations
 can explain the current evidence without inventing actual expenses, inflation
 or validated seasonality. See [the contract and deeper follow-up](../docs/saved-cost-calendar.md).
 
-Seller opportunities and on-demand alerts now combine private modeled margins,
-saved cost changes, reviewed expenses, production output and material waste.
-The deterministic report works without AI; optional saved seller conversations
-can explain its current evidence. See [scope and frontend handoff](../docs/seller-insights.md).
-
 Conditional seller price recommendations now combine saved production economics,
 selected reported price context and current mandatory quality evidence. No range
 overrides failed quality, changed selling units or unsupported price bounds;
 saved seller conversations can explain the current result. See
 [the policy and frontend handoff](../docs/conditional-pricing-recommendations.md).
+
+Sellers can author ingredient/material declarations in Passport drafts and
+explicitly approve their disclosure. Buyer explanations use those approved
+claims; sellers can separately opt into private recipe-input explanations.
+Private recipes never automatically become public composition. See
+[the contract and frontend handoff](../docs/composition-explanations.md).
+
+Supplier review modes now select cost minima, ordered optional preference matches
+or balanced tradeoffs after current mandatory exclusions. Saved seller assistants
+can explain them without authorizing a substitution. See
+[the contract and future depth](../docs/supplier-recommendation-modes.md).
+
+Seller opportunities and on-demand alerts now combine private modeled margins,
+saved cost changes, reviewed expenses, production output and material waste.
+The deterministic report works without AI; optional saved seller conversations
+can explain its current evidence. See [scope and frontend handoff](../docs/seller-insights.md).
+
+Buyer and seller product pair suggestions now use current same-storefront prices,
+stock and quality exclusions. Buyers can use confirmed preferences; seller
+co-purchase counts remain private. Both saved assistants can explain current
+suggestions. See [contract and deeper bundle follow-up](../docs/product-bundle-suggestions.md).
 
 The Fair Price Engine calculates batch and unit costs, fee-aware break-even
 prices, seller-selected margin ranges, and profit simulations. The stateless
@@ -23,6 +39,28 @@ Accounts default to buyer; only accounts with verified seller access can manage
 private products and save immutable analysis history. Local Qwen3 8B assistants
 are opt-in and disabled by default; the core calculators never call AI.
 PayPal sandbox calls are opt-in and disabled by default.
+Public catalog, storefront and nearby listing pages now support explicit
+price/quality/unit/value ordering from approved disclosures. Unknowns and
+uncomparable results are labeled; no universal value score is invented.
+See [ordering policy and frontend handoff](../docs/marketplace-ordering.md).
+
+Order participants can now exchange private plain-text messages with cursor
+history and retry-safe sends. Apply migration 0029; messages perform no commerce
+or assistant action. See [order messaging and later pre-purchase inquiries](../docs/order-messaging.md).
+
+Seller product forecasts now provide a read-only observed-sales-rate baseline
+and conditional stock coverage from verified sandbox sales, with explicit
+insufficient-history results. Saved seller conversations can explain the same
+fresh calculation. See [formulas, source limits and handoff](../docs/observed-sales-forecast.md).
+
+Buyers can plan a single-storefront basket from explicit quantities and acceptable
+alternatives, with exact subtotals and confirmed preferences. Plans support saved
+assistant explanations but create no order or reservation. See the
+[basket contract and later multi-seller enhancement](../docs/buyer-basket-optimization.md).
+Buyer personalization supports explicit opt-in, remembered preferences, favorites
+and verified sandbox purchase signals. Buyer conversations reload that memory;
+preference proposals from saved questions require confirmation. Apply migration
+0028 and see [the buyer memory workflow](../docs/buyer-personalization.md).
 Receipt images can now become private OCR/AI drafts and explicitly reviewed
 expense records. Run migration 0027 and configure local Tesseract plus the
 existing Qwen3 model. See [receipt setup, review and limits](../docs/receipt-expenses.md).

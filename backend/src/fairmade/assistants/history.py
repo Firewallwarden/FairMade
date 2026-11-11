@@ -30,6 +30,8 @@ HISTORY_WORDS = re.compile(
 def period_for(body: SellerQuestion) -> HistoryPeriod | None:
     if body.history_period is not None:
         return body.history_period
+    if body.forecast is not None:
+        return None  # Forecast scope defines its own closed-date window; history stays explicit.
     if not HISTORY_WORDS.search(body.question):
         return None
     today = utcnow().date()
