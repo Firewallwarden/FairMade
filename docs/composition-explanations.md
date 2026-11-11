@@ -5,6 +5,10 @@ are pending. This extends existing Passport drafts/publications and assistant
 sources; there is no new endpoint, provider, migration or business mutation.
 Public declarations and private production recipes are separate evidence.
 
+[Implementation #53](https://github.com/Firewallwarden/FairMade/pull/53) is a
+main-targeted draft dependent on #38 through #42. Refresh and revalidate against
+verified main after prerequisite integration before review readiness.
+
 ## Explicit public disclosure
 
 Existing POST /api/v1/products/{product_id}/passports and revision-safe PUT

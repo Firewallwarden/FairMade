@@ -42,7 +42,8 @@ and normal exact-preview publication approval. Buyer explanations use approved
 declarations only. Sellers can separately opt into bounded private recipe-input
 explanations; production inputs are never inferred as finished contents.
 See [the contract, privacy and compatibility](composition-explanations.md).
-Implementation is under review; frontend acceptance/integration is pending.
+[Implementation #53](https://github.com/Firewallwarden/FairMade/pull/53) is a
+main-targeted draft dependent on #38 through #42; frontend integration is pending.
 These fields, source projections and limits are implementation choices under
 delegation, not individually confirmed user preferences.
 
