@@ -7,6 +7,10 @@ Accounts default to buyer; only accounts with verified seller access can manage
 private products and save immutable analysis history. Local Qwen3 8B assistants
 are opt-in and disabled by default; the core calculators never call AI.
 PayPal sandbox calls are opt-in and disabled by default.
+Receipt images can now become private OCR/AI drafts and explicitly reviewed
+expense records. Run migration 0027 and configure local Tesseract plus the
+existing Qwen3 model. See [receipt setup, review and limits](../docs/receipt-expenses.md).
+Receipt expenses do not automatically change production costs or inventory.
 Seller and buyer assistant endpoints now explain scoped evidence through local
 Ollama. Exact financial facts are rendered by the backend separately from AI
 paragraphs; seller evidence is owner-scoped and buyers see approved disclosures

@@ -29,6 +29,45 @@ def new_id() -> str:
     return str(uuid4())
 
 
+class ReceiptDraft(Base):
+    __tablename__ = "receipt_drafts"
+    __table_args__ = (
+        UniqueConstraint("account_id", "request_id", name="uq_receipt_request"),
+        UniqueConstraint("account_id", "source_hash", name="uq_receipt_image"),
+        CheckConstraint("revision BETWEEN 1 AND 2147483646", name="ck_receipt_revision"),
+        CheckConstraint("state IN ('draft', 'approved')", name="ck_receipt_state"),
+        CheckConstraint(
+            "(state = 'draft' AND approved_at IS NULL) OR "
+            "(state = 'approved' AND approved_at IS NOT NULL)",
+            name="ck_receipt_approval",
+        ),
+        Index("ix_receipt_owner_created", "account_id", "created_at", "id"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"))
+    request_id: Mapped[str] = mapped_column(String(36))
+    source_hash: Mapped[str] = mapped_column(String(64))
+    revision: Mapped[int] = mapped_column(Integer)
+    state: Mapped[str] = mapped_column(String(12))
+    ocr_text: Mapped[str] = mapped_column(Text)
+    provenance: Mapped[dict] = mapped_column(JSON)
+    extracted: Mapped[dict] = mapped_column(JSON)
+    details: Mapped[dict] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    approved_at: Mapped[datetime | None] = mapped_column(DateTime)
+
+
+class ReceiptExpense(Base):
+    __tablename__ = "receipt_expenses"
+    __table_args__ = (Index("ix_receipt_expense_owner_created", "account_id", "created_at", "id"),)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    receipt_id: Mapped[str] = mapped_column(ForeignKey("receipt_drafts.id"), unique=True)
+    account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"))
+    details: Mapped[dict] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
 class AssistantConversation(Base):
     __tablename__ = "assistant_conversations"
     __table_args__ = (

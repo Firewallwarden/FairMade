@@ -2,6 +2,13 @@
 
 ## Status and common conventions
 
+Receipt extraction/review is an additive backend proposal under
+/api/v1/seller/receipt-drafts, with owner GET /api/v1/seller/expenses.
+Drafts require explicit seller approval before an immutable expense is recorded.
+See [the receipt contract, local setup and frontend handoff](receipt-expenses.md).
+Migration 0027 is required. Frontend acceptance and real image OCR validation
+remain pending; existing cost and sales APIs are unchanged.
+
 The account, seller-application, product, saved-analysis, quality, comparison, review, Passport, marketplace, inventory, order, sandbox-payment, refund, supplier-sourcing, seller-sales, favorite, and storefront endpoints
 below are implemented by the backend for **local development**. Their shared integration contract is
 **proposed; frontend acceptance and browser integration are pending**. No frontend

@@ -33,6 +33,27 @@ separate from backend availability.
 
 ## Current implementation limits to revisit
 
+### Receipt OCR and expenses: DOMAIN-004
+
+After restarting the continuous cycle, the user chose option 1: free local
+Tesseract OCR plus the existing Qwen3 text model for receipt scanning and
+expense extraction. [Contract, setup and retention](receipt-expenses.md).
+This adds private drafts and exact seller approval to immutable unverified
+expense snapshots, without stock, recipe or production-cost side effects.
+
+English OCR, JPEG/PNG input, five MiB/twelve million pixels, ISO-only automatic
+date parsing, explicit USD extraction, two-place money, fifty items, two hundred
+retained receipts, best-effort redaction and persistent business evidence are
+implementation limits, not individually confirmed user choices. Ambiguous
+fields require seller review. Images are transient; approved records have no
+automatic expiry or correction/void workflow. Chat retention does not apply.
+
+Before broader use, review localized dates/currencies, discounts/returns,
+semantic duplicate detection, record corrections/voids, expense allocation and
+assistant retrieval, retention/erasure/backup policy, isolated OCR/decoding,
+abuse/resource controls and frontend integration. The local installer was
+canceled; real full image OCR evaluation remains pending until configured.
+
 ### Saved conversations: DOMAIN-003
 
 The user explicitly selected option 2: saved database conversations with account
