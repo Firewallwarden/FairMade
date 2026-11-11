@@ -7,6 +7,7 @@ from pydantic import Field, field_validator
 from fairmade.assistants.schemas import (
     AssistantResponse,
     BuyerQuestion,
+    BuyerSelection,
     HistoryPeriod,
     Question,
     SellerQuestion,
@@ -25,16 +26,8 @@ class SellerScope(Contract):
     history_period: HistoryPeriod | None = None
 
 
-class BuyerScope(Contract):
+class BuyerScope(BuyerSelection):
     role: Literal["buyer"]
-    listing_ids: Annotated[list[UUID], Field(min_length=1, max_length=4)]
-
-    @field_validator("listing_ids")
-    @classmethod
-    def unique_listings(cls, values):
-        if len(set(values)) != len(values):
-            raise ValueError("Select each listing only once")
-        return values
 
 
 Scope = Annotated[SellerScope | BuyerScope, Field(discriminator="role")]

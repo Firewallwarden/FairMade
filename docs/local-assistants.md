@@ -176,7 +176,9 @@ Receipt extraction/review and approved expense questions now have separate
 [backend implementations](receipt-expenses.md), with real image OCR validation
 pending. [Opt-in personalization](buyer-personalization.md) adds confirmed profile
 memory, favorites and verified sandbox purchase signals to buyer answers.
-Demand/inventory forecasting and basket optimization remain follow-ups. Revisit them after foundation
+Single-storefront [basket optimization](buyer-basket-optimization.md) supports
+explicit needs and saved buyer follow-ups using confirmed profile memory.
+Demand/inventory forecasting and multi-seller plans remain follow-ups. Revisit them after foundation
 integration/evaluation and as the submission schedule permits. Further work
 includes richer supplier suggestions, sales/history questions, bundles,
 description generation and alerts. No automatic background feature cycle or

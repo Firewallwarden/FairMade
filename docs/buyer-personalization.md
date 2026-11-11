@@ -219,8 +219,9 @@ proposal review from a selected buyer turn, suggestion reasons/units/availabilit
 buyer conversation creation, safe facts/citation rendering and stale-state
 handling. Never present affinity as a fairness, quality or safety score.
 
-No frontend/browser demonstration is included. Basket budgets, multi-seller
-optimization, safety evidence verification, cross-category unit equivalence,
+No frontend/browser demonstration is included. Single-storefront basket budgets
+and saved explanations are now covered by [basket planning](buyer-basket-optimization.md).
+Multi-seller optimization, safety evidence verification, cross-category unit equivalence,
 behavioral embeddings, sensitive-trait inference, forecasting and hosted
 operational controls remain separate work.
 

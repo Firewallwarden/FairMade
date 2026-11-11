@@ -33,6 +33,31 @@ separate from backend availability.
 
 ## Current implementation limits to revisit
 
+### Single-storefront basket optimization: DOMAIN-006
+
+[Implementation PR #46](https://github.com/Firewallwarden/FairMade/pull/46)
+is a main-targeted draft depending on #38 through #45; not yet integrated.
+
+The user confirmed option 1: one seller/storefront per basket, and explicitly
+asked to revisit option 2 (multi-seller shopping plans) as a later enhancement.
+The [basket contract](buyer-basket-optimization.md) implements minimum merchandise
+subtotals for buyer-specified quantities and acceptable, compatible alternatives.
+Confirmed profile memory is binding; affinity breaks equal-cost ties only.
+Existing saved buyer conversations can explain recalculated plans. No order,
+reservation, price change or payment occurs during planning.
+
+Four needs, four disjoint alternatives per need, fixed quantities, identical
+declared contents within each comparison, USD merchandise-only budgets and
+no inferred safety suitability are current implementation boundaries. They
+were not individually chosen by the user. Browser integration remains pending.
+
+Revisit multi-seller plans grouped into separate orders and pickups, with
+transparent merchandise/travel limitations; decide any combined checkout or
+payout behavior separately. Optional later improvements include package/unit
+normalization, splitting quantities, optional/prioritized needs, larger scopes
+and reviewed scope editing. A later-enhancement entry does not authorize these
+changes or imply they are automatically required for production hosting.
+
 ### Buyer personalization and profile memory: DOMAIN-005
 
 The user selected option 2: opt-in activity-based personalization using favorites
@@ -52,8 +77,9 @@ favorites and orders have separate deletion/retention policies.
 
 Before hosting, review retention/backup/erasure, scheduled cleanup, larger data
 windows, granular consent/monitoring, historical variant semantics, safety
-evidence and frontend/browser evaluation. Basket budgets and multi-seller
-optimization need separate design. Persistent personalization is the chosen
+evidence and frontend/browser evaluation. Basket budgets are addressed by
+DOMAIN-006; multi-seller plans remain its explicitly deferred enhancement.
+Persistent personalization is the chosen
 foundation, not an automatically temporary feature to replace with stateless
 behavior after MVP.
 
@@ -145,8 +171,9 @@ numeric-prose checks are not proofs of semantic correctness; review remains
 required. See the contract's evaluation notes and explicit operational limits.
 
 Receipt scanning was initially deferred; after restarting the continuous cycle
-the user selected the implementation tracked in DOMAIN-004 above. Forecasting,
-and basket optimization remain backlog items. Personalization is implemented
+the user selected the implementation tracked in DOMAIN-004 above. Forecasting
+remains a backlog item. Single-storefront basket planning is implemented under
+DOMAIN-006 above. Personalization is implemented
 under DOMAIN-005 above. Further assistant capabilities, hosted
 use, a new model/provider, external retrieval and spending require their own
 scope/operational review; this entry does not activate a continuous feature cycle.

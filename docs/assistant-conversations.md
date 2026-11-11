@@ -14,6 +14,10 @@ products, Quality Locks or payments. The existing /assistants/seller and
 
 ## HTTP contract
 
+Buyer scopes additionally support a reviewed basket request instead of listing_ids.
+See [basket quantities, budgets, source rechecks and scope limits](buyer-basket-optimization.md).
+This uses the same owner, retention, retry, deletion and follow-up mechanics.
+
 Paths start with /api/v1/assistants/conversations, without a trailing slash on
 the collection. All operations require bearer authentication and return
 Cache-Control: no-store, including errors. UUIDs are strings, money uses decimal
