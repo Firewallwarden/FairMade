@@ -37,8 +37,9 @@ rendering checks are retained as history, not claimed as live backend results.
 PayPal sandbox SDK/capture/reconciliation UI is wired, but the local backend
 reports payments disabled. Credentialed browser approval/capture and recovery
 remain unverified until its owner supplies server-only sandbox configuration.
-No backend source was edited. No push, deployment, live payment or production
-readiness is claimed. See the [frontend checklist](../frontend/INTEGRATION.md)
+No backend source was edited. The frontend feature branches were published on
+2026-11-10 after synchronization and validation. No merge into main, deployment,
+live payment or production readiness is claimed. See the [frontend checklist](../frontend/INTEGRATION.md)
 for the remaining secondary UI slices and actual verification limits. Reload
 intentionally loses the memory-only session and any in-flight reservation retry
 key; check Orders after an uncertain request before creating another reservation.

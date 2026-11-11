@@ -89,4 +89,6 @@ Production hosting needs approved API routing; the development proxy is not bund
 
 Checks: `npm.cmd run build`, `npm.cmd run lint`, `npm.cmd test`.
 Tests require Node 22.18+ native TypeScript support. Use separate buyer/seller
-accounts. No changes have been pushed or deployed.
+accounts. The setup and demo feature branches were pushed on 2026-11-10 after
+conflict checks, synchronization and validation. They have not been merged into
+main or deployed by this frontend work.
