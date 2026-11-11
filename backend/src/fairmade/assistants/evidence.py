@@ -12,6 +12,8 @@ from fairmade.auth import api_error
 from fairmade.baskets.integration import evidence as basket_evidence
 from fairmade.bundles.integration import evidence as bundle_evidence
 from fairmade.evidence import today
+from fairmade.forecasting.integration import TITLE as FORECAST_TITLE
+from fairmade.forecasting.service import forecast
 from fairmade.marketplace.service import get_public
 from fairmade.models import Analysis, QualityLockSet
 from fairmade.ownership import require_owned_product
@@ -86,6 +88,13 @@ def seller_evidence(db: Session, account_id: str, body: SellerQuestion) -> list[
             supplier_details(db, product.id, body.supplier_report_id, today()),
         )
     history_evidence(db, account_id, body, facts)
+    if body.forecast is not None:
+        add(
+            facts,
+            FORECAST_TITLE,
+            forecast(db, account_id, product.id, body.forecast).model_dump(mode="json"),
+            "calculated_from_backend_verified_sandbox_sales_and_seller_recorded_stock",
+        )
     if body.bundles is not None:
         for fact in bundle_evidence(db, account_id, body.bundles, product_id=product.id):
             fact.key = f"e{len(facts) + 1}"

@@ -2,6 +2,13 @@
 
 ## Status and common conventions
 
+Observed-sales forecasting is an additive backend proposal at
+POST /api/v1/products/{product_id}/forecasts. Seller questions and saved seller
+scopes add optional forecast: {lookback_days, horizon_days}; exact unit baselines
+are read-only and use backend-verified sandbox sales only. See
+[source limits, formulas, memory and frontend handoff](observed-sales-forecast.md).
+No new migration is required beyond 0026; frontend acceptance remains pending.
+
 Read-only product pair suggestions are an additive backend proposal at POST
 /api/v1/buyer/bundles/suggest and POST /api/v1/seller/bundles/suggest. Buyer
 questions/scopes accept exactly one listing_ids, basket or bundles scope;

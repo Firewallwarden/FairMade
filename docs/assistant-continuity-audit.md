@@ -74,7 +74,7 @@ require confirmation. Profile erasure clears derived answer copies while
 original user messages have separate conversation deletion controls.
 Single-storefront [basket plans](buyer-basket-optimization.md) now support saved
 buyer follow-ups with recalculated stock, constraints and profile memory.
-Forecasting and multi-seller basket plans remain follow-ups; browser integration is pending.
+Verified-sales [forecasting](observed-sales-forecast.md) supports saved follow-ups. Multi-seller plans and browser integration remain follow-ups.
 
 Thirty-day inactivity expiry and history/resource caps are documented
 implementation limits. Durable storage is the confirmed user choice. Scheduled

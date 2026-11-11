@@ -12,6 +12,11 @@ Accounts default to buyer; only accounts with verified seller access can manage
 private products and save immutable analysis history. Local Qwen3 8B assistants
 are opt-in and disabled by default; the core calculators never call AI.
 PayPal sandbox calls are opt-in and disabled by default.
+Seller product forecasts now provide a read-only observed-sales-rate baseline
+and conditional stock coverage from verified sandbox sales, with explicit
+insufficient-history results. Saved seller conversations can explain the same
+fresh calculation. See [formulas, source limits and handoff](../docs/observed-sales-forecast.md).
+
 Buyers can plan a single-storefront basket from explicit quantities and acceptable
 alternatives, with exact subtotals and confirmed preferences. Plans support saved
 assistant explanations but create no order or reservation. See the

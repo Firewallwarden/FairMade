@@ -23,6 +23,7 @@ from fairmade.database import database_url, make_engine
 from fairmade.description_drafts.routes import router as description_router
 from fairmade.discovery.routes import router as discovery_router
 from fairmade.favorites.routes import router as favorites_router
+from fairmade.forecasting.routes import router as forecast_router
 from fairmade.fulfillment.routes import buyer_router as pickup_buyer_router
 from fairmade.fulfillment.routes import seller_router as pickup_seller_router
 from fairmade.inventory.routes import router as inventory_router
@@ -114,6 +115,7 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
         if (
             request.url.path.startswith("/api/v1/auth/")
             or request.url.path.startswith("/api/v1/assistants")
+            or request.url.path.endswith("/forecasts")
             or request.url.path.startswith("/api/v1/buyer/personalization")
             or request.url.path.startswith("/api/v1/buyer/baskets")
             or request.url.path.endswith("/bundles/suggest")
@@ -165,6 +167,7 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
         return calculate(request)
 
     application.include_router(auth_router)
+    application.include_router(forecast_router)
     application.include_router(personalization_router)
     application.include_router(basket_router)
     application.include_router(bundle_router)

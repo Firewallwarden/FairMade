@@ -9,6 +9,7 @@ from fairmade.assistants.schemas import Evidence
 from fairmade.assistants.supplier_explanations import supplier_context
 from fairmade.baskets.integration import context as basket_context
 from fairmade.bundles.integration import context as bundle_context
+from fairmade.forecasting.integration import context as forecast_context
 from fairmade.personalization.integration import context as personalization_context
 
 DIGITS = re.compile(r"[-+]?\d+(?:,\d{3})*(?:\.\d+)?")
@@ -41,6 +42,8 @@ def model_evidence(evidence: list[Evidence]) -> list[dict]:
             data = expense_context(fact)
         if data is None:
             data = supplier_context(fact)
+        if data is None:
+            data = forecast_context(fact)
         if data is None:
             data = personalization_context(fact)
         if data is None:
