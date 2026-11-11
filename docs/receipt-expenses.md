@@ -13,7 +13,9 @@ Only approval records an immutable seller-reviewed, unverified expense snapshot.
 Extracting a draft alone records no expense. Repeated identical approval returns
 the same expense. Inventory, recipes, production analyses, supplier quotes,
 public Passports, payments and existing sales profitability reports are unchanged.
-Expenses are not yet retrieved by assistant financial questions.
+Approved expense aggregates are now available to
+[seller assistant history questions](assistant-receipt-expenses.md), separately
+from modeled production costs and sandbox sales profit.
 
 The model sees bounded, best-effort-redacted OCR text only. It receives no private
 product records, account details, prior chat history or receipt image. OCR text

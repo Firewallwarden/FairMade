@@ -7,6 +7,7 @@ from decimal import ROUND_HALF_UP, Decimal, localcontext
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from fairmade.assistants.expenses import expense_evidence
 from fairmade.assistants.schemas import Evidence, HistoryPeriod, Paragraph, SellerQuestion
 from fairmade.auth import api_error
 from fairmade.database import utcnow
@@ -20,7 +21,7 @@ COST_TITLE = "Selected product saved cost history"
 MAX_ANALYSES = 25
 HISTORY_WORDS = re.compile(
     r"\b(sales?|revenue|sold|refunds?|history|historical|trends?|changed|"
-    r"increased|decreased|expenses?|last year|last month|this month|"
+    r"increased|decreased|expenses?|spend|spent|spending|receipts?|last year|last month|this month|"
     r"yesterday|today|last week|last \d+ days)\b",
     re.IGNORECASE,
 )
@@ -141,6 +142,7 @@ def history_evidence(
     period = period_for(body)
     if period is None:
         return
+    expense_evidence(db, account_id, period, facts)
     records = sales_repository.summary_records(db, account_id, period.start_date, period.end_date)
     if len(records) > sales_repository.MAX_SUMMARY_ORDERS:
         raise api_error(409, "REPORT_TOO_LARGE", "Narrow the sales period.")

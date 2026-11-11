@@ -40,6 +40,8 @@ Tesseract OCR plus the existing Qwen3 text model for receipt scanning and
 expense extraction. [Contract, setup and retention](receipt-expenses.md).
 This adds private drafts and exact seller approval to immutable unverified
 expense snapshots, without stock, recipe or production-cost side effects.
+Approved aggregates now support [seller receipt-expense questions](assistant-receipt-expenses.md);
+the assistant sees totals/coverage, not OCR, merchants or item descriptions.
 
 English OCR, JPEG/PNG input, five MiB/twelve million pixels, ISO-only automatic
 date parsing, explicit USD extraction, two-place money, fifty items, two hundred
@@ -118,9 +120,9 @@ and supplies qualitative context to the explanation model. Schema/citation and
 numeric-prose checks are not proofs of semantic correctness; review remains
 required. See the contract's evaluation notes and explicit operational limits.
 
-Receipt scanning, forecasting, personalization and basket optimization are
-explicitly deferred until foundational assistants work and the schedule allows.
-They remain backlog items. Further assistant capabilities, hosted
+Receipt scanning was initially deferred; after restarting the continuous cycle
+the user selected the implementation tracked in DOMAIN-004 above. Forecasting,
+personalization and basket optimization remain backlog items. Further assistant capabilities, hosted
 use, a new model/provider, external retrieval and spending require their own
 scope/operational review; this entry does not activate a continuous feature cycle.
 

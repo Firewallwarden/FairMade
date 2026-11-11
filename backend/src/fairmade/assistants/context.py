@@ -3,6 +3,7 @@
 import re
 from decimal import Decimal
 
+from fairmade.assistants.expenses import expense_context
 from fairmade.assistants.history import history_context
 from fairmade.assistants.schemas import Evidence
 from fairmade.assistants.supplier_explanations import supplier_context
@@ -33,6 +34,8 @@ def model_evidence(evidence: list[Evidence]) -> list[dict]:
     result = []
     for fact in evidence:
         data = history_context(fact)
+        if data is None:
+            data = expense_context(fact)
         if data is None:
             data = supplier_context(fact)
         if data is None:
