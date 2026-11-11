@@ -13,6 +13,8 @@ from fairmade.evidence import today
 from fairmade.marketplace.service import get_public
 from fairmade.models import Analysis, QualityLockSet
 from fairmade.ownership import require_owned_product
+from fairmade.personalization.constants import TITLE as PROFILE_TITLE
+from fairmade.personalization.service import buyer_profile_data
 from fairmade.pricing.schemas import PricingRequest, PricingResponse
 from fairmade.pricing.service import calculate
 
@@ -113,7 +115,9 @@ def scenario_evidence(
     )
 
 
-def buyer_evidence(db: Session, body: BuyerQuestion) -> list[Evidence]:
+def buyer_evidence(
+    db: Session, body: BuyerQuestion, account_id: str | None = None
+) -> list[Evidence]:
     facts: list[Evidence] = []
     listings = []
     for listing_id in body.listing_ids:
@@ -174,4 +178,13 @@ def buyer_evidence(db: Session, body: BuyerQuestion) -> list[Evidence]:
         },
         "application_policy",
     )
+    if account_id is not None:
+        personalization = buyer_profile_data(db, account_id, listings)
+        if personalization is not None:
+            add(
+                facts,
+                PROFILE_TITLE,
+                personalization,
+                "buyer_confirmed_preferences_and_private_activity",
+            )
     return facts

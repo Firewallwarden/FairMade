@@ -29,6 +29,24 @@ def new_id() -> str:
     return str(uuid4())
 
 
+class BuyerProfile(Base):
+    __tablename__ = "buyer_profiles"
+    __table_args__ = (
+        Index("ix_buyer_profile_expiry", "expires_at"),
+        CheckConstraint("revision BETWEEN 1 AND 2147483646", name="ck_buyer_profile_revision"),
+        CheckConstraint(
+            "(enabled = 1 AND expires_at IS NOT NULL) OR (enabled = 0 AND expires_at IS NULL)",
+            name="ck_buyer_profile_expiry",
+        ),
+    )
+    account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"), primary_key=True)
+    revision: Mapped[int] = mapped_column(Integer)
+    enabled: Mapped[bool] = mapped_column(Integer)
+    preferences: Mapped[dict] = mapped_column(JSON)
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
 class ReceiptDraft(Base):
     __tablename__ = "receipt_drafts"
     __table_args__ = (
