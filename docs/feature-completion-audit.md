@@ -61,7 +61,7 @@ of any user-requested item.
 | Reviewed receipt expense questions | [PR #44](https://github.com/Firewallwarden/FairMade/pull/44), dependent draft; no inferred product-cost allocation. |
 | Buyer opt-in personalization, favorites/verified sandbox signals and confirmed memory proposals | [PR #45](https://github.com/Firewallwarden/FairMade/pull/45), dependent draft. |
 | Budget-aware single-storefront basket plans and saved explanations | [PR #46](https://github.com/Firewallwarden/FairMade/pull/46), dependent draft. Multi-seller plans are explicitly a later enhancement. |
-| Verified-sales unit baseline and inventory planning explanations | Implemented in this change; [source, formulas and limitations](observed-sales-forecast.md). Offline history is a potential later enhancement. |
+| Verified-sales unit baseline and inventory planning explanations | [PR #47](https://github.com/Firewallwarden/FairMade/pull/47), dependent draft behind #38–#42; [source, formulas and limitations](observed-sales-forecast.md). Offline history is a potential later enhancement. |
 
 ## Core feature map outside the assistant chat shell
 
@@ -100,7 +100,8 @@ independently verified seller claims or completion of every possible expansion.
 
 ## Suggested next priorities
 
-1. Finish and publish the approved verified-sales forecasting work.
+1. Approved verified-sales forecasting is implemented and published in draft #47;
+   integrate and review it through the normal prerequisite-refresh workflow.
 2. Address core buyer–seller communication and the missing marketplace ordering
    behavior, with visible design questions where policy is needed.
 3. Complete the remaining pricing/supplier recommendation policy if required

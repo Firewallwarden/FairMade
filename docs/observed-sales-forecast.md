@@ -1,5 +1,9 @@
 # Observed sales-rate baseline and inventory planning
 
+[Implementation PR #47](https://github.com/Firewallwarden/FairMade/pull/47)
+targets main and remains draft behind #38 through #42. It is not integrated
+into main. Receipt/personalization/basket PRs #43 through #46 are independent.
+
 Implemented backend proposal; frontend acceptance and browser integration are
 pending. The confirmed choice is option 1: use backend-verified FairMade sales
 only. Seller-entered/imported offline sales history (option 2) is recorded as

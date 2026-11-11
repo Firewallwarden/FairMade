@@ -35,6 +35,9 @@ separate from backend availability.
 
 ### Verified FairMade sales-rate forecasting: DOMAIN-007
 
+[Implementation PR #47](https://github.com/Firewallwarden/FairMade/pull/47)
+is a main-targeted draft dependent on #38 through #42; not yet integrated.
+
 The user confirmed option 1: backend-verified FairMade sales only, and explicitly
 asked to record option 2 (seller-entered offline history) as a potential later
 implementation. [Forecast contract](observed-sales-forecast.md).
