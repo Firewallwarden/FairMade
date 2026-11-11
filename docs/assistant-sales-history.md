@@ -1,5 +1,9 @@
 # Seller assistant sales and cost-history questions
 
+History answers also provide [reviewed receipt expense aggregates](assistant-receipt-expenses.md).
+These are seller-wide recorded spending evidence, separate from product costs
+and sandbox capture-cohort profit. Unapproved drafts and raw OCR are excluded.
+
 This additive assistant feature depends on local assistant PR #38. Its own PR
 targets main and stays draft until prerequisites are integrated and refreshed.
 Implementation: [PR #39](https://github.com/Firewallwarden/FairMade/pull/39).

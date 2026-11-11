@@ -63,9 +63,12 @@ paged history restore, retry/revision handling, facts/citations/notices, stale
 answer states, deletion and auth/expiry handling. Browser and screen-recorder
 integration/latency have not been tested here.
 
-Receipt scanning, forecasting, personalization and basket optimization remain
-deferred. Their next step is reassessment after the foundational browser demo
-is working and evaluated; no larger backlog item was silently started.
+The user restarted the continuous cycle and approved local Tesseract plus Qwen3
+for receipts. [Receipt review](receipt-expenses.md) and
+[receipt-expense questions](assistant-receipt-expenses.md) now have backend
+implementations. Tesseract installation and full image OCR validation remain
+pending. Forecasting, personalization and basket optimization remain follow-ups
+with their own data/design requirements; browser integration is still pending.
 
 Thirty-day inactivity expiry and history/resource caps are documented
 implementation limits. Durable storage is the confirmed user choice. Scheduled

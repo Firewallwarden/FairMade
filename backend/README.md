@@ -11,6 +11,8 @@ Receipt images can now become private OCR/AI drafts and explicitly reviewed
 expense records. Run migration 0027 and configure local Tesseract plus the
 existing Qwen3 model. See [receipt setup, review and limits](../docs/receipt-expenses.md).
 Receipt expenses do not automatically change production costs or inventory.
+Seller assistant history questions can explain approved receipt totals by period
+and category. See [scope and double-counting limits](../docs/assistant-receipt-expenses.md).
 Seller and buyer assistant endpoints now explain scoped evidence through local
 Ollama. Exact financial facts are rendered by the backend separately from AI
 paragraphs; seller evidence is owner-scoped and buyers see approved disclosures

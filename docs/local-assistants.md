@@ -172,8 +172,10 @@ model/provider, external sources, backup retention, monitoring and broader
 scaling need separate review. Frontend implementation and end-to-end browser
 checks remain pending.
 
-Receipt scanning, demand/inventory forecasting, personalized recommendations and
-basket optimization are deferred, not removed. Revisit them after foundation
+Receipt extraction/review and approved expense questions now have separate
+[backend implementations](receipt-expenses.md), with real image OCR validation
+pending. Demand/inventory forecasting, personalized recommendations and basket
+optimization remain follow-ups. Revisit them after foundation
 integration/evaluation and as the submission schedule permits. Further work
 includes richer supplier suggestions, sales/history questions, bundles,
 description generation and alerts. No automatic background feature cycle or

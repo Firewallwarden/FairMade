@@ -8,6 +8,8 @@ Drafts require explicit seller approval before an immutable expense is recorded.
 See [the receipt contract, local setup and frontend handoff](receipt-expenses.md).
 Migration 0027 is required. Frontend acceptance and real image OCR validation
 remain pending; existing cost and sales APIs are unchanged.
+Seller history questions now add owner-only reviewed receipt expense aggregates.
+See [scope, period and double-counting limits](assistant-receipt-expenses.md).
 
 The account, seller-application, product, saved-analysis, quality, comparison, review, Passport, marketplace, inventory, order, sandbox-payment, refund, supplier-sourcing, seller-sales, favorite, and storefront endpoints
 below are implemented by the backend for **local development**. Their shared integration contract is
