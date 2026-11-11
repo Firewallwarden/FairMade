@@ -63,9 +63,18 @@ paged history restore, retry/revision handling, facts/citations/notices, stale
 answer states, deletion and auth/expiry handling. Browser and screen-recorder
 integration/latency have not been tested here.
 
-Receipt scanning, forecasting, personalization and basket optimization remain
-deferred. Their next step is reassessment after the foundational browser demo
-is working and evaluated; no larger backlog item was silently started.
+The user restarted the continuous cycle and approved local Tesseract plus Qwen3
+for receipts. [Receipt review](receipt-expenses.md) and
+[receipt-expense questions](assistant-receipt-expenses.md) now have backend
+implementations. Tesseract installation and full image OCR validation remain
+pending. [Opt-in buyer personalization](buyer-personalization.md) now connects
+confirmed profile preferences, favorites and verified sandbox purchases to buyer
+answers. Remembered-preference proposals read owned saved buyer questions and
+require confirmation. Profile erasure clears derived answer copies while
+original user messages have separate conversation deletion controls.
+Single-storefront [basket plans](buyer-basket-optimization.md) now support saved
+buyer follow-ups with recalculated stock, constraints and profile memory.
+Verified-sales [forecasting](observed-sales-forecast.md) supports saved follow-ups. Multi-seller plans and browser integration remain follow-ups.
 
 Thirty-day inactivity expiry and history/resource caps are documented
 implementation limits. Durable storage is the confirmed user choice. Scheduled
