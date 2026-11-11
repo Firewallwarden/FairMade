@@ -12,6 +12,7 @@ from fairmade.assistants.schemas import (
     Question,
     SellerQuestion,
 )
+from fairmade.bundles.schemas import BundleRequest
 from fairmade.pricing.schemas import Contract
 from fairmade.schemas import UTCResponse
 
@@ -24,6 +25,7 @@ class SellerScope(Contract):
     analysis_id: UUID | None = None
     supplier_report_id: UUID | None = None
     history_period: HistoryPeriod | None = None
+    bundles: BundleRequest | None = None
 
 
 class BuyerScope(BuyerSelection):

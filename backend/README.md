@@ -1,5 +1,10 @@
 # FairMade backend
 
+Buyer and seller product pair suggestions now use current same-storefront prices,
+stock and quality exclusions. Buyers can use confirmed preferences; seller
+co-purchase counts remain private. Both saved assistants can explain current
+suggestions. See [contract and deeper bundle follow-up](../docs/product-bundle-suggestions.md).
+
 The Fair Price Engine calculates batch and unit costs, fee-aware break-even
 prices, seller-selected margin ranges, and profit simulations. The stateless
 calculator remains available. Anyone can register a FairMade account and log in.

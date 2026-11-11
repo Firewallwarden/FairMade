@@ -70,7 +70,8 @@ def propose(
             "Enable personalization before remembering preferences.",
         )
     text = question(db, account_id, body)
-    basket_scope = owned(db, account_id, str(body.conversation_id)).scope.get("basket") is not None
+    scope = owned(db, account_id, str(body.conversation_id)).scope
+    total_budget_scope = any(scope.get(key) is not None for key in ("basket", "bundles"))
     revision = profile.revision
     db.rollback()
     if not INFERENCE_SLOT.acquire(blocking=False):
@@ -103,11 +104,14 @@ def propose(
         if len(set(extracted.product_types)) != len(extracted.product_types):
             raise api_error(502, "ASSISTANT_INVALID_RESPONSE", "Invalid preference proposal.")
         if extracted.budget_per_item is not None:
-            if basket_scope and not re.search(r"\bper[- ](?:item|listed[- ]unit)\b", text, re.I):
+            if total_budget_scope and not re.search(
+                r"\bper[- ](?:item|listed[- ]unit)\b", text, re.I
+            ):
                 raise api_error(
                     502,
                     "ASSISTANT_INVALID_RESPONSE",
-                    "A basket question must explicitly identify a per-item preference budget.",
+                    "A shopping plan question must explicitly identify "
+                    "a per-item preference budget.",
                 )
             if not re.search(
                 r"\b(budget|maximum|max|limit|spend)\b", text, re.I

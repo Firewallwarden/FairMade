@@ -33,6 +33,29 @@ separate from backend availability.
 
 ## Current implementation limits to revisit
 
+### Buyer/seller bundle suggestions: DOMAIN-011
+
+The user delegated recommended design choices during the continuous cycle,
+requesting deeper alternatives be logged for later. This implementation chooses
+read-only pairs of two approved products from one published storefront, one
+selling unit each, exact existing prices, current stock/quality exclusions and
+explicit total budgets. Buyers use consented preference/activity affinity;
+seller co-purchase counts use bounded verified sandbox captures and stay private.
+See [the bundle contract and limits](product-bundle-suggestions.md).
+Implementation is under review, with frontend acceptance/integration pending.
+These mechanics are implementation choices, not separately confirmed preferences.
+
+No new price, promotion, bundle SKU, purchase or reservation is created. Suggestions
+do not establish ingredient compatibility, safety, complementarity, savings or
+future demand. Confirmed buyer constraints and mandatory Quality Locks stay binding.
+Saved scope is retained and recomputed; profile erasure removes derived answers.
+
+Later optional depth: larger/configurable bundles, seller-reviewed bundle SKUs,
+evidence-backed complementary uses, revision-specific patterns and confidence
+evaluation, cost/fee-aware promotion budgets and approved discounts, and
+multi-seller plans. Evaluate evidence and commerce effects before implementation;
+paid services, new infrastructure and disclosure changes require separate scope.
+
 ### Single-storefront basket optimization: DOMAIN-006
 
 [Implementation PR #46](https://github.com/Firewallwarden/FairMade/pull/46)
