@@ -33,6 +33,32 @@ separate from backend availability.
 
 ## Current implementation limits to revisit
 
+### Transparent public-evidence ordering: DOMAIN-009
+
+The user selected option 1: disclosed quality-check status and comparable unit
+prices, with unknowns/unverified claims clearly labeled; buyer-defined criteria
+and weights (option 2) are explicitly a later improvement.
+[Contract and ordering rules](marketplace-ordering.md).
+The user subsequently delegated recommended in-scope design choices during
+the continuous cycle and requested deeper alternatives be recorded for later.
+
+The backend implements optional catalog/storefront/nearby listing ordering
+without changing approved listing payloads, prices or stock. Quality states
+remain seller-reported; value is an explicit quality/availability/unit-price
+sequence, not an objective score or certification. Not-compared items remain
+visible in a separate trailing group, with reasons.
+
+One thousand full candidates, published six-place unit-price displays,
+recency/UUID ties, required type/reference-unit scope for unit/value modes
+and the exact group precedence are implementation choices rather than
+individual user selections. Frontend acceptance/integration remains pending.
+
+Revisit buyer-configurable criteria/weights with explicit evidence/consent,
+missing-data behavior and non-negotiable quality constraints. Other optional
+improvements are larger indexed exact sorting, stable snapshot pagination,
+richer public evidence and freshness semantics. No paid source, infrastructure
+or broader scoring policy is authorized by this follow-up.
+
 These are documented boundaries, not claims that the user individually selected
 each detail or approved a production replacement.
 

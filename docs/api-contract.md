@@ -2,6 +2,13 @@
 
 ## Status and common conventions
 
+Public listing pages now propose optional sort modes newest, price_asc,
+price_desc, quality, unit_price and value across catalog, storefront listings
+and nearby listing search. Unit/value ordering requires a product type and
+reference unit, and ordered pages add explicit public-evidence metadata.
+See [ordering policy, unknowns, bounds and frontend handoff](marketplace-ordering.md).
+No migration is required; shared frontend acceptance remains pending.
+
 The account, seller-application, product, saved-analysis, quality, comparison, review, Passport, marketplace, inventory, order, sandbox-payment, refund, supplier-sourcing, seller-sales, favorite, and storefront endpoints
 below are implemented by the backend for **local development**. Their shared integration contract is
 **proposed; frontend acceptance and browser integration are pending**. No frontend

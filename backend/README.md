@@ -6,6 +6,10 @@ calculator remains available. Anyone can register a FairMade account and log in.
 Accounts default to buyer; only accounts with verified seller access can manage
 private products and save immutable analysis history. AI services are not called.
 PayPal sandbox calls are opt-in and disabled by default.
+Public catalog, storefront and nearby listing pages now support explicit
+price/quality/unit/value ordering from approved disclosures. Unknowns and
+uncomparable results are labeled; no universal value score is invented.
+See [ordering policy and frontend handoff](../docs/marketplace-ordering.md).
 Sellers can keep private supplier profiles, subjective ratings and dated delivery
 observations with immutable corrections and exact summaries that show missing data.
 Optional quote references freeze owned evidence without changing comparisons or
