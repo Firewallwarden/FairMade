@@ -35,6 +35,9 @@ separate from backend availability.
 
 ### Single-storefront basket optimization: DOMAIN-006
 
+[Implementation PR #46](https://github.com/Firewallwarden/FairMade/pull/46)
+is a main-targeted draft depending on #38 through #45; not yet integrated.
+
 The user confirmed option 1: one seller/storefront per basket, and explicitly
 asked to revisit option 2 (multi-seller shopping plans) as a later enhancement.
 The [basket contract](buyer-basket-optimization.md) implements minimum merchandise

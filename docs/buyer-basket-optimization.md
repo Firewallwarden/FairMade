@@ -1,5 +1,10 @@
 # Single-storefront basket optimization
 
+[Implementation PR #46](https://github.com/Firewallwarden/FairMade/pull/46)
+targets main and remains draft while prerequisites #38 through #45 are open.
+It is not integrated into main; refresh dependent branches after prerequisite
+squash merges before promoting this work for review.
+
 Backend implementation, additive frontend contract proposal. The user selected
 option 1: one seller/storefront per basket. Option 2, shopping plans across
 multiple sellers with separate orders and pickups, is explicitly a later
