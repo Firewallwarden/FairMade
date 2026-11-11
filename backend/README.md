@@ -1,15 +1,63 @@
 # FairMade backend
 
+Buyer and seller product pair suggestions now use current same-storefront prices,
+stock and quality exclusions. Buyers can use confirmed preferences; seller
+co-purchase counts remain private. Both saved assistants can explain current
+suggestions. See [contract and deeper bundle follow-up](../docs/product-bundle-suggestions.md).
+
 The Fair Price Engine calculates batch and unit costs, fee-aware break-even
 prices, seller-selected margin ranges, and profit simulations. The stateless
 calculator remains available. Anyone can register a FairMade account and log in.
 Accounts default to buyer; only accounts with verified seller access can manage
-private products and save immutable analysis history. AI services are not called.
+private products and save immutable analysis history. Local Qwen3 8B assistants
+are opt-in and disabled by default; the core calculators never call AI.
 PayPal sandbox calls are opt-in and disabled by default.
 Public catalog, storefront and nearby listing pages now support explicit
 price/quality/unit/value ordering from approved disclosures. Unknowns and
 uncomparable results are labeled; no universal value score is invented.
 See [ordering policy and frontend handoff](../docs/marketplace-ordering.md).
+
+Order participants can now exchange private plain-text messages with cursor
+history and retry-safe sends. Apply migration 0029; messages perform no commerce
+or assistant action. See [order messaging and later pre-purchase inquiries](../docs/order-messaging.md).
+
+Seller product forecasts now provide a read-only observed-sales-rate baseline
+and conditional stock coverage from verified sandbox sales, with explicit
+insufficient-history results. Saved seller conversations can explain the same
+fresh calculation. See [formulas, source limits and handoff](../docs/observed-sales-forecast.md).
+
+Buyers can plan a single-storefront basket from explicit quantities and acceptable
+alternatives, with exact subtotals and confirmed preferences. Plans support saved
+assistant explanations but create no order or reservation. See the
+[basket contract and later multi-seller enhancement](../docs/buyer-basket-optimization.md).
+Buyer personalization supports explicit opt-in, remembered preferences, favorites
+and verified sandbox purchase signals. Buyer conversations reload that memory;
+preference proposals from saved questions require confirmation. Apply migration
+0028 and see [the buyer memory workflow](../docs/buyer-personalization.md).
+Receipt images can now become private OCR/AI drafts and explicitly reviewed
+expense records. Run migration 0027 and configure local Tesseract plus the
+existing Qwen3 model. See [receipt setup, review and limits](../docs/receipt-expenses.md).
+Receipt expenses do not automatically change production costs or inventory.
+Seller assistant history questions can explain approved receipt totals by period
+and category. See [scope and double-counting limits](../docs/assistant-receipt-expenses.md).
+Seller and buyer assistant endpoints now explain scoped evidence through local
+Ollama. Exact financial facts are rendered by the backend separately from AI
+paragraphs; seller evidence is owner-scoped and buyers see approved disclosures
+only. No cloud fallback or automatic business changes are added.
+Saved owner-bound conversations now support follow-ups across restarts, current
+evidence checks, deletion and thirty-day inactivity expiry. Run migration 0026;
+see [the conversation contract and frontend handoff](../docs/assistant-conversations.md).
+The original independent question endpoints remain stateless.
+See the [assistant workflow](examples/assistants/README.md) and
+[contract, evaluation and limits](../docs/local-assistants.md).
+Seller assistant sales/history questions now reuse private sandbox sales totals
+and bounded saved cost analyses. See [period semantics and limits](../docs/assistant-sales-history.md).
+Selected supplier reports now explain current checks and exclusion reasons while
+preserving eligible-only cost minima. See [supplier explanations](../docs/assistant-supplier-explanations.md).
+Local AI can generate private description drafts from product metadata. Sellers
+edit and approve exact copy before applying it to the private product; public
+publication stays separate. Run migration 0025 and see
+[the description workflow](../docs/ai-description-drafts.md).
 Sellers can keep private supplier profiles, subjective ratings and dated delivery
 observations with immutable corrections and exact summaries that show missing data.
 Optional quote references freeze owned evidence without changing comparisons or
