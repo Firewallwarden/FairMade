@@ -25,6 +25,13 @@ remain pending; existing cost and sales APIs are unchanged.
 Seller history questions now add owner-only reviewed receipt expense aggregates.
 See [scope, period and double-counting limits](assistant-receipt-expenses.md).
 
+Conditional price recommendations are an additive backend proposal at POST
+/api/v1/products/{product_id}/pricing-recommendations with an owned review_id.
+Seller questions/saved scopes accept pricing_review_id, pinning its analysis.
+The range combines explicit economics/context after current quality gates;
+no price is selected or published. See
+[the policy, exact bounds, units and handoff](conditional-pricing-recommendations.md).
+
 The account, seller-application, product, saved-analysis, quality, comparison, review, Passport, marketplace, inventory, order, sandbox-payment, refund, supplier-sourcing, seller-sales, favorite, and storefront endpoints
 below are implemented by the backend for **local development**. Their shared integration contract is
 **proposed; frontend acceptance and browser integration are pending**. No frontend

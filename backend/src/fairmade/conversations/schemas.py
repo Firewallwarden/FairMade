@@ -27,6 +27,7 @@ class SellerScope(Contract):
     history_period: HistoryPeriod | None = None
     insights: InsightOptions | None = None
     cost_calendar: CalendarOptions | None = None
+    pricing_review_id: UUID | None = None
 
 
 class BuyerScope(Contract):

@@ -10,6 +10,12 @@ saved cost changes, reviewed expenses, production output and material waste.
 The deterministic report works without AI; optional saved seller conversations
 can explain its current evidence. See [scope and frontend handoff](../docs/seller-insights.md).
 
+Conditional seller price recommendations now combine saved production economics,
+selected reported price context and current mandatory quality evidence. No range
+overrides failed quality, changed selling units or unsupported price bounds;
+saved seller conversations can explain the current result. See
+[the policy and frontend handoff](../docs/conditional-pricing-recommendations.md).
+
 The Fair Price Engine calculates batch and unit costs, fee-aware break-even
 prices, seller-selected margin ranges, and profit simulations. The stateless
 calculator remains available. Anyone can register a FairMade account and log in.

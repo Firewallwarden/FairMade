@@ -51,6 +51,7 @@ from fairmade.payments.routes import router as payment_router
 from fairmade.payments.routes import seller_router as seller_payment_router
 from fairmade.photos.routes import public_router as public_photo_router
 from fairmade.photos.routes import router as photo_router
+from fairmade.price_advice.routes import router as price_advice_router
 from fairmade.pricing.schemas import PricingRequest, PricingResponse
 from fairmade.pricing.service import calculate
 from fairmade.product_reviews.routes import author_router as review_author_router
@@ -114,6 +115,7 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
             request.url.path.startswith("/api/v1/auth/")
             or request.url.path.endswith("/insights")
             or request.url.path.endswith("/cost-calendar")
+            or request.url.path.endswith("/pricing-recommendations")
             or request.url.path.startswith("/api/v1/assistants")
             or "/description-drafts" in request.url.path
             or request.url.path.startswith("/api/v1/seller/receipt-drafts")
@@ -165,6 +167,7 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
     application.include_router(auth_router)
     application.include_router(insight_router)
     application.include_router(calendar_router)
+    application.include_router(price_advice_router)
     application.include_router(description_router)
     application.include_router(receipt_router)
     application.include_router(assistant_router)
