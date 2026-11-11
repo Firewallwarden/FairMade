@@ -1,5 +1,11 @@
 # FairMade backend
 
+Conditional seller price recommendations now combine saved production economics,
+selected reported price context and current mandatory quality evidence. No range
+overrides failed quality, changed selling units or unsupported price bounds;
+saved seller conversations can explain the current result. See
+[the policy and frontend handoff](../docs/conditional-pricing-recommendations.md).
+
 Sellers can author ingredient/material declarations in Passport drafts and
 explicitly approve their disclosure. Buyer explanations use those approved
 claims; sellers can separately opt into private recipe-input explanations.

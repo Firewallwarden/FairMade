@@ -13,6 +13,7 @@ from fairmade.composition.integration import context as recipe_context
 from fairmade.composition.integration import public_context as composition_context
 from fairmade.forecasting.integration import context as forecast_context
 from fairmade.personalization.integration import context as personalization_context
+from fairmade.price_advice.integration import context as price_advice_context
 from fairmade.seller_insights.integration import context as insight_context
 from fairmade.supplier_recommendations.integration import context as recommendation_context
 
@@ -48,6 +49,8 @@ def model_evidence(evidence: list[Evidence]) -> list[dict]:
             data = insight_context(fact)
         if data is None:
             data = supplier_context(fact)
+        if data is None:
+            data = price_advice_context(fact)
         if data is None:
             data = recipe_context(fact)
         if data is None:

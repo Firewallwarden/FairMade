@@ -55,6 +55,7 @@ from fairmade.payments.routes import seller_router as seller_payment_router
 from fairmade.personalization.routes import router as personalization_router
 from fairmade.photos.routes import public_router as public_photo_router
 from fairmade.photos.routes import router as photo_router
+from fairmade.price_advice.routes import router as price_advice_router
 from fairmade.pricing.schemas import PricingRequest, PricingResponse
 from fairmade.pricing.service import calculate
 from fairmade.product_reviews.routes import author_router as review_author_router
@@ -92,7 +93,7 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
             finally:
                 application.state.engine.dispose()
 
-    application = FastAPI(title="FairMade API", version="0.42.0", lifespan=lifespan)
+    application = FastAPI(title="FairMade API", version="0.43.0", lifespan=lifespan)
     application.add_exception_handler(RefundError, refund_error_handler)
     application.add_exception_handler(PaymentError, payment_error_handler)
     application.add_exception_handler(CommerceError, commerce_error_handler)
@@ -117,6 +118,7 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
     async def safe_validation(request: Request, exc: RequestValidationError):
         if (
             request.url.path.startswith("/api/v1/auth/")
+            or request.url.path.endswith("/pricing-recommendations")
             or request.url.path.endswith("/supplier-recommendations")
             or request.url.path.endswith("/insights")
             or request.url.path.startswith("/api/v1/marketplace/listings")
@@ -176,6 +178,7 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
         return calculate(request)
 
     application.include_router(auth_router)
+    application.include_router(price_advice_router)
     application.include_router(recommendation_router)
     application.include_router(insight_router)
     application.include_router(forecast_router)

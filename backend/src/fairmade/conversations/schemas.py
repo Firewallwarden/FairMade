@@ -28,6 +28,7 @@ class SellerScope(Contract):
     analysis_id: UUID | None = None
     supplier_report_id: UUID | None = None
     history_period: HistoryPeriod | None = None
+    pricing_review_id: UUID | None = None
     include_recipe_inputs: StrictBool = False
     recommendations: RecommendationOptions | None = None
 

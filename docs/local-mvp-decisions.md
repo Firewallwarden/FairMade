@@ -33,6 +33,33 @@ separate from backend availability.
 
 ## Current implementation limits to revisit
 
+### Conditional pricing recommendations: DOMAIN-014
+
+The user delegated recommended designs during the continuous cycle and asked
+that deeper alternatives be retained for later. This implementation uses an
+owned saved pricing review to pin its cost analysis and selected market/quality
+evidence. Current quality and quote freshness are reassessed. An eligible
+seller-target/context overlap becomes a supported positive-cent review range;
+missing usable context is labelled economics-only, and failed quality, changed
+basis, unsupported cents or nonoverlap leaves no recommendation.
+See [the policy, uncertainty and handoff](conditional-pricing-recommendations.md).
+[Implementation #54](https://github.com/Firewallwarden/FairMade/pull/54) is a
+main-targeted draft dependent on #38 through #42; frontend integration is pending.
+This policy is an implementation choice under delegation, not a separately
+confirmed claim that manual observations establish market or quality equivalence.
+
+No price point is chosen, no highest quote is maximized, no Quality Lock or
+margin target is relaxed, and no missing cost is invented. Record-save dates
+do not verify current costs. Comparables/locality and ingredient quality remain
+unverified. Publication and final price decisions stay with the seller.
+No new migration, provider or infrastructure is introduced.
+
+Later optional depth: verified quality-matched local comparables, representative
+coverage/confidence, cost freshness/completeness, actual-cost reconciliation,
+validated demand/seasonal effects and a reviewed price-application workflow.
+These need evidence and separately authorized scope; they are not automatic
+production requirements or permission for paid services or new infrastructure.
+
 ### Ingredient/material explanations and composition disclosure: DOMAIN-013
 
 The user delegated recommended designs during the continuous cycle, requesting

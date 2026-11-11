@@ -2,6 +2,13 @@
 
 ## Status and common conventions
 
+Conditional price recommendations are an additive backend proposal at POST
+/api/v1/products/{product_id}/pricing-recommendations with an owned review_id.
+Seller questions/saved scopes accept pricing_review_id, pinning its analysis.
+The range combines explicit economics/context after current quality gates;
+no price is selected or published. See
+[the policy, exact bounds, units and handoff](conditional-pricing-recommendations.md).
+
 Ingredient/material explanations are an additive backend proposal. Passport
 drafts accept optional composition and disclosures.include_composition, hidden
 by default and published only through exact-preview approval. Buyer answers use
