@@ -43,7 +43,8 @@ seller-target/context overlap becomes a supported positive-cent review range;
 missing usable context is labelled economics-only, and failed quality, changed
 basis, unsupported cents or nonoverlap leaves no recommendation.
 See [the policy, uncertainty and handoff](conditional-pricing-recommendations.md).
-Implementation is under review; frontend acceptance/integration is pending.
+[Implementation #54](https://github.com/Firewallwarden/FairMade/pull/54) is a
+main-targeted draft dependent on #38 through #42; frontend integration is pending.
 This policy is an implementation choice under delegation, not a separately
 confirmed claim that manual observations establish market or quality equivalence.
 

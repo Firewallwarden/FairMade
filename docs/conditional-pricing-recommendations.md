@@ -7,6 +7,10 @@ a **conditional range for seller review**. The existing local assistant explains
 its limitations. It never chooses the highest price, changes a listing, relaxes
 quality or declares an objectively fair price.
 
+[Implementation #54](https://github.com/Firewallwarden/FairMade/pull/54) is a
+main-targeted draft dependent on #38 through #42. Refresh and revalidate against
+verified main after prerequisite integration before review readiness.
+
 ## Endpoint and sources
 
 POST /api/v1/products/{product_id}/pricing-recommendations requires a current
