@@ -36,8 +36,10 @@ class SellerQuestion(Contract):
     analysis_id: UUID | None = None
     supplier_report_id: UUID | None = None
     history_period: HistoryPeriod | None = None
-    pricing_review_id: UUID | None = None
-    include_recipe_inputs: StrictBool = False
+    insights: InsightOptions | None = None
+    cost_calendar: CalendarOptions | None = None
+    bundles: BundleRequest | None = None
+    forecast: ForecastRequest | None = None
     recommendations: RecommendationOptions | None = None
 
     @model_validator(mode="after")
@@ -46,10 +48,8 @@ class SellerQuestion(Contract):
             raise ValueError("Select supplier_report_id for recommendation options")
         return self
 
-    insights: InsightOptions | None = None
-    cost_calendar: CalendarOptions | None = None
-    forecast: ForecastRequest | None = None
-    bundles: BundleRequest | None = None
+    include_recipe_inputs: StrictBool = False
+    pricing_review_id: UUID | None = None
 
 
 class BuyerSelection(Contract):

@@ -94,7 +94,7 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
             finally:
                 application.state.engine.dispose()
 
-    application = FastAPI(title="FairMade API", version="0.44.0", lifespan=lifespan)
+    application = FastAPI(title="FairMade API", version="0.44.1", lifespan=lifespan)
     application.add_exception_handler(RefundError, refund_error_handler)
     application.add_exception_handler(PaymentError, payment_error_handler)
     application.add_exception_handler(CommerceError, commerce_error_handler)
@@ -119,21 +119,21 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
     async def safe_validation(request: Request, exc: RequestValidationError):
         if (
             request.url.path.startswith("/api/v1/auth/")
-            or request.url.path.endswith("/pricing-recommendations")
-            or request.url.path.endswith("/supplier-recommendations")
             or request.url.path.endswith("/insights")
             or request.url.path.endswith("/cost-calendar")
-            or request.url.path.startswith("/api/v1/marketplace/listings")
-            or request.url.path.startswith("/api/v1/storefronts")
+            or request.url.path.endswith("/supplier-recommendations")
+            or request.url.path.endswith("/pricing-recommendations")
             or request.url.path.startswith("/api/v1/assistants")
-            or request.url.path.endswith("/forecasts")
             or request.url.path.startswith("/api/v1/buyer/personalization")
-            or request.url.path.endswith("/messages")
             or request.url.path.startswith("/api/v1/buyer/baskets")
             or request.url.path.endswith("/bundles/suggest")
+            or request.url.path.endswith("/forecasts")
+            or request.url.path.endswith("/messages")
             or "/description-drafts" in request.url.path
-            or "/passports" in request.url.path
             or request.url.path.startswith("/api/v1/seller/receipt-drafts")
+            or request.url.path.startswith("/api/v1/marketplace/listings")
+            or request.url.path.startswith("/api/v1/storefronts")
+            or "/passports" in request.url.path
             or "/paypal-checkout" in request.url.path
             or "/refund-request" in request.url.path
             or "/sourcing-inputs" in request.url.path
@@ -180,14 +180,14 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
         return calculate(request)
 
     application.include_router(auth_router)
-    application.include_router(price_advice_router)
-    application.include_router(recommendation_router)
     application.include_router(insight_router)
     application.include_router(calendar_router)
-    application.include_router(forecast_router)
     application.include_router(personalization_router)
     application.include_router(basket_router)
     application.include_router(bundle_router)
+    application.include_router(forecast_router)
+    application.include_router(recommendation_router)
+    application.include_router(price_advice_router)
     application.include_router(description_router)
     application.include_router(receipt_router)
     application.include_router(assistant_router)

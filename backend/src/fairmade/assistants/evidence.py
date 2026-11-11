@@ -114,12 +114,26 @@ def seller_evidence(db: Session, account_id: str, body: SellerQuestion) -> list[
             calendar_report(db, account_id, product.id, body.cost_calendar).model_dump(mode="json"),
             "seller_recorded_save_month_not_actual_expenses",
         )
-    if advice is not None:
-        add(facts, PRICE_ADVICE_TITLE, advice.model_dump(mode="json"))
-    if body.include_recipe_inputs:
-        fact = recipe_evidence(db, product)
-        fact.key = f"e{len(facts) + 1}"
-        facts.append(fact)
+    if body.insights is not None:
+        add(
+            facts,
+            INSIGHT_TITLE,
+            insight_report(db, account_id, product.id, body.insights, selected_id).model_dump(
+                mode="json"
+            ),
+            "seller_recorded_unverified_and_deterministic_modeled_inputs",
+        )
+    if body.bundles is not None:
+        for fact in bundle_evidence(db, account_id, body.bundles, product_id=product.id):
+            fact.key = f"e{len(facts) + 1}"
+            facts.append(fact)
+    if body.forecast is not None:
+        add(
+            facts,
+            FORECAST_TITLE,
+            forecast(db, account_id, product.id, body.forecast).model_dump(mode="json"),
+            "calculated_from_backend_verified_sandbox_sales_and_seller_recorded_stock",
+        )
     if body.recommendations is not None:
         add(
             facts,
@@ -128,26 +142,12 @@ def seller_evidence(db: Session, account_id: str, body: SellerQuestion) -> list[
                 db, account_id, product.id, body.supplier_report_id, body.recommendations
             ).model_dump(mode="json"),
         )
-    if body.insights is not None:
-        add(
-            facts,
-            INSIGHT_TITLE,
-            insight_report(db, account_id, product.id, body.insights, body.analysis_id).model_dump(
-                mode="json"
-            ),
-            "seller_recorded_unverified_and_deterministic_modeled_inputs",
-        )
-    if body.forecast is not None:
-        add(
-            facts,
-            FORECAST_TITLE,
-            forecast(db, account_id, product.id, body.forecast).model_dump(mode="json"),
-            "calculated_from_backend_verified_sandbox_sales_and_seller_recorded_stock",
-        )
-    if body.bundles is not None:
-        for fact in bundle_evidence(db, account_id, body.bundles, product_id=product.id):
-            fact.key = f"e{len(facts) + 1}"
-            facts.append(fact)
+    if body.include_recipe_inputs:
+        fact = recipe_evidence(db, product)
+        fact.key = f"e{len(facts) + 1}"
+        facts.append(fact)
+    if advice is not None:
+        add(facts, PRICE_ADVICE_TITLE, advice.model_dump(mode="json"))
     return facts
 
 

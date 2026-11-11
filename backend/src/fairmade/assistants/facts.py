@@ -27,13 +27,13 @@ def statements(evidence: list[Evidence]) -> list[Paragraph]:
         result.extend(insight_statements(fact))
         result.extend(calendar_statements(fact))
         result.extend(supplier_statements(fact))
-        result.extend(price_advice_statements(fact))
-        result.extend(composition_statements(fact))
-        result.extend(recommendation_statements(fact))
-        result.extend(forecast_statements(fact))
         result.extend(personalization_statements(fact))
         result.extend(basket_statements(fact))
         result.extend(bundle_statements(fact))
+        result.extend(forecast_statements(fact))
+        result.extend(recommendation_statements(fact))
+        result.extend(composition_statements(fact))
+        result.extend(price_advice_statements(fact))
         data = fact.data
         if fact.title == "Selected saved production economics":
             costs = data["result"]["costs"]

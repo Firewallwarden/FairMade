@@ -53,19 +53,19 @@ def model_evidence(evidence: list[Evidence]) -> list[dict]:
         if data is None:
             data = supplier_context(fact)
         if data is None:
-            data = price_advice_context(fact)
-        if data is None:
-            data = recipe_context(fact)
-        if data is None:
-            data = recommendation_context(fact)
-        if data is None:
-            data = forecast_context(fact)
-        if data is None:
             data = personalization_context(fact)
         if data is None:
             data = basket_context(fact)
         if data is None:
             data = bundle_context(fact)
+        if data is None:
+            data = forecast_context(fact)
+        if data is None:
+            data = recommendation_context(fact)
+        if data is None:
+            data = recipe_context(fact)
+        if data is None:
+            data = price_advice_context(fact)
         if data is None:
             data = fact.data
         if fact.title == "Selected saved production economics":
