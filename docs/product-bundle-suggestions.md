@@ -5,6 +5,10 @@ are pending. Suggestions are read-only plans based on approved public listings.
 They are not a new bundle SKU, discount, promotion, purchase or stock reservation.
 No new package, migration, provider or infrastructure is introduced.
 
+[Implementation #51](https://github.com/Firewallwarden/FairMade/pull/51) is a
+main-targeted draft dependent on #38 through #46. Refresh and revalidate against
+verified main after prerequisite integration before review readiness.
+
 ## Endpoints and request
 
 POST /api/v1/buyer/bundles/suggest requires a current bearer session and another

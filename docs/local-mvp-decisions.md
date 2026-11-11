@@ -42,7 +42,8 @@ selling unit each, exact existing prices, current stock/quality exclusions and
 explicit total budgets. Buyers use consented preference/activity affinity;
 seller co-purchase counts use bounded verified sandbox captures and stay private.
 See [the bundle contract and limits](product-bundle-suggestions.md).
-Implementation is under review, with frontend acceptance/integration pending.
+[Implementation #51](https://github.com/Firewallwarden/FairMade/pull/51) is a
+main-targeted draft dependent on #38 through #46; frontend integration is pending.
 These mechanics are implementation choices, not separately confirmed preferences.
 
 No new price, promotion, bundle SKU, purchase or reservation is created. Suggestions
