@@ -1,16 +1,15 @@
 # Backend review and demonstration handoff
 
-Snapshot: 2026-11-11. Main remains
-`16bd9c03933b176fc67c325c3a30932ee16e869b`. This guide describes open
-implementations and local validation; it does not authorize merges or assert
-that those features are on main.
+Integration update: 2026-11-11. The user authorized review and squash integration
+of all pending PRs. Implementation PRs #38–#56 are now verified on main, ending
+at `d48d52829cabb9d01df506945227ccdc38198536` before this final handoff (#57).
+The earlier main baseline was `16bd9c03933b176fc67c325c3a30932ee16e869b`.
 
 ## Review dependencies
 
 Every PR targets main. “Parent” below identifies the development dependency,
-not the GitHub destination. A draft's main-targeted diff includes its unmerged
-ancestors. Review the feature increment against its parent while evaluating
-that cumulative diff.
+not the GitHub destination. This table retains the development dependencies as
+review history; the implementation PRs below are now integrated.
 
 | PR | Feature | Direct development parent(s) |
 | --- | --- | --- |
@@ -34,20 +33,17 @@ that cumulative diff.
 | [55](https://github.com/Firewallwarden/FairMade/pull/55) | Saved cost calendar | 50 |
 | [56](https://github.com/Firewallwarden/FairMade/pull/56) | Consistent economic selection | 54 and 55 |
 
-The economic-selection compatibility follow-up #56 combines #54 and #55 and
-therefore depends on #38–#44, #50, #54 and #55. This documentation branch is
-based on #47 (and therefore #38–#42); its references to other features do not
-make those implementations part of its tree.
+The economic-selection compatibility follow-up #56 combines #54 and #55.
+The handoff branch was refreshed with all integrated implementations before
+its final review. No feature branch was used as a GitHub PR destination.
 
-Only #38 and #49 were ready at this snapshot. All dependent implementations
-remain draft. **Do not squash-merge this table consecutively.** After each
-parent merge the agent must fetch, verify the merge commit on origin/main,
-refresh affected published children by normally merging current main into
-their branches, resolve both sides, push, revalidate and run the Review guard.
-A child can become ready only after all its prerequisites are verified.
+The merge order was #38–#46, #51, #47–#50, then #52–#56. After each parent
+merge the agent fetched, verified the merge commit on origin/main, refreshed
+the next published child, reviewed conflicts, validated and passed the Review
+guard. Every merged implementation passed the Integrated guard.
 The [integration incident procedure](stacked-pr-integration.md) explains why
-squashing in order alone does not refresh descendants. No main merge or
-published history rewrite was performed by this validation work.
+squashing in order alone does not refresh descendants. Merges used the user's
+explicit authorization; no published history rewrite or direct main push occurred.
 
 ## Combined validation
 
@@ -58,6 +54,10 @@ live in its dedicated worktree, outside the primary main checkout.
 
 The local validation commit is
 `1a2cb844110b04f63cfa2a96386ac0dd35901c12` (unpublished artifact, not main).
+After merge resolution, application source, migrations, examples and package
+configuration were compared byte-for-byte with this snapshot and matched.
+This handoff retains its combined-scope regression and structural/migration
+validation scripts so those checks can be repeated from the integrated checkout.
 Checks completed:
 
 - Seven real local Qwen dialogues passed (fourteen turns), including buyer/seller

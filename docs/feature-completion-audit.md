@@ -4,21 +4,20 @@ Snapshot: 2026-11-11. This replaces the earlier forecast-only audit after the
 authorized continuous cycle. Recommended local MVP designs were delegated by
 the user; deeper alternatives are recorded with their feature PRs.
 
-The fetched main baseline is `16bd9c03933b176fc67c325c3a30932ee16e869b`.
-PRs #38 through #56 are open and target main. Their implementations are in
-feature branches, **not integrated into main**. This documentation branch is
-based on #47; references to later PRs describe their published implementations,
-not code included in this checkout. Only #38 and independent #49 are currently
-ready for review; dependent PRs remain draft.
+The earlier baseline was `16bd9c03933b176fc67c325c3a30932ee16e869b`.
+PRs #38 through #56 have now been reviewed, squash-merged into main and verified
+there. Published children were refreshed after prerequisite merges. The resulting
+application matches the combined validation snapshot; this final handoff (#57)
+records the review and retains its reproducible integration checks.
 
-The remaining work is review, integration and demonstration, plus explicitly
+The remaining work is browser/provider integration and demonstration, plus explicitly
 bounded deeper functionality below. It would be inaccurate to call the full
 original wishlist or a production marketplace finished. Backend APIs, accepted
 browser contracts, frontend screens and successful real-provider demos are
 different completion states. The frontend developer's current branch has not
 been audited here.
 
-## Seller and buyer assistants under review
+## Integrated seller and buyer assistants
 
 | Capability | Published backend implementation | Boundary / later depth |
 | --- | --- | --- |
@@ -41,7 +40,7 @@ been audited here.
 | Consistent economics across combined seller reports | [#56](https://github.com/Firewallwarden/FairMade/pull/56) | Price advice and insights share the selected analysis, including saved follow-ups after restart. |
 
 The three assistant groups listed as missing in the previous audit now have
-published local MVP implementations (#50–#53). Price advice and descriptive
+integrated local MVP implementations (#50–#53). Price advice and descriptive
 annual cost analysis have also been added (#54–#55). Further assistant depth
 requires better evidence and the follow-ups in the decision log, rather than
 another copy of the foundation.
@@ -79,9 +78,9 @@ journey, verified seller claims or production readiness.
 
 ## What remains before the demo
 
-1. Review and integrate pending PRs using the parent-refresh guard workflow.
-   Each squash merge requires agent refresh/revalidation of affected children
-   before their review. Do not batch-merge an unrefreshed stack.
+1. Use the integrated checkout and confirm local configuration and demo data.
+   The pending implementation PRs have been reviewed and squash-integrated with
+   parent refreshes and integration guards; future dependent work needs the same care.
 2. Coordinate the browser assistant: create/select conversations, restore paged
    turns after reload, handle revision/retry/expiry/delete, display exact facts
    separately from cited AI prose, and offer confirmed preference controls.

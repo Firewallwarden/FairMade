@@ -177,9 +177,9 @@ model/provider, external sources, backup retention, monitoring and broader
 scaling need separate review. Frontend implementation and end-to-end browser
 checks remain pending.
 
-The original receipt/personalization/basket deferrals have separate follow-up
-PRs tracked in the audit; this forecast branch uses the conversation foundation
-without requiring those independent extensions. Remaining expanded work includes
-structured seller insights/alerts, bundles and richer ingredient/supplier
-recommendation policies. No automatic background feature cycle or
+Receipt review, approved expense questions, personalization, single-storefront
+basket and bundle plans, and verified-sales forecasting have backend implementations.
+Real image OCR and browser checks remain pending. See the
+[feature audit](feature-completion-audit.md) for status and deeper limits.
+No automatic background feature cycle or
 unapproved spending is enabled by this document.

@@ -9,14 +9,27 @@ from fairmade.assistants.history import history_evidence
 from fairmade.assistants.schemas import BuyerQuestion, Evidence, SellerQuestion
 from fairmade.assistants.supplier_explanations import supplier_details
 from fairmade.auth import api_error
+from fairmade.baskets.integration import evidence as basket_evidence
+from fairmade.bundles.integration import evidence as bundle_evidence
+from fairmade.composition.integration import recipe_evidence
+from fairmade.cost_calendar.integration import TITLE as CALENDAR_TITLE
+from fairmade.cost_calendar.service import report as calendar_report
 from fairmade.evidence import today
 from fairmade.forecasting.integration import TITLE as FORECAST_TITLE
 from fairmade.forecasting.service import forecast
 from fairmade.marketplace.service import get_public
 from fairmade.models import Analysis, QualityLockSet
 from fairmade.ownership import require_owned_product
+from fairmade.personalization.constants import TITLE as PROFILE_TITLE
+from fairmade.personalization.service import buyer_profile_data
+from fairmade.price_advice.integration import TITLE as PRICE_ADVICE_TITLE
+from fairmade.price_advice.service import recommend as price_advice
 from fairmade.pricing.schemas import PricingRequest, PricingResponse
 from fairmade.pricing.service import calculate
+from fairmade.seller_insights.integration import TITLE as INSIGHT_TITLE
+from fairmade.seller_insights.service import report as insight_report
+from fairmade.supplier_recommendations.integration import TITLE as RECOMMENDATION_TITLE
+from fairmade.supplier_recommendations.service import recommend
 
 
 def add(facts: list[Evidence], title: str, data: dict, basis="seller_reported_unverified"):
@@ -25,6 +38,15 @@ def add(facts: list[Evidence], title: str, data: dict, basis="seller_reported_un
 
 def seller_evidence(db: Session, account_id: str, body: SellerQuestion) -> list[Evidence]:
     product = require_owned_product(db, account_id, body.product_id)
+    advice = (
+        price_advice(db, account_id, product.id, body.pricing_review_id)
+        if body.pricing_review_id
+        else None
+    )
+    if advice and body.analysis_id and body.analysis_id != advice.pricing_analysis_id:
+        raise api_error(
+            409, "PRICING_SOURCE_MISMATCH", "Use the pricing review's selected analysis."
+        )
     facts: list[Evidence] = []
     add(
         facts,
@@ -37,8 +59,9 @@ def seller_evidence(db: Session, account_id: str, body: SellerQuestion) -> list[
         },
     )
     statement = select(Analysis).where(Analysis.product_id == product.id)
-    if body.analysis_id:
-        statement = statement.where(Analysis.id == str(body.analysis_id))
+    selected_id = advice.pricing_analysis_id if advice else body.analysis_id
+    if selected_id:
+        statement = statement.where(Analysis.id == str(selected_id))
     analysis = db.scalar(
         statement.order_by(Analysis.created_at.desc(), Analysis.id.desc()).limit(1)
     )
@@ -84,6 +107,26 @@ def seller_evidence(db: Session, account_id: str, body: SellerQuestion) -> list[
             supplier_details(db, product.id, body.supplier_report_id, today()),
         )
     history_evidence(db, account_id, body, facts)
+    if body.cost_calendar is not None:
+        add(
+            facts,
+            CALENDAR_TITLE,
+            calendar_report(db, account_id, product.id, body.cost_calendar).model_dump(mode="json"),
+            "seller_recorded_save_month_not_actual_expenses",
+        )
+    if body.insights is not None:
+        add(
+            facts,
+            INSIGHT_TITLE,
+            insight_report(db, account_id, product.id, body.insights, selected_id).model_dump(
+                mode="json"
+            ),
+            "seller_recorded_unverified_and_deterministic_modeled_inputs",
+        )
+    if body.bundles is not None:
+        for fact in bundle_evidence(db, account_id, body.bundles, product_id=product.id):
+            fact.key = f"e{len(facts) + 1}"
+            facts.append(fact)
     if body.forecast is not None:
         add(
             facts,
@@ -91,6 +134,20 @@ def seller_evidence(db: Session, account_id: str, body: SellerQuestion) -> list[
             forecast(db, account_id, product.id, body.forecast).model_dump(mode="json"),
             "calculated_from_backend_verified_sandbox_sales_and_seller_recorded_stock",
         )
+    if body.recommendations is not None:
+        add(
+            facts,
+            RECOMMENDATION_TITLE,
+            recommend(
+                db, account_id, product.id, body.supplier_report_id, body.recommendations
+            ).model_dump(mode="json"),
+        )
+    if body.include_recipe_inputs:
+        fact = recipe_evidence(db, product)
+        fact.key = f"e{len(facts) + 1}"
+        facts.append(fact)
+    if advice is not None:
+        add(facts, PRICE_ADVICE_TITLE, advice.model_dump(mode="json"))
     return facts
 
 
@@ -122,7 +179,17 @@ def scenario_evidence(
     )
 
 
-def buyer_evidence(db: Session, body: BuyerQuestion) -> list[Evidence]:
+def buyer_evidence(
+    db: Session, body: BuyerQuestion, account_id: str | None = None
+) -> list[Evidence]:
+    if body.bundles is not None:
+        if account_id is None:
+            raise api_error(401, "UNAUTHORIZED", "A valid bearer token is required.")
+        return bundle_evidence(db, account_id, body.bundles)
+    if body.basket is not None:
+        if account_id is None:
+            raise api_error(401, "UNAUTHORIZED", "A valid bearer token is required.")
+        return basket_evidence(db, account_id, body.basket)
     facts: list[Evidence] = []
     listings = []
     for listing_id in body.listing_ids:
@@ -183,4 +250,13 @@ def buyer_evidence(db: Session, body: BuyerQuestion) -> list[Evidence]:
         },
         "application_policy",
     )
+    if account_id is not None:
+        personalization = buyer_profile_data(db, account_id, listings)
+        if personalization is not None:
+            add(
+                facts,
+                PROFILE_TITLE,
+                personalization,
+                "buyer_confirmed_preferences_and_private_activity",
+            )
     return facts

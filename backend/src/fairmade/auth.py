@@ -33,6 +33,19 @@ def hash_token(token: str) -> str:
     return hashlib.sha256(token.encode("utf-8")).hexdigest()
 
 
+def require_live_session(db: Session, token_hash: str, account_id: str) -> LoginSession:
+    """Revalidate account/session after a long external operation."""
+    db.expire_all()
+    session = db.get(LoginSession, token_hash)
+    if (
+        session is None
+        or session.account_id != account_id
+        or session.expires_at.replace(tzinfo=UTC) <= utcnow()
+    ):
+        raise api_error(401, "UNAUTHORIZED", "A valid bearer token is required.")
+    return session
+
+
 def current_session(
     db: DB,
     credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer)],
