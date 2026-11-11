@@ -1,5 +1,10 @@
 # FairMade backend
 
+Supplier review modes now select cost minima, ordered optional preference matches
+or balanced tradeoffs after current mandatory exclusions. Saved seller assistants
+can explain them without authorizing a substitution. See
+[the contract and future depth](../docs/supplier-recommendation-modes.md).
+
 Seller opportunities and on-demand alerts now combine private modeled margins,
 saved cost changes, reviewed expenses, production output and material waste.
 The deterministic report works without AI; optional saved seller conversations

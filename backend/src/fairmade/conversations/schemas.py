@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Annotated, Literal
 from uuid import UUID
 
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator
 
 from fairmade.assistants.schemas import (
     AssistantResponse,
@@ -17,6 +17,7 @@ from fairmade.forecasting.schemas import ForecastRequest
 from fairmade.pricing.schemas import Contract
 from fairmade.schemas import UTCResponse
 from fairmade.seller_insights.schemas import InsightOptions
+from fairmade.supplier_recommendations.schemas import RecommendationOptions
 
 ConversationRevision = Annotated[int, Field(strict=True, ge=0, le=40)]
 
@@ -27,6 +28,14 @@ class SellerScope(Contract):
     analysis_id: UUID | None = None
     supplier_report_id: UUID | None = None
     history_period: HistoryPeriod | None = None
+    recommendations: RecommendationOptions | None = None
+
+    @model_validator(mode="after")
+    def selected_supplier_report(self):
+        if self.recommendations is not None and self.supplier_report_id is None:
+            raise ValueError("Select supplier_report_id for recommendation options")
+        return self
+
     insights: InsightOptions | None = None
     forecast: ForecastRequest | None = None
     bundles: BundleRequest | None = None

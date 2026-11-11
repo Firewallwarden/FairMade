@@ -12,6 +12,7 @@ from fairmade.bundles.integration import context as bundle_context
 from fairmade.forecasting.integration import context as forecast_context
 from fairmade.personalization.integration import context as personalization_context
 from fairmade.seller_insights.integration import context as insight_context
+from fairmade.supplier_recommendations.integration import context as recommendation_context
 
 DIGITS = re.compile(r"[-+]?\d+(?:,\d{3})*(?:\.\d+)?")
 QUESTION_AMOUNTS = re.compile(r"(?:USD\s*|\$)?[-+]?\d+(?:,\d{3})*(?:\.\d+)?")
@@ -45,6 +46,8 @@ def model_evidence(evidence: list[Evidence]) -> list[dict]:
             data = insight_context(fact)
         if data is None:
             data = supplier_context(fact)
+        if data is None:
+            data = recommendation_context(fact)
         if data is None:
             data = forecast_context(fact)
         if data is None:

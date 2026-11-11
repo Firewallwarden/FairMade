@@ -3,16 +3,10 @@
 from datetime import date
 from uuid import UUID
 
-from pydantic import TypeAdapter
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from fairmade.assistants.schemas import Evidence, Paragraph
-from fairmade.auth import api_error
-from fairmade.models import SourcingInput, SupplierComparison
-from fairmade.quality.schemas import Rule
-from fairmade.suppliers.schemas import SupplierComparisonRequest, SupplierQuoteSnapshot
-from fairmade.suppliers.service import COMPARISON_VERSION, compare_suppliers
+from fairmade.suppliers.current import current_comparison
 
 TITLE = "Current supplier comparison of selected saved quote evidence"
 REASONS = {
@@ -32,26 +26,8 @@ REASONS = {
 
 
 def supplier_details(db: Session, product_id: str, report_id: UUID, as_of: date) -> dict:
-    report = db.scalar(
-        select(SupplierComparison)
-        .join(SourcingInput, SourcingInput.id == SupplierComparison.sourcing_input_id)
-        .where(SupplierComparison.id == str(report_id), SourcingInput.product_id == product_id)
-    )
-    if report is None:
-        raise api_error(404, "NOT_FOUND", "Resource not found.")
-    if report.comparison_version != COMPARISON_VERSION:
-        raise api_error(409, "UNSUPPORTED_EVIDENCE_VERSION", "Unsupported supplier version.")
-    sourcing = db.get(SourcingInput, report.sourcing_input_id)
-    result = compare_suppliers(
-        SupplierComparisonRequest.model_validate(report.request_snapshot),
-        [
-            SupplierQuoteSnapshot.model_validate({"id": row["quote_id"], "details": row["details"]})
-            for row in report.result["rows"]
-        ],
-        TypeAdapter(list[Rule]).validate_python(sourcing.rules),
-        sourcing.rule_revision,
-        as_of,
-    )
+    current = current_comparison(db, product_id, report_id, as_of)
+    report, sourcing, result = current.report, current.sourcing, current.result
     eligible = [row for row in result.rows if row.eligible_for_cost_comparison]
     excluded = [row for row in result.rows if not row.eligible_for_cost_comparison]
     minimum_purchase = result.lowest_purchase_cost

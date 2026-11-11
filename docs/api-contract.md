@@ -2,6 +2,12 @@
 
 ## Status and common conventions
 
+Supplier review recommendations are an additive backend proposal at POST
+/api/v1/products/{product_id}/supplier-recommendations. Seller questions and
+saved scopes accept recommendations alongside supplier_report_id. Mandatory
+eligibility precedes savings/quality/balanced modes; selection does not approve
+a finished-product substitution. See [the modes, exact objectives and handoff](supplier-recommendation-modes.md).
+
 Seller insight reports are an additive backend proposal at POST
 /api/v1/products/{product_id}/insights. Seller questions and saved scopes accept
 optional insights with a bounded period_days. Reports cover current modeled

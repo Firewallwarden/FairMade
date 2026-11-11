@@ -12,6 +12,7 @@ from fairmade.evidence import Amount
 from fairmade.forecasting.schemas import ForecastRequest
 from fairmade.pricing.schemas import Contract
 from fairmade.seller_insights.schemas import InsightOptions
+from fairmade.supplier_recommendations.schemas import RecommendationOptions
 
 Question = Annotated[str, Field(min_length=1, max_length=2000)]
 EvidenceKey = Annotated[str, Field(pattern=r"^e[1-9][0-9]?$")]
@@ -34,6 +35,14 @@ class SellerQuestion(Contract):
     analysis_id: UUID | None = None
     supplier_report_id: UUID | None = None
     history_period: HistoryPeriod | None = None
+    recommendations: RecommendationOptions | None = None
+
+    @model_validator(mode="after")
+    def selected_supplier_report(self) -> Self:
+        if self.recommendations is not None and self.supplier_report_id is None:
+            raise ValueError("Select supplier_report_id for recommendation options")
+        return self
+
     insights: InsightOptions | None = None
     forecast: ForecastRequest | None = None
     bundles: BundleRequest | None = None

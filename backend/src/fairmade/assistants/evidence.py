@@ -23,6 +23,8 @@ from fairmade.pricing.schemas import PricingRequest, PricingResponse
 from fairmade.pricing.service import calculate
 from fairmade.seller_insights.integration import TITLE as INSIGHT_TITLE
 from fairmade.seller_insights.service import report as insight_report
+from fairmade.supplier_recommendations.integration import TITLE as RECOMMENDATION_TITLE
+from fairmade.supplier_recommendations.service import recommend
 
 
 def add(facts: list[Evidence], title: str, data: dict, basis="seller_reported_unverified"):
@@ -90,6 +92,14 @@ def seller_evidence(db: Session, account_id: str, body: SellerQuestion) -> list[
             supplier_details(db, product.id, body.supplier_report_id, today()),
         )
     history_evidence(db, account_id, body, facts)
+    if body.recommendations is not None:
+        add(
+            facts,
+            RECOMMENDATION_TITLE,
+            recommend(
+                db, account_id, product.id, body.supplier_report_id, body.recommendations
+            ).model_dump(mode="json"),
+        )
     if body.insights is not None:
         add(
             facts,
