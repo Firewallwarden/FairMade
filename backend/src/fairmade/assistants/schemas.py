@@ -7,6 +7,7 @@ from uuid import UUID
 from pydantic import Field, model_validator
 
 from fairmade.evidence import Amount
+from fairmade.forecasting.schemas import ForecastRequest
 from fairmade.pricing.schemas import Contract
 
 Question = Annotated[str, Field(min_length=1, max_length=2000)]
@@ -30,6 +31,7 @@ class SellerQuestion(Contract):
     analysis_id: UUID | None = None
     supplier_report_id: UUID | None = None
     history_period: HistoryPeriod | None = None
+    forecast: ForecastRequest | None = None
 
 
 class BuyerQuestion(Contract):

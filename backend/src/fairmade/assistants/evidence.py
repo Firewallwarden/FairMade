@@ -10,6 +10,8 @@ from fairmade.assistants.schemas import BuyerQuestion, Evidence, SellerQuestion
 from fairmade.assistants.supplier_explanations import supplier_details
 from fairmade.auth import api_error
 from fairmade.evidence import today
+from fairmade.forecasting.integration import TITLE as FORECAST_TITLE
+from fairmade.forecasting.service import forecast
 from fairmade.marketplace.service import get_public
 from fairmade.models import Analysis, QualityLockSet
 from fairmade.ownership import require_owned_product
@@ -82,6 +84,13 @@ def seller_evidence(db: Session, account_id: str, body: SellerQuestion) -> list[
             supplier_details(db, product.id, body.supplier_report_id, today()),
         )
     history_evidence(db, account_id, body, facts)
+    if body.forecast is not None:
+        add(
+            facts,
+            FORECAST_TITLE,
+            forecast(db, account_id, product.id, body.forecast).model_dump(mode="json"),
+            "calculated_from_backend_verified_sandbox_sales_and_seller_recorded_stock",
+        )
     return facts
 
 

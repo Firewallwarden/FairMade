@@ -63,9 +63,13 @@ paged history restore, retry/revision handling, facts/citations/notices, stale
 answer states, deletion and auth/expiry handling. Browser and screen-recorder
 integration/latency have not been tested here.
 
-Receipt scanning, forecasting, personalization and basket optimization remain
-deferred. Their next step is reassessment after the foundational browser demo
-is working and evaluated; no larger backlog item was silently started.
+The user subsequently restarted the continuous cycle. Verified-sales
+[forecasting](observed-sales-forecast.md) now supports saved seller follow-ups
+with recalculated unit baselines and current stock. Receipt, personalization and
+basket implementations are in separate open PRs; see the
+[original feature-list audit](feature-completion-audit.md) for status and remaining
+assistant versus core marketplace work. This forecast branch does not include
+those independent later extensions. Browser evaluation remains separate.
 
 Thirty-day inactivity expiry and history/resource caps are documented
 implementation limits. Durable storage is the confirmed user choice. Scheduled

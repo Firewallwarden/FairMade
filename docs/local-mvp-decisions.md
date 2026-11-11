@@ -33,6 +33,28 @@ separate from backend availability.
 
 ## Current implementation limits to revisit
 
+### Verified FairMade sales-rate forecasting: DOMAIN-007
+
+The user confirmed option 1: backend-verified FairMade sales only, and explicitly
+asked to record option 2 (seller-entered offline history) as a potential later
+implementation. [Forecast contract](observed-sales-forecast.md).
+The backend now provides read-only observed unit rates, conditional inventory
+coverage/whole-unit planning and saved seller follow-up explanations. It adds
+no order, stock or production effects and does not establish future demand.
+
+Fourteen-to-ninety-day lookback, one-to-thirty-day horizon, a fourteen-complete-date
+and three-sale-date minimum, one thousand captured product lines, calendar-day
+zero observations, six-place displays, all-refund-request exclusions and matching
+historical product/unit labels are implementation limits, not individual user
+choices or statistical confidence. Unknown inventory and insufficient history
+remain null. Only complete UTC dates after product creation are counted.
+
+Offline/manual imports remain a possible later enhancement requiring explicit
+provenance, validation, correction, deduplication and retention policy. Separately
+review stockout/publication exposure, refunds, variants, lead times, seasonality,
+calibration and raw-material mapping. No provider, infrastructure or new source
+is authorized by this follow-up. Browser integration remains separate.
+
 ### Saved conversations: DOMAIN-003
 
 The user explicitly selected option 2: saved database conversations with account
@@ -97,9 +119,10 @@ and supplies qualitative context to the explanation model. Schema/citation and
 numeric-prose checks are not proofs of semantic correctness; review remains
 required. See the contract's evaluation notes and explicit operational limits.
 
-Receipt scanning, forecasting, personalization and basket optimization are
-explicitly deferred until foundational assistants work and the schedule allows.
-They remain backlog items. Further assistant capabilities, hosted
+Receipt scanning, forecasting, personalization and basket optimization were
+initially deferred. The user restarted the cycle: forecasting is now covered
+by DOMAIN-007, while other follow-ups have separate open PRs in the
+[feature completion audit](feature-completion-audit.md). Further assistant capabilities, hosted
 use, a new model/provider, external retrieval and spending require their own
 scope/operational review; this entry does not activate a continuous feature cycle.
 
