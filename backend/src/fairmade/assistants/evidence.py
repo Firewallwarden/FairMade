@@ -9,6 +9,7 @@ from fairmade.assistants.history import history_evidence
 from fairmade.assistants.schemas import BuyerQuestion, Evidence, SellerQuestion
 from fairmade.assistants.supplier_explanations import supplier_details
 from fairmade.auth import api_error
+from fairmade.baskets.integration import evidence as basket_evidence
 from fairmade.evidence import today
 from fairmade.marketplace.service import get_public
 from fairmade.models import Analysis, QualityLockSet
@@ -118,6 +119,10 @@ def scenario_evidence(
 def buyer_evidence(
     db: Session, body: BuyerQuestion, account_id: str | None = None
 ) -> list[Evidence]:
+    if body.basket is not None:
+        if account_id is None:
+            raise api_error(401, "UNAUTHORIZED", "A valid bearer token is required.")
+        return basket_evidence(db, account_id, body.basket)
     facts: list[Evidence] = []
     listings = []
     for listing_id in body.listing_ids:
