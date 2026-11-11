@@ -12,8 +12,8 @@ from fairmade.assistants.schemas import (
     Question,
     SellerQuestion,
 )
-from fairmade.forecasting.schemas import ForecastRequest
 from fairmade.bundles.schemas import BundleRequest
+from fairmade.forecasting.schemas import ForecastRequest
 from fairmade.pricing.schemas import Contract
 from fairmade.schemas import UTCResponse
 
