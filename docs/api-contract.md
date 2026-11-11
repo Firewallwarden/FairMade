@@ -18,6 +18,9 @@ questions additionally require verified seller access and product ownership.
 Responses separate deterministic facts from cited qualitative AI paragraphs
 and return allowlisted evidence and notices. Model prose must not replace the
 exact financial facts. Frontend integration remains pending.
+Seller questions additionally support bounded sales and saved cost-history
+evidence through optional history_period and documented relative-period phrases.
+See [the sales/history extension](assistant-sales-history.md).
 
 **Authorization change from #5:** registration now creates a buyer account.
 Private product/history endpoints require the seller role and return 403 until

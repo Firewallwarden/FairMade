@@ -1,6 +1,6 @@
 """Explicit request scope, cited model paragraphs and authoritative evidence."""
 
-from datetime import datetime
+from datetime import date, datetime
 from typing import Annotated, Literal, Self
 from uuid import UUID
 
@@ -13,11 +13,23 @@ Question = Annotated[str, Field(min_length=1, max_length=2000)]
 EvidenceKey = Annotated[str, Field(pattern=r"^e[1-9][0-9]?$")]
 
 
+class HistoryPeriod(Contract):
+    start_date: date
+    end_date: date
+
+    @model_validator(mode="after")
+    def bounded_period(self) -> Self:
+        if not 1 <= (self.end_date - self.start_date).days <= 366:
+            raise ValueError("Use an exclusive end date, 1-366 days after start")
+        return self
+
+
 class SellerQuestion(Contract):
     question: Question
     product_id: UUID
     analysis_id: UUID | None = None
     supplier_report_id: UUID | None = None
+    history_period: HistoryPeriod | None = None
 
 
 class BuyerQuestion(Contract):

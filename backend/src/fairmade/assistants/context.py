@@ -3,6 +3,7 @@
 import re
 from decimal import Decimal
 
+from fairmade.assistants.history import history_context
 from fairmade.assistants.schemas import Evidence
 
 DIGITS = re.compile(r"[-+]?\d+(?:,\d{3})*(?:\.\d+)?")
@@ -30,7 +31,9 @@ def qualitative(value):
 def model_evidence(evidence: list[Evidence]) -> list[dict]:
     result = []
     for fact in evidence:
-        data = fact.data
+        data = history_context(fact)
+        if data is None:
+            data = fact.data
         if fact.title == "Selected saved production economics":
             costs = data["result"]["costs"]
             data = {

@@ -35,6 +35,13 @@ separate from backend availability.
 
 ### Local assistant decision: MVP-021
 
+The [sales/history extension](assistant-sales-history.md) adds bounded saved
+analysis comparisons and existing sandbox capture-cohort summaries. English
+relative-period phrases, a thirty-date default, twenty-five saved analyses and
+the existing one-thousand-sale cap are documented implementation limits.
+These are not expense ledgers, forecasts or verified live earnings. Conversation
+retention remains a separate pending decision.
+
 The user approved option 1: Ollama with Qwen3 8B locally, with no paid inference.
 Implemented and validated in [PR #38](https://github.com/Firewallwarden/FairMade/pull/38)
 (1,173 backend tests and eight separate real local-model evaluations).
