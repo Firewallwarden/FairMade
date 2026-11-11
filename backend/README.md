@@ -1,5 +1,10 @@
 # FairMade backend
 
+Supplier review modes now select cost minima, ordered optional preference matches
+or balanced tradeoffs after current mandatory exclusions. Saved seller assistants
+can explain them without authorizing a substitution. See
+[the contract and future depth](../docs/supplier-recommendation-modes.md).
+
 The Fair Price Engine calculates batch and unit costs, fee-aware break-even
 prices, seller-selected margin ranges, and profit simulations. The stateless
 calculator remains available. Anyone can register a FairMade account and log in.

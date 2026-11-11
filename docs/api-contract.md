@@ -2,6 +2,12 @@
 
 ## Status and common conventions
 
+Supplier review recommendations are an additive backend proposal at POST
+/api/v1/products/{product_id}/supplier-recommendations. Seller questions and
+saved scopes accept recommendations alongside supplier_report_id. Mandatory
+eligibility precedes savings/quality/balanced modes; selection does not approve
+a finished-product substitution. See [the modes, exact objectives and handoff](supplier-recommendation-modes.md).
+
 The account, seller-application, product, saved-analysis, quality, comparison, review, Passport, marketplace, inventory, order, sandbox-payment, refund, supplier-sourcing, seller-sales, favorite, and storefront endpoints
 below are implemented by the backend for **local development**. Their shared integration contract is
 **proposed; frontend acceptance and browser integration are pending**. No frontend

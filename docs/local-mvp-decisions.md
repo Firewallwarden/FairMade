@@ -33,6 +33,31 @@ separate from backend availability.
 
 ## Current implementation limits to revisit
 
+### Supplier recommendation modes: DOMAIN-012
+
+The user delegated recommended design choices during the continuous cycle and
+asked to retain deeper alternatives for later. This implementation uses existing
+saved quote evidence, current sourcing-input requirements and up to eight
+explicit optional preferences. Savings minimizes the chosen cost objective;
+quality follows ordered known matches then cost; balanced preserves non-dominated
+cost/preference tradeoffs, without invented weights or quality grades.
+See [the contract and limitations](supplier-recommendation-modes.md).
+Implementation is under review; frontend acceptance/integration is pending.
+The algorithms and limits are implementation choices under that delegation,
+not separately confirmed user settings.
+
+Every mode excludes mandatory failures/unknowns and ineligible price/availability
+evidence before selection. Input-review selection does not establish finished
+product compatibility, certification or a realized saving. Product Quality Locks
+remain binding. No supplier purchase, recipe edit, stock or price change occurs.
+The deterministic report does not require AI or a new migration/provider.
+
+Later optional depth: seller-reviewed weighted preferences, evidence confidence
+and verification, explicitly chosen private reliability signals, confirmed
+recipe/substitution effects and input links, actual savings baselines, and
+reviewed proposals for applying changes. New infrastructure, paid services and
+disclosure-policy changes require separate scope authorization.
+
 ### Saved conversations: DOMAIN-003
 
 The user explicitly selected option 2: saved database conversations with account
