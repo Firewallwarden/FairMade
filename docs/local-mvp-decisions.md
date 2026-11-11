@@ -33,6 +33,31 @@ separate from backend availability.
 
 ## Current implementation limits to revisit
 
+### Private messages for existing orders: DOMAIN-008
+
+[Implementation PR #48](https://github.com/Firewallwarden/FairMade/pull/48)
+is a main-targeted draft dependent on #38 through #45; not yet integrated.
+
+The user confirmed option 1: order-bound buyer–seller messages, and explicitly
+asked to record option 2 (pre-purchase product/storefront inquiries) as a later
+improvement. [Messaging contract and frontend handoff](order-messaging.md).
+The backend provides private participant-only plain-text sends and cursor
+history, with safe retries, current seller authorization and no commerce or
+AI-memory side effects. Existing unpaid/cancelled/refunded orders remain in scope.
+
+Two thousand characters per message, one thousand messages per order, ten new
+messages per account/minute across orders, read-only history and HTTP polling
+are implementation limits, not individual user choices. Messages are retained
+with their order without automatic expiry, edit or deletion; this is separate
+from AI chat retention and profile erasure. SQLite append serialization needs
+review if moving to a database with different write concurrency.
+
+Revisit pre-purchase inquiries with explicit eligibility, contact consent,
+privacy, reporting/blocking, retention and abuse policies. Separately review
+message erasure/export, backups, inbox/unread state, attachments, read receipts
+and notifications. This future entry does not authorize providers, infrastructure
+or a broader messaging/contact scope. Browser integration remains pending.
+
 ### Verified FairMade sales-rate forecasting: DOMAIN-007
 
 [Implementation PR #47](https://github.com/Firewallwarden/FairMade/pull/47)

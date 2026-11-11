@@ -33,6 +33,7 @@ from fairmade.marketplace.routes import listing_error_handler
 from fairmade.marketplace.routes import public_router as marketplace_public_router
 from fairmade.marketplace.routes import router as marketplace_router
 from fairmade.materials.routes import router as material_router
+from fairmade.order_messages.routes import router as order_message_router
 from fairmade.orders.routes import router as order_router
 from fairmade.orders.routes import seller_router as seller_order_router
 from fairmade.passports.errors import PassportError
@@ -117,6 +118,7 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
             or request.url.path.startswith("/api/v1/assistants")
             or request.url.path.endswith("/forecasts")
             or request.url.path.startswith("/api/v1/buyer/personalization")
+            or request.url.path.endswith("/messages")
             or request.url.path.startswith("/api/v1/buyer/baskets")
             or request.url.path.endswith("/bundles/suggest")
             or "/description-drafts" in request.url.path
@@ -186,6 +188,7 @@ def create_app(db_url: str | None = None, *, paypal_gateway: Gateway | None = No
     application.include_router(marketplace_public_router)
     application.include_router(inventory_router)
     application.include_router(order_router)
+    application.include_router(order_message_router)
     application.include_router(seller_order_router)
     application.include_router(payment_router)
     application.include_router(seller_payment_router)

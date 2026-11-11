@@ -12,6 +12,10 @@ Accounts default to buyer; only accounts with verified seller access can manage
 private products and save immutable analysis history. Local Qwen3 8B assistants
 are opt-in and disabled by default; the core calculators never call AI.
 PayPal sandbox calls are opt-in and disabled by default.
+Order participants can now exchange private plain-text messages with cursor
+history and retry-safe sends. Apply migration 0029; messages perform no commerce
+or assistant action. See [order messaging and later pre-purchase inquiries](../docs/order-messaging.md).
+
 Seller product forecasts now provide a read-only observed-sales-rate baseline
 and conditional stock coverage from verified sandbox sales, with explicit
 insufficient-history results. Saved seller conversations can explain the same

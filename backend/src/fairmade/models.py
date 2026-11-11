@@ -1049,6 +1049,28 @@ class Order(Base):
     refund_request: Mapped[RefundRequest | None] = relationship(uselist=False)
 
 
+class OrderMessage(Base):
+    __tablename__ = "order_messages"
+    __table_args__ = (
+        UniqueConstraint("order_id", "sequence", name="uq_order_message_sequence"),
+        UniqueConstraint(
+            "order_id", "sender_account_id", "request_id", name="uq_order_message_request"
+        ),
+        CheckConstraint("sequence BETWEEN 1 AND 1000", name="ck_order_message_sequence"),
+        CheckConstraint("sender_role IN ('buyer', 'seller')", name="ck_order_message_role"),
+        CheckConstraint("length(text) BETWEEN 1 AND 2000", name="ck_order_message_text"),
+        Index("ix_order_message_sender_created", "sender_account_id", "created_at"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    order_id: Mapped[str] = mapped_column(ForeignKey("orders.id"))
+    sequence: Mapped[int] = mapped_column(Integer)
+    sender_account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"))
+    sender_role: Mapped[str] = mapped_column(String(6))
+    request_id: Mapped[str] = mapped_column(String(36))
+    text: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
 class OrderLine(Base):
     __tablename__ = "order_lines"
     __table_args__ = (

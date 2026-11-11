@@ -2,6 +2,13 @@
 
 ## Status and common conventions
 
+Order-bound buyer/seller messages are an additive backend proposal at
+/api/v1/orders/{order_id}/messages (GET/POST): private participant access,
+retry-safe sends and cursor history. Apply migration 0029 after 0028. See
+[message schemas, privacy, limits and frontend handoff](order-messaging.md).
+Pre-purchase inquiries are explicitly a later improvement; frontend acceptance
+remains pending. Messages do not change commerce state or feed AI memory.
+
 Observed-sales forecasting is an additive backend proposal at
 POST /api/v1/products/{product_id}/forecasts. Seller questions and saved seller
 scopes add optional forecast: {lookback_days, horizon_days}; exact unit baselines
