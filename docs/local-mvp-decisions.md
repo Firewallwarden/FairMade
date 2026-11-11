@@ -1,5 +1,11 @@
 # Local MVP decisions and follow-up
 
+Integration update (2026-11-11): implementation PRs #38–#56 have been
+squash-merged and verified on main. Earlier draft/open dependency descriptions
+below are retained as decision history; they no longer describe current merge
+status. Frontend, real OCR and credentialed PayPal checks remain separate.
+See [the current integration and demo handoff](backend-demo-handoff.md).
+
 This register tracks deliberate local-development tradeoffs and existing limits
 that need attention as FairMade grows. A local MVP is a working foundation for
 testing and development; it is not evidence of hosted or production readiness.

@@ -1,124 +1,105 @@
 # Original feature list: backend completion audit
 
-Snapshot: 2026-11-10, after the user chose verified FairMade sales only for
-forecasting and requested the remaining assistant versus wider-product scope.
-This maps the original supplied list; it does not authorize new work or change
-the optional continuous-cycle rules.
+Snapshot: 2026-11-11. This replaces the earlier forecast-only audit after the
+authorized continuous cycle. Recommended local MVP designs were delegated by
+the user; deeper alternatives are recorded with their feature PRs.
 
-The fetched main baseline is 16bd9c03933b176fc67c325c3a30932ee16e869b.
-Assistant PRs #38 through #46 are still open and main-targeted; their code is
-implemented in feature branches, not integrated into main. This forecast change
-branches from #42 and does not require the receipt/personalization/basket
-extensions. Refresh published children after prerequisite squash merges;
-merging a stack in order alone is not integration.
+The earlier baseline was `16bd9c03933b176fc67c325c3a30932ee16e869b`.
+PRs #38 through #56 have now been reviewed, squash-merged into main and verified
+there. Published children were refreshed after prerequisite merges. The resulting
+application matches the combined validation snapshot; this final handoff (#57)
+records the review and retains its reproducible integration checks.
 
-Backend availability is distinct from frontend completion, shared contract
-acceptance, provider/browser end-to-end checks and a recorded demonstration.
-The backend agent has not audited the frontend developer's current branch and
-does not claim that every browser feature is missing or complete.
+The remaining work is browser/provider integration and demonstration, plus explicitly
+bounded deeper functionality below. It would be inaccurate to call the full
+original wishlist or a production marketplace finished. Backend APIs, accepted
+browser contracts, frontend screens and successful real-provider demos are
+different completion states. The frontend developer's current branch has not
+been audited here.
 
-## How much assistant work remains?
+## Integrated seller and buyer assistants
 
-The usable assistant foundation is implemented in open PRs: seller/buyer scoped
-questions, saved conversations, source rechecks and exact calculated facts;
-seller economics, history and supplier explanations; descriptions, receipt
-review/questions; buyer confirmed preference memory and activity-informed
-suggestions; single-storefront basket plans.
-
-Forecasting is implemented in this change. After it, there are **three grouped
-assistant capability areas** still partial or absent from the original expanded
-wishlist. These are planning groups, not a claim that only three endpoints or
-three small tasks remain:
-
-| Remaining group | Existing coverage | Work still needed |
+| Capability | Published backend implementation | Boundary / later depth |
 | --- | --- | --- |
-| Seller insights and alerts | Break-even/target-margin warnings, cost/history facts, reviewed spending aggregates and private production/material records exist. | Structured waste/profit-improvement opportunities and low-margin/expense-increase alerts with explicit evidence, baselines and thresholds. Existing warnings/questions are not an alert feed or notification system. |
-| Seller and buyer bundle suggestions | Basket planning selects acceptable alternatives at existing prices. | Explainable product pairing/bundle proposals. Basket optimization is not a bundle feature; promotional discounts, repricing and combined checkout need separate decisions. |
-| Richer ingredient/material and supplier recommendation assistance | Buyer explanations use approved disclosures; supplier checks show current failures and eligible cost minima. | More complete disclosed ingredient/material explanations and quality/savings/balance recommendation policies. Do not invent composition, certifications, availability or objective quality/value scores. |
+| Seller/buyer questions with exact facts and cited qualitative answers | [#38](https://github.com/Firewallwarden/FairMade/pull/38) | Free local Ollama/Qwen3; no cloud fallback or autonomous changes. |
+| Sales and saved cost-history questions | [#39](https://github.com/Firewallwarden/FairMade/pull/39) | Bounded nominal histories; not actual-cost accounting. |
+| Current supplier exclusions and Quality Lock explanations | [#40](https://github.com/Firewallwarden/FairMade/pull/40) | Ineligible alternatives cannot be acceptable savings. |
+| AI description drafts | [#41](https://github.com/Firewallwarden/FairMade/pull/41) | Seller reviews exact private copy; public publication is separate. |
+| Persistent buyer/seller conversations | [#42](https://github.com/Firewallwarden/FairMade/pull/42), [contract](assistant-conversations.md) | Owner/scope-bound, bounded history, restart continuity, source refresh, deletion and thirty-day inactivity expiry. Not unlimited memory across all records. |
+| Receipt OCR and reviewed expenses | [#43](https://github.com/Firewallwarden/FairMade/pull/43) | Transient images, local Tesseract/Qwen drafts, explicit seller approval; real full image OCR remains pending setup. |
+| Reviewed receipt expense questions | [#44](https://github.com/Firewallwarden/FairMade/pull/44) | Seller-wide totals, no implicit allocation or double deduction from modeled profits. |
+| Buyer personalization and remembered preferences | [#45](https://github.com/Firewallwarden/FairMade/pull/45) | Opt-in favorites/verified sandbox purchase signals; proposed memory updates require confirmation. No inferred sensitive traits. |
+| Budget-aware basket optimization | [#46](https://github.com/Firewallwarden/FairMade/pull/46) | Fixed quantities, explicit compatible alternatives, one storefront, exact merchandise subtotal; no reservation/order. |
+| Sales baseline and inventory planning | [#47](https://github.com/Firewallwarden/FairMade/pull/47), [contract](observed-sales-forecast.md) | Backend-verified sandbox sales, closed UTC dates, sparse-history nulls; conditional rate projection, not validated demand. |
+| Seller waste/profit insights and alerts | [#50](https://github.com/Firewallwarden/FairMade/pull/50) | On-demand margin/cost/expense/output/waste reports. No scheduler, notification feed, causal savings guarantee or automatic business change. |
+| Buyer and seller bundles | [#51](https://github.com/Firewallwarden/FairMade/pull/51) | Same-storefront product pairs at existing prices. Consented buyer signals; seller co-purchase counts stay private. No discount, bundle SKU or verified complementarity. |
+| Quality/savings/balance supplier recommendations | [#52](https://github.com/Firewallwarden/FairMade/pull/52) | Current hard exclusions first; exact cost and optional known preference matches. Sourcing-input review does not establish a compatible finished-product substitution. |
+| Ingredient/material explanations | [#53](https://github.com/Firewallwarden/FairMade/pull/53) | Explicitly approved seller composition declarations for buyers; private recipe input opt-in for sellers. No inferred allergens, safety, nutrition or certification. |
+| Conditional price recommendations | [#54](https://github.com/Firewallwarden/FairMade/pull/54) | Selected economics/market review, current quality gates, supported positive-cent review bounds. Unsupported/nonoverlapping evidence can yield no recommendation. |
+| Saved cost calendar and annual comparisons | [#55](https://github.com/Firewallwarden/FairMade/pull/55) | Closed save-month snapshots and same-month annual differences; missing data stays unknown. Seasonality is explicitly not established. |
+| Consistent economics across combined seller reports | [#56](https://github.com/Firewallwarden/FairMade/pull/56) | Price advice and insights share the selected analysis, including saved follow-ups after restart. |
 
-Receipt OCR is implemented but the real full image-to-expense smoke test remains
-pending local Tesseract setup after the installer was canceled. It is an
-integration/setup gap, not a second receipt feature to rebuild. Persistent
-memory is implemented within documented owner/scope/retention limits; it is
-not unbounded memory across every record or every conversation.
+The three assistant groups listed as missing in the previous audit now have
+integrated local MVP implementations (#50–#53). Price advice and descriptive
+annual cost analysis have also been added (#54–#55). Further assistant depth
+requires better evidence and the follow-ups in the decision log, rather than
+another copy of the foundation.
 
-Recommended scope after this forecast PR: move to the missing core marketplace
-and purchase capabilities, then complete integration/demo checks. The remaining
-expanded assistant wishlist should not obscure a missing core buying flow.
-This is a prioritization recommendation, not automatic deferral or cancellation
-of any user-requested item.
+## Original core feature map
 
-## Implemented assistant work under review
+“Main” means code/docs exist in the fetched baseline, not a completed browser
+journey, verified seller claims or production readiness.
 
-| Feature | Evidence / status |
-| --- | --- |
-| Local seller and buyer questions, deterministic facts/citations, private/public source boundaries | [PR #38](https://github.com/Firewallwarden/FairMade/pull/38), open; local Ollama/Qwen3. |
-| Seller sales and saved cost-history questions | [PR #39](https://github.com/Firewallwarden/FairMade/pull/39), dependent draft. These are bounded history questions, not validated seasonality. |
-| Supplier eligibility and mandatory-quality explanations | [PR #40](https://github.com/Firewallwarden/FairMade/pull/40), dependent draft. No automatic substitute or recipe change. |
-| AI product description drafts with explicit seller approval | [PR #41](https://github.com/Firewallwarden/FairMade/pull/41), dependent draft. Public publication remains separate. |
-| Saved buyer/seller conversations, restart continuity and erasure/expiry | [PR #42](https://github.com/Firewallwarden/FairMade/pull/42), dependent draft; [contract](assistant-conversations.md). |
-| Local receipt OCR/extraction and explicitly reviewed expense records | [PR #43](https://github.com/Firewallwarden/FairMade/pull/43), dependent draft; real full OCR smoke remains pending. |
-| Reviewed receipt expense questions | [PR #44](https://github.com/Firewallwarden/FairMade/pull/44), dependent draft; no inferred product-cost allocation. |
-| Buyer opt-in personalization, favorites/verified sandbox signals and confirmed memory proposals | [PR #45](https://github.com/Firewallwarden/FairMade/pull/45), dependent draft. |
-| Budget-aware single-storefront basket plans and saved explanations | [PR #46](https://github.com/Firewallwarden/FairMade/pull/46), dependent draft. Multi-seller plans are explicitly a later enhancement. |
-| Verified-sales unit baseline and inventory planning explanations | [PR #47](https://github.com/Firewallwarden/FairMade/pull/47), dependent draft behind #38–#42; [source, formulas and limitations](observed-sales-forecast.md). Offline history is a potential later enhancement. |
-
-## Core feature map outside the assistant chat shell
-
-“Present on main” below means the cited backend code/docs are in the fetched
-main baseline. It is not a claim of frontend acceptance, live payment readiness,
-independently verified seller claims or completion of every possible expansion.
-
-| Original-list area | Backend status | Gap / boundary |
+| Original area | Backend coverage | Remaining boundary |
 | --- | --- | --- |
-| Seller profiles/storefronts; listings, descriptions and photos | Present on main: [storefront API](../backend/src/fairmade/storefronts/routes.py), [listing API](../backend/src/fairmade/marketplace/routes.py), [photo API](../backend/src/fairmade/photos/routes.py). | One storefront/account is the confirmed initial policy; browser integration must be checked with frontend. |
-| Recipe/ingredient management | Present on main: [manual recipe contract](manual-recipe-costing.md). | Manual prices/quantities, no live ingredient catalog or automatic supplier substitution/consumption. |
-| Livestock production tracking | Present on main: [groups, animals and production source tracking](livestock-tracking.md). | Seller-reported data, no automatic per-animal allocation or certified animal-welfare claim. |
-| Material/supply inventory | Present on main: [material inventory](manual-material-inventory.md). | Quantity/event tracking; lot/expiry/valuation and automatic recipe consumption remain deeper optional work. |
-| Labor, packaging, utilities, equipment and batch yield/unit costs | Present on main: [economics formulas](fair-price-engine.md), [actual production records](completed-production-records.md). | Manual allocation and observed completed output. A separate equipment asset ledger or production scheduler is not implied by these calculations. |
-| Product quality standards and minimum requirements | Present on main: [Quality Lock API](../backend/src/fairmade/quality/routes.py). | Structured rules and immutable evaluations; matching seller claims are not independent verification. |
-| True costs, margins/markup, break-even, price scenarios and profit projections | Present on main: [calculator](fair-price-engine.md), saved analyses and pricing reviews. | Outputs depend on seller inputs and modeled fees/yields; AI does not silently choose a price or calculate money. |
-| AI-recommended sustainable price choices combining economics, market context and quality | Partial: deterministic seller-target ranges, comparisons, reviews and assistant explanations exist. | A richer recommendation policy that turns all three into proposed price choices is not yet implemented; the current margin-target range is not an objective fairness verdict or an AI-chosen market price. |
-| Local comparable finished products and price-change simulations | Present on main: [comparison API](../backend/src/fairmade/comparisons/routes.py), calculator scenarios. | Comparable evidence is manually entered with provenance; no unsupported live-price retrieval. |
-| Seasonal and historical cost analysis | Partial: saved cost differences/history questions exist in #39. | Save-time trends do not prove seasonality or actual procurement inflation. A seasonal evidence/model feature remains unimplemented. |
-| Unsustainable-price warnings | Present on main: calculator/review warnings; assistant explanations in #38/#39. | Not an autonomous repricing or notification workflow. |
-| Supplier/bulk/usable-unit comparisons, specification checks and transport/availability inputs | Present on main: [supplier contract/API](../backend/src/fairmade/suppliers/routes.py). | Seller-entered evidence, freshness and quality exclusions. Automated nearby supplier discovery/live stock is not implemented. |
-| Supplier ratings/reliability | Present on main: [private supplier records](private-supplier-reliability.md). | Private seller-reported observations, not shared verified reputation. |
-| Quality/savings/balance substitution recommendations and quality-reduction alerts | Partial: eligible-only minima and failure/exclusion explanations exist (#40). | Ranked recommendation modes, ingredient replacement proposals and confirmed application need explicit policy; no failing Quality Lock can become an acceptable saving. |
-| Orders, verified sandbox payments, transaction history, stock updates, sales/profit reporting | Present on main: [orders](../backend/src/fairmade/orders/routes.py), [payments](../backend/src/fairmade/payments/routes.py), [seller sales](../backend/src/fairmade/sales/routes.py). | Shared sandbox merchant is approved for development. Seller-connected production merchants and live payouts are explicitly deferred. |
-| Refund/cancellation workflows | Present on main: [refund API](../backend/src/fairmade/refunds/routes.py). | Buyer requests require seller review/approval; no automatic restocking. |
-| Order/purchase confirmations and order history | Backend order/payment status and history present on main. | Browser confirmation screens must be verified. Email/push confirmations are not implemented and are not authorized by a status response. |
-| Buyer search, basic categories, nearby seller discovery, distance/availability filters | Present on main: catalog product-type filters, [nearby discovery](../backend/src/fairmade/discovery/routes.py), [availability](public-listing-availability.md). | Categories are sourdough/eggs/other, not an extensible taxonomy. No live geocoding or driving-distance guarantee. |
-| Sort by price, quality and overall value | Incomplete: catalog currently sorts by publication order; filter and comparison primitives exist. | Price sorting and explainable quality/value ordering still need implementation. Unknown/unverified quality must not become an invented universal score. |
-| Product comparisons, seller/product information, favorites | Present on main: comparable evidence, public Passports/listings/storefronts and owner favorites. | Frontend comparison pages and saved-product browsing need frontend confirmation. |
-| Fair Price Passport, seller-approved costs/material/labor/overhead, disclosed margins | Present on main: [Passport API](../backend/src/fairmade/passports/routes.py). | Omitted fields remain unknown; seller consent governs disclosure. Not every seller must reveal every cost. |
-| Standard unit prices, reported/estimated indicators, evidence warnings | Present on main: [standard unit pricing](standardized-unit-pricing.md), provenance and review warnings. | No false independent-verification or objective-fairness guarantee. |
-| Buyer AI price/value explanations and alternative recommendations | Foundation plus #45/#46 under review. | Preferences/activity and compatible alternatives only; richer ingredient explanations/overall-value policies remain partial. |
-| Cart/order summary, purchase history, PayPal purchase | Backend APIs present on main. | Validate the real browser-to-sandbox journey with frontend and configured sandbox credentials; a provider double is not that integration check. |
-| Seller communication | No buyer–seller message API found in the audited backend. | Core gap: decide eligible conversation scope (for example, order-bound versus pre-purchase), privacy, retention and abuse controls before implementation. |
-| Reviews and verified-purchase feedback | Present on main: [review contract](product-reviews.md). | Sandbox purchase evidence and unverified buyer opinions; hosted moderation/reporting/appeals remain follow-ups. |
+| Seller profiles/storefronts; product descriptions/photos | Main: [storefronts](../backend/src/fairmade/storefronts/routes.py), [listings](../backend/src/fairmade/marketplace/routes.py), [photos](../backend/src/fairmade/photos/routes.py). | One storefront/account; browser acceptance/integration. |
+| Recipes/ingredients, livestock, materials/supplies | Main: [recipes](manual-recipe-costing.md), [livestock](livestock-tracking.md), [materials](manual-material-inventory.md). | Manual seller reports/prices; no automatic supplier substitution, lot valuation or recipe consumption. |
+| Labor, packaging, utilities, equipment, yields/unit costs | Main: [economics](fair-price-engine.md), [completed production](completed-production-records.md). | Manual allocation; no equipment asset ledger or scheduler implied. |
+| Quality standards and ingredient requirements | Main: [Quality Locks](../backend/src/fairmade/quality/routes.py). | Structured rules and immutable evaluations; seller claims are not independent certification. |
+| True modeled costs, margins/markup, break-even, profit projections and price simulations | Main: deterministic economics and saved reviews; explanations #38–#39, conditional advice #54. | No invented missing costs, automatic price selection or objectively fair-price guarantee. |
+| Local finished-product comparisons | Main: [comparisons](../backend/src/fairmade/comparisons/routes.py). | Seller-entered dated observations, not automated verified local market coverage. |
+| Seasonal/historical cost analysis | History #39; descriptive calendar/annual analysis #55. | Validated seasonality and actual procurement inflation remain unimplemented. Save timestamps are not expense dates. |
+| Unsustainable-price warnings | Main calculator/review warnings; #50 on-demand insight alerts. | No proactive notifications or autonomous repricing. |
+| Nearby supplier, bulk, usable-unit, specification, transport/availability comparisons | Main: [supplier API](../backend/src/fairmade/suppliers/routes.py). | Recorded provenance/location/availability; no automated nearby discovery or live stock retrieval. |
+| Supplier ratings/reliability | Main: [private records](private-supplier-reliability.md). | Seller-reported private observations; no verified shared reputation. |
+| Supplier recommendation modes and quality-reduction warnings | Main exclusions/minima plus #40/#52. | No reviewed ingredient replacement/application workflow or verified product-impact calculation. |
+| Orders, PayPal, transactions, inventory updates and fee-aware sales/profit reports | Main: [orders](../backend/src/fairmade/orders/routes.py), [payments](../backend/src/fairmade/payments/routes.py), [sales](../backend/src/fairmade/sales/routes.py). | Shared development sandbox merchant; credentialed browser purchase/capture still needs a smoke test. Production seller merchants/payouts deferred. |
+| Refunds/cancellations | Main: [refunds](../backend/src/fairmade/refunds/routes.py). | Buyer request requires seller approval; no automatic restocking. |
+| Order/purchase confirmations and history | Main order/payment status/history APIs. | Browser confirmation screens need verification. Email/push confirmations are not implemented. |
+| Search/categories, nearby discovery, distance/availability filters | Main: product-type search, [discovery](../backend/src/fairmade/discovery/routes.py), [availability](public-listing-availability.md). | Three basic product types; no live geocoding or driving-distance guarantee. |
+| Price, quality, unit-price and value ordering | [#49](https://github.com/Firewallwarden/FairMade/pull/49), independent of assistants. | Explicit public-evidence order and unknown groups; no universal quality/value score or buyer-weighted ranking. |
+| Product comparisons, seller/product information, favorites | Main public Passports/listings/storefronts and owned favorites. | Browser comparison/saved-product pages require frontend verification. |
+| Fair Price Passport and cost/margin disclosures | Main: [Passports](../backend/src/fairmade/passports/routes.py); explicit composition adds #53. | Exact seller approval governs disclosure; omitted facts stay unknown. |
+| Unit pricing, verified/estimated labels and missing-data warnings | Main: [unit pricing](standardized-unit-pricing.md) and provenance. | No fabricated independent verification or fairness verdict. |
+| Personalized/budget/quality-price shopping, alternatives, bundles and value questions | #38/#42/#45/#46/#49/#51/#53. | Explicit compatible alternatives and approved evidence; no inferred safety or multi-seller basket. |
+| Cart/order summary, history and purchase confirmations | Main backend APIs. | Real browser-to-sandbox walkthrough remains a required integration check. |
+| Seller communication | [#48](https://github.com/Firewallwarden/FairMade/pull/48). | Private order-bound messages; pre-purchase inquiries, inbox/notifications and moderation depth deferred. |
+| Reviews and verified-purchase feedback | Main: [reviews](product-reviews.md). | Sandbox purchase evidence and buyer opinions; hosted moderation/reporting/appeals remain follow-ups. |
 
-## Suggested next priorities
+## What remains before the demo
 
-1. Approved verified-sales forecasting is implemented and published in draft #47;
-   integrate and review it through the normal prerequisite-refresh workflow.
-2. Address core buyer–seller communication and the missing marketplace ordering
-   behavior, with visible design questions where policy is needed.
-3. Complete the remaining pricing/supplier recommendation policy if required
-   for the intended signature-feature demonstration; keep quality constraints
-   binding and evidence limitations explicit.
-4. Integrate and validate the UI/backend journey, migrations, login/logout,
-   source changes, provider failures, real receipt OCR and sandbox purchase/refund.
-   Review/merge PRs through the guard workflow; merges are not authorized here.
-5. Return to the remaining expanded assistant insights/alerts, bundles and richer
-   ingredient/supplier explanations as scope and submission needs permit.
+1. Use the integrated checkout and confirm local configuration and demo data.
+   The pending implementation PRs have been reviewed and squash-integrated with
+   parent refreshes and integration guards; future dependent work needs the same care.
+2. Coordinate the browser assistant: create/select conversations, restore paged
+   turns after reload, handle revision/retry/expiry/delete, display exact facts
+   separately from cited AI prose, and offer confirmed preference controls.
+   Frontend owns this work; its actual completion must be checked there.
+3. Walk through seller publication, buyer discovery/comparison/Passport,
+   purchase/capture, stock, messaging, seller-approved refund and history with
+   synthetic data and real sandbox credentials. A provider double is not this check.
+4. Configure local Tesseract and run a real image-to-reviewed-expense test before
+   advertising receipt scanning as demo-ready. Do not silently substitute mocked OCR.
+5. Record the video from an integrated, smoke-tested checkout, showing evidence
+   labels, missing-data behavior and safe failures rather than claiming verified
+   demand, seasonality, costs, certifications or universal fairness.
 
-Deferred enhancements include offline sales ingestion, multi-seller shopping
-plans, additional storefronts and production seller-connected PayPal merchants.
-Their presence in the decision log does not make them mandatory before a local
-demo and does not authorize them automatically.
+See [the backend review/demo handoff](backend-demo-handoff.md) for dependencies,
+combined validation evidence and the browser-facing sequence.
 
-Use this audit as a checklist for product decisions and frontend coordination,
-not as a percentage-complete estimate. A working backend endpoint, a merged
-feature, an accepted browser contract and a successfully demonstrated user
-journey are different completion states.
+Deeper alternatives include validated seasonal/demand models, offline sales
+imports, actual-cost reconciliation, multi-seller shopping, configurable bundles,
+proactive notifications, source-backed ingredient verification, automatic live
+supplier discovery and production seller-connected merchants. Feature PRs retain
+their decision-log entries. These remain limits or optional later enhancements,
+not authorization for new services, spending or infrastructure.
