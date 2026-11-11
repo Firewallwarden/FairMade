@@ -6,6 +6,7 @@ from uuid import UUID
 
 from pydantic import Field, model_validator
 
+from fairmade.cost_calendar.schemas import CalendarOptions
 from fairmade.evidence import Amount
 from fairmade.pricing.schemas import Contract
 from fairmade.seller_insights.schemas import InsightOptions
@@ -32,6 +33,7 @@ class SellerQuestion(Contract):
     supplier_report_id: UUID | None = None
     history_period: HistoryPeriod | None = None
     insights: InsightOptions | None = None
+    cost_calendar: CalendarOptions | None = None
 
 
 class BuyerQuestion(Contract):

@@ -11,6 +11,7 @@ from fairmade.assistants.schemas import (
     Question,
     SellerQuestion,
 )
+from fairmade.cost_calendar.schemas import CalendarOptions
 from fairmade.pricing.schemas import Contract
 from fairmade.schemas import UTCResponse
 from fairmade.seller_insights.schemas import InsightOptions
@@ -25,6 +26,7 @@ class SellerScope(Contract):
     supplier_report_id: UUID | None = None
     history_period: HistoryPeriod | None = None
     insights: InsightOptions | None = None
+    cost_calendar: CalendarOptions | None = None
 
 
 class BuyerScope(Contract):

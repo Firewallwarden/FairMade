@@ -9,6 +9,8 @@ from fairmade.assistants.history import history_evidence
 from fairmade.assistants.schemas import BuyerQuestion, Evidence, SellerQuestion
 from fairmade.assistants.supplier_explanations import supplier_details
 from fairmade.auth import api_error
+from fairmade.cost_calendar.integration import TITLE as CALENDAR_TITLE
+from fairmade.cost_calendar.service import report as calendar_report
 from fairmade.evidence import today
 from fairmade.marketplace.service import get_public
 from fairmade.models import Analysis, QualityLockSet
@@ -84,6 +86,13 @@ def seller_evidence(db: Session, account_id: str, body: SellerQuestion) -> list[
             supplier_details(db, product.id, body.supplier_report_id, today()),
         )
     history_evidence(db, account_id, body, facts)
+    if body.cost_calendar is not None:
+        add(
+            facts,
+            CALENDAR_TITLE,
+            calendar_report(db, account_id, product.id, body.cost_calendar).model_dump(mode="json"),
+            "seller_recorded_save_month_not_actual_expenses",
+        )
     if body.insights is not None:
         add(
             facts,

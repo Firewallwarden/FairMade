@@ -33,6 +33,32 @@ separate from backend availability.
 
 ## Current implementation limits to revisit
 
+### Saved cost calendar and descriptive annual analysis: DOMAIN-015
+
+The user delegated recommended designs during the continuous cycle and requested
+deeper alternatives be retained for later. This implementation chooses complete
+UTC save-month production-cost snapshots, latest-per-month source selection,
+same-calendar-month annual differences and descriptive cross-year bounds.
+The default twenty-four months, maximum thirty-six months and thousand-source
+bound are implementation choices, not individually confirmed user preferences.
+See [the scope and limits](saved-cost-calendar.md). Backend implementation is
+under review; frontend acceptance/integration is pending.
+
+Unknowns remain null; changed basis/unsupported latest snapshots are not replaced
+by older convenient values. Record-save time does not establish expense timing,
+actual monthly cost, quality equivalence, inflation, causes or validated seasonal
+effects. seasonality_status remains not_established. Synthetic test histories
+stay in temporary test databases. No business records, forecast or price changes.
+Nullable Decimal changes share the existing seller-insight behavior and contract.
+No new migration, provider or infrastructure is introduced.
+
+Later optional depth: cost-occurrence imports and actual/volume reconciliation,
+quality/recipe/version comparability, representative multiple-cycle evidence,
+validated seasonal/confidence models and reviewed forecasting/pricing use.
+Those deeper findings are not implied by descriptive saved-model comparisons.
+Paid services, new infrastructure and disclosure policy still require separate
+authorization. No production price or demand guarantee is made.
+
 ### Seller insights and on-demand alerts: DOMAIN-010
 
 The user delegated recommended design choices during the continuous cycle and

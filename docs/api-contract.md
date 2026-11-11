@@ -2,6 +2,13 @@
 
 ## Status and common conventions
 
+Saved cost calendars are an additive backend proposal at POST
+/api/v1/products/{product_id}/cost-calendar, with strict months one through
+thirty-six (default twenty-four). Seller questions/saved scopes accept optional
+cost_calendar. Closed save-month snapshots and annual comparisons are descriptive;
+validated seasonality is not claimed. See
+[the exact scope, missing evidence and handoff](saved-cost-calendar.md).
+
 Seller insight reports are an additive backend proposal at POST
 /api/v1/products/{product_id}/insights. Seller questions and saved scopes accept
 optional insights with a bounded period_days. Reports cover current modeled

@@ -1,5 +1,10 @@
 # FairMade backend
 
+Private saved cost calendars now show complete UTC months, latest supported
+model snapshots and same-month annual comparisons. Saved seller conversations
+can explain the current evidence without inventing actual expenses, inflation
+or validated seasonality. See [the contract and deeper follow-up](../docs/saved-cost-calendar.md).
+
 Seller opportunities and on-demand alerts now combine private modeled margins,
 saved cost changes, reviewed expenses, production output and material waste.
 The deterministic report works without AI; optional saved seller conversations
