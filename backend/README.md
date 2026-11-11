@@ -4,8 +4,15 @@ The Fair Price Engine calculates batch and unit costs, fee-aware break-even
 prices, seller-selected margin ranges, and profit simulations. The stateless
 calculator remains available. Anyone can register a FairMade account and log in.
 Accounts default to buyer; only accounts with verified seller access can manage
-private products and save immutable analysis history. AI services are not called.
+private products and save immutable analysis history. Local Qwen3 8B assistants
+are opt-in and disabled by default; the core calculators never call AI.
 PayPal sandbox calls are opt-in and disabled by default.
+Seller and buyer assistant endpoints now explain scoped evidence through local
+Ollama. Exact financial facts are rendered by the backend separately from AI
+paragraphs; seller evidence is owner-scoped and buyers see approved disclosures
+only. No cloud fallback, automatic changes or persistent chat is added.
+See the [assistant workflow](examples/assistants/README.md) and
+[contract, evaluation and limits](../docs/local-assistants.md).
 Sellers can keep private supplier profiles, subjective ratings and dated delivery
 observations with immutable corrections and exact summaries that show missing data.
 Optional quote references freeze owned evidence without changing comparisons or
