@@ -98,6 +98,23 @@
 .workspace-panel p {
   line-height: 1.7;
 }
+.workspace-panel > p + p,
+.workspace-panel details p + p {
+  margin-top: 12px;
+}
+.workspace-panel h4 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-block: 20px 8px;
+}
+.workspace-panel ul {
+  list-style: disc;
+  padding-inline-start: 22px;
+  margin-block: 16px;
+}
+.workspace-panel li + li {
+  margin-top: 8px;
+}
 .workspace-actions {
   display: flex;
   align-items: center;

@@ -7,10 +7,8 @@ export function PassportView({ passport }: { passport: Passport }) {
       className="workspace-panel passport-view"
       aria-label="Fair Price Passport"
     >
-      <p className="eyebrow">
-        Fair Price Passport · Seller-reported, unverified
-      </p>
-      <h2>A price with a little more understanding.</h2>
+      <p className="eyebrow">Behind the price · Seller-reported, unverified</p>
+      <h2>Fair Price Passport</h2>
       <p>
         <strong>{passport.product.title}</strong> · {usd(passport.price.amount)}{' '}
         per {passport.product.selling_unit}.
