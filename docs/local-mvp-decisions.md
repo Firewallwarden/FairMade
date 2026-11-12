@@ -542,6 +542,16 @@ until prerequisite squash merges are verified and each child is refreshed.
 
 ## Updating this register
 
+### Private listing-photo previews (2026-11-12)
+
+Browser acceptance reproduced a broken image when a seller previewed a newly
+selected photo: the public image endpoint correctly returned 404 before approval.
+`fix/frontend-private-photo-preview` uses the existing authenticated private-photo
+transport in the seller preview. The selected normalized image bytes remain
+private until separate listing approval; public image visibility rules are unchanged.
+The browser suite checks loaded preview pixels while the public URL remains 404,
+then anonymous image access after approval.
+
 ### Older-record selector pagination (2026-11-12)
 
 Implemented in `feature/frontend-history-pagination`, dependent on withdrawal PR
@@ -555,70 +565,24 @@ No all-history fetch or persistent browser cache is introduced. Initial source
 availability checks remain bounded. Browser selection/paging acceptance is pending
 the dedicated Playwright suite; saved historical results are not reevaluated.
 
-### Passport withdrawal (2026-11-12)
+### Administrator verification UI (2026-11-12)
 
-Implemented in `feature/frontend-passport-withdraw`: publication history exposes
-withdrawal only for published versions and asks for explicit confirmation.
-Backend-confirmed withdrawal clears local publication/listing previews and refreshes
-saved state; existing order snapshots and previously received copies remain.
-This is distinct from listing deactivation and storefront withdrawal. The initial
-history uses the existing bounded endpoint; older-history pagination is a separate
-requested feature. Live browser acceptance remains pending the Playwright suite.
-The public-listing banner additionally checks the public endpoint: a private
-listing marked active can still be hidden after withdrawal or supersession.
-Publishing a replacement Passport does not imply that its listing was reapproved.
-### Saved Passport draft editing (2026-11-12)
+Implemented in `feature/frontend-admin-verification`: current administrators have
+a paginated application queue and detail/decision screen linked from Account.
+Decisions submit expected_revision, outcome and applicant-visible reason, require
+confirmation, and reload stale conflicts for review. Self-review is disabled in
+the UI and denied authoritatively by the backend. No bootstrap, new criteria,
+certification claim or role-grant shortcut is introduced. Final decisions remain
+terminal in this local MVP. Browser/permission acceptance remains pending Playwright.
 
-Implemented in `feature/frontend-passport-edit`: sellers can load owned drafts,
-edit title, price, description and disclosure policy, and save against the loaded
-revision. Saved review and composition content are preserved. Editing invalidates
-publication previews; saving or reloading enables a fresh server preview and
-explicit approval. Stale writes remain backend-rejected and the editor offers a
-reload that discards unsaved edits. Existing published snapshots are unchanged.
-Composition content editing and review replacement remain outside this editor;
-create a new draft for those changes. Build, lint and 45 unit tests passed;
-live browser acceptance is pending the dedicated browser suite.
-### Seller cancellation (2026-11-12)
+### Pickup history (2026-11-12)
 
-Implemented in `feature/frontend-seller-cancel`: sellers can request cancellation
-of pending unpaid orders with confirmation. Backend eligibility remains authoritative;
-rejections are displayed and order/payment state is reloaded after every attempt.
-Cancelled orders display freshly fetched listing availability, with hidden or failed
-lookups kept unknown and a retry control. Public availability is a snapshot, not a
-reservation or substitute for private inventory. Live browser checks remain pending
-the requested Playwright workflow.
-### Radius-based product discovery (2026-11-12)
+Implemented in `feature/frontend-pickup-history`: buyers and verified sellers can
+page through private recorded fulfillment changes from order details. Timestamps,
+revisions and recorded instructions remain seller-reported; no independent handoff
+verification is implied. History refreshes after saved pickup changes and supports
+manual retry. Browser acceptance remains pending the full Playwright workflow.
 
-Implemented in `feature/frontend-radius-discovery`: marketplace search supports
-transient user-entered coordinates and radius through the agreed POST endpoint.
-Supported query/type/availability/order filters and pagination are retained;
-location-label filtering is disabled in radius mode because that endpoint does not
-accept it. Distances and backend notices identify approximate seller-chosen areas,
-not addresses or travel routes. No geolocation permission, coordinate URL/storage,
-or new mapping service is introduced. Browser acceptance remains pending Playwright.
-### Historical quality evaluation inspection (2026-11-12)
-
-Implemented in `feature/frontend-quality-history`: paginated saved evaluations
-reopen their recorded rules, seller claims, checks and result. Revision and captured
-rules are compared with current requirements to flag historical incompatibility;
-results are never silently reevaluated or represented as independent verification.
-Selection survives history paging. Browser acceptance remains pending Playwright.
-### Reopening complete pricing reviews (2026-11-12)
-
-Implemented in `feature/frontend-pricing-review-history`: sellers can paginate
-saved reviews and reopen recorded economics, Quality Lock/market context,
-explanations and warnings. Complete private evidence snapshots remain inspectable.
-Reopening does not reevaluate source age, current requirements or prices; historical
-and unverified status stays explicit. Selection survives pagination. Live browser
-acceptance remains pending Playwright.
-### Itemized sales reporting (2026-11-12)
-
-Implemented in `feature/frontend-sales-report`: the seller dashboard exposes a
-date-filtered, paginated order-level report using backend-provided economics.
-Unknown fees/costs/profit stay null; backend reasons, warnings and frozen source
-details remain visible. The report explains UTC capture periods and refunds known
-at report time, and links to seller orders. It does not calculate actual earnings
-or call payment providers. Live browser acceptance remains pending Playwright.
 ### Seller refund inbox (2026-11-12)
 
 Implemented in `feature/frontend-seller-refunds`, dependent on buyer-list PR #90:
@@ -634,31 +598,77 @@ buyer request list with saved states, reasons, decisions and links to order cont
 Only the existing verified-refund predicate confirms completion; pending/uncertain
 states remain explicit. No new payment calls or backend state changes occur from
 this list. Browser acceptance remains pending the full Playwright workflow.
-### Pickup history (2026-11-12)
 
-Implemented in `feature/frontend-pickup-history`: buyers and verified sellers can
-page through private recorded fulfillment changes from order details. Timestamps,
-revisions and recorded instructions remain seller-reported; no independent handoff
-verification is implied. History refreshes after saved pickup changes and supports
-manual retry. Browser acceptance remains pending the full Playwright workflow.
-### Administrator verification UI (2026-11-12)
+### Itemized sales reporting (2026-11-12)
 
-Implemented in `feature/frontend-admin-verification`: current administrators have
-a paginated application queue and detail/decision screen linked from Account.
-Decisions submit expected_revision, outcome and applicant-visible reason, require
-confirmation, and reload stale conflicts for review. Self-review is disabled in
-the UI and denied authoritatively by the backend. No bootstrap, new criteria,
-certification claim or role-grant shortcut is introduced. Final decisions remain
-terminal in this local MVP. Browser/permission acceptance remains pending Playwright.
-### Private listing-photo previews (2026-11-12)
+Implemented in `feature/frontend-sales-report`: the seller dashboard exposes a
+date-filtered, paginated order-level report using backend-provided economics.
+Unknown fees/costs/profit stay null; backend reasons, warnings and frozen source
+details remain visible. The report explains UTC capture periods and refunds known
+at report time, and links to seller orders. It does not calculate actual earnings
+or call payment providers. Live browser acceptance remains pending Playwright.
 
-Browser acceptance reproduced a broken image when a seller previewed a newly
-selected photo: the public image endpoint correctly returned 404 before approval.
-`fix/frontend-private-photo-preview` uses the existing authenticated private-photo
-transport in the seller preview. The selected normalized image bytes remain
-private until separate listing approval; public image visibility rules are unchanged.
-The browser suite checks loaded preview pixels while the public URL remains 404,
-then anonymous image access after approval.
+### Reopening complete pricing reviews (2026-11-12)
+
+Implemented in `feature/frontend-pricing-review-history`: sellers can paginate
+saved reviews and reopen recorded economics, Quality Lock/market context,
+explanations and warnings. Complete private evidence snapshots remain inspectable.
+Reopening does not reevaluate source age, current requirements or prices; historical
+and unverified status stays explicit. Selection survives pagination. Live browser
+acceptance remains pending Playwright.
+
+### Historical quality evaluation inspection (2026-11-12)
+
+Implemented in `feature/frontend-quality-history`: paginated saved evaluations
+reopen their recorded rules, seller claims, checks and result. Revision and captured
+rules are compared with current requirements to flag historical incompatibility;
+results are never silently reevaluated or represented as independent verification.
+Selection survives history paging. Browser acceptance remains pending Playwright.
+
+### Radius-based product discovery (2026-11-12)
+
+Implemented in `feature/frontend-radius-discovery`: marketplace search supports
+transient user-entered coordinates and radius through the agreed POST endpoint.
+Supported query/type/availability/order filters and pagination are retained;
+location-label filtering is disabled in radius mode because that endpoint does not
+accept it. Distances and backend notices identify approximate seller-chosen areas,
+not addresses or travel routes. No geolocation permission, coordinate URL/storage,
+or new mapping service is introduced. Browser acceptance remains pending Playwright.
+
+### Seller cancellation (2026-11-12)
+
+Implemented in `feature/frontend-seller-cancel`: sellers can request cancellation
+of pending unpaid orders with confirmation. Backend eligibility remains authoritative;
+rejections are displayed and order/payment state is reloaded after every attempt.
+Cancelled orders display freshly fetched listing availability, with hidden or failed
+lookups kept unknown and a retry control. Public availability is a snapshot, not a
+reservation or substitute for private inventory. Live browser checks remain pending
+the requested Playwright workflow.
+
+### Passport withdrawal (2026-11-12)
+
+Implemented in `feature/frontend-passport-withdraw`: publication history exposes
+withdrawal only for published versions and asks for explicit confirmation.
+Backend-confirmed withdrawal clears local publication/listing previews and refreshes
+saved state; existing order snapshots and previously received copies remain.
+This is distinct from listing deactivation and storefront withdrawal. The initial
+history uses the existing bounded endpoint; older-history pagination is a separate
+requested feature. Live browser acceptance remains pending the Playwright suite.
+The public-listing banner additionally checks the public endpoint: a private
+listing marked active can still be hidden after withdrawal or supersession.
+Publishing a replacement Passport does not imply that its listing was reapproved.
+
+### Saved Passport draft editing (2026-11-12)
+
+Implemented in `feature/frontend-passport-edit`: sellers can load owned drafts,
+edit title, price, description and disclosure policy, and save against the loaded
+revision. Saved review and composition content are preserved. Editing invalidates
+publication previews; saving or reloading enables a fresh server preview and
+explicit approval. Stale writes remain backend-rejected and the editor offers a
+reload that discards unsaved edits. Existing published snapshots are unchanged.
+Composition content editing and review replacement remain outside this editor;
+create a new draft for those changes. Build, lint and 45 unit tests passed;
+live browser acceptance is pending the dedicated browser suite.
 
 For a new tradeoff, record the confirmed decision or documented limit, its source,
 implementation status, consequences, and the trigger/follow-up for revisiting it.
@@ -674,6 +684,6 @@ the user's answer.
 demo checklist to reflect implemented assistants, receipts, refunds and newer
 seller tools. Current browser evidence is linked explicitly, with provider gates
 and historical backend evidence distinguished. No disabled-provider or unexecuted
-case is described as a successful current browser workflow. This documentation
-depends on the combined browser-suite branch and remains draft until refreshed
-after prerequisite integration. It authorizes no further feature merge.
+case is described as a successful current browser workflow. Prerequisites #83-#96
+were verified on main and this branch refreshed before final review. Runtime
+source identity and retained-data checks remain separate from provider acceptance.

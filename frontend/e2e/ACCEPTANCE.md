@@ -1,6 +1,6 @@
 # Frontend browser acceptance record
 
-Executed locally on 2026-11-12, using the combined unmerged feature tree based on
+Original runs were executed locally on 2026-11-12, using the combined unmerged feature tree based on
 main `8c27804` plus PRs #83-#95. These results do not establish integration into main.
 The suite lives in `feature/frontend-browser-workflows`; run artifacts remain in
 ignored per-run directories. Setup assertions count in the totals below.
@@ -74,3 +74,14 @@ success or bypass backend verification.
 Before a review demo, rebuild/restart from the clean published feature head and
 check the served `fairmade-source-revision` and `fairmade-source-state` metadata.
 The persistent central runtime may still serve an earlier snapshot.
+
+## Integration refresh before PR #96 merge
+
+After PRs #83-#95 were squash merged and verified on fetched main `34b467c`,
+the suite branch was refreshed to include those exact merges. Its remaining diff
+contains only browser tooling, source identity and evidence documentation; no
+application or backend changes remain. Build, lint, all 49 unit tests and browser
+TypeScript passed. Refreshed desktop/narrow Chromium run
+`f72b9d1c-4f60-4703-b5df-0baee8533924` passed 64 checks with 14 explicit provider
+skips, zero failures and zero retries. Earlier live-provider evidence and the
+remaining receipt/PayPal/mobile-provider limitations above still apply.

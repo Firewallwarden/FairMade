@@ -34,10 +34,11 @@ import { choice } from '../../services/decode'
 import { CompositionFields } from './CompositionFields'
 import { readComposition } from '../../utils/composition'
 import { PassportPublications } from './PassportPublications'
-import { PassportEditor } from './PassportEditor'
-import { getPassportDraft } from '../../services/seller'
 import { getCatalogListing } from '../../services/commerce'
 import { ApiError } from '../../services/http'
+
+import { PassportEditor } from './PassportEditor'
+import { getPassportDraft } from '../../services/seller'
 
 const disclosureLabels = {
   include_labor: 'Labor cost per unit',
