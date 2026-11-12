@@ -241,6 +241,7 @@ export function AccountPage() {
           </section>
           <section className="workspace-panel">
             <h2>A place for your kind of good.</h2>
+            {session.account.roles.includes('admin') && <p><a className="calculator-secondary" href="#/admin-applications">Review seller applications</a></p>}
             {session.account.roles.includes('seller') ? (
               <>
                 <p>
