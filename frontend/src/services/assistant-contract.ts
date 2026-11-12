@@ -10,6 +10,8 @@ import {
 
 export type ConversationScope =
   | { role: 'buyer'; listing_ids: string[] }
+  | { role: 'buyer'; basket: import('./planning-contract').BasketRequest }
+  | { role: 'buyer'; bundles: import('./planning-contract').BundleRequest }
   | {
       role: 'seller'
       product_id: string

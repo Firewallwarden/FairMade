@@ -232,6 +232,14 @@ function StorefrontEditor() {
         <div className="workspace-actions">
           <a href={`#/storefront/${current.id}`}>Check public storefront</a>
           {current.state === 'published' && (
+            <a
+              className="calculator-secondary"
+              href={`#/planning/${current.id}/seller`}
+            >
+              Review seller bundle suggestions
+            </a>
+          )}
+          {current.state === 'published' && (
             <button
               className="calculator-secondary"
               disabled={action.busy}
@@ -317,6 +325,11 @@ export function StorefrontPage({ id }: { id: string }) {
             <StorefrontContent content={resource.data.profile.payload} />
           </section>
           <h2>Currently approved listings</h2>
+          <div className="workspace-actions">
+            <a className="button-primary" href={`#/planning/${id}`}>
+              Plan a basket from this maker
+            </a>
+          </div>
           {!resource.data.listings.items.length && (
             <p>No public listings on this page.</p>
           )}
