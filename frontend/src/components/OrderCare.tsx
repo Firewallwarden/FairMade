@@ -16,6 +16,7 @@ import { TextArea } from './FormFields'
 import { fieldValue } from '../utils/form'
 import { usd } from '../utils/presentation'
 import type { Order } from '../services/order-contract'
+import { PickupHistory } from './PickupHistory'
 
 export function PickupPanel({
   orderId,
@@ -136,6 +137,7 @@ export function PickupPanel({
       >
         Refresh pickup
       </button>
+      {resource.data && <PickupHistory key={`${orderId}-${seller}-${resource.data.revision}`} orderId={orderId} seller={seller} />}
     </section>
   )
 }
