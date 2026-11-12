@@ -1,11 +1,41 @@
-import { test, expect } from './fixtures'
+import { test, expect, request } from './fixtures'
 import { readFileSync } from 'node:fs'
+import { randomUUID } from 'node:crypto'
 import { signIn, apiForRole, seedListing, field, posted } from './helpers'
 import type { Page } from '@playwright/test'
 import { openProduct } from './helpers'
 
 // Provider sign-in and receipt details must not appear in screenshots or traces.
 test.use({ screenshot: 'off', trace: 'off' })
+
+async function signInReceiptSeller(page: Page) {
+  // Each project must import independently without bypassing receipt deduplication.
+  const reviewer = await apiForRole('admin')
+  const credentials = { email: `receipt-${randomUUID()}@example.com`, password: process.env.E2E_PASSWORD! }
+  const registration = await reviewer.post('auth/register', { data: credentials })
+  expect(registration.status()).toBe(201)
+  const login = await reviewer.post('auth/login', { data: credentials })
+  expect(login.ok()).toBeTruthy()
+  const token = await login.json()
+  const seller = await request.newContext({
+    baseURL: `http://127.0.0.1:${process.env.E2E_API_PORT ?? '8002'}/api/v1/`,
+    extraHTTPHeaders: { Authorization: `Bearer ${token.access_token}` },
+  })
+  const applicationResponse = await seller.post('seller-applications', { data: {} })
+  expect(applicationResponse.ok()).toBeTruthy()
+  const application = await applicationResponse.json()
+  const approval = await reviewer.post(`admin/seller-applications/${application.id}/decision`, {
+    data: { expected_revision: application.revision, outcome: 'approved', reason: 'Isolated synthetic receipt browser acceptance seller.' },
+  })
+  expect(approval.ok()).toBeTruthy()
+  await reviewer.dispose()
+  await page.goto('/#/account')
+  await page.getByLabel('Email', { exact: true }).fill(credentials.email)
+  await page.getByLabel(/^Password/).fill(credentials.password)
+  await page.getByRole('button', { name: 'Sign in', exact: true }).last().click()
+  await expect(page.getByRole('button', { name: 'Sign out', exact: true })).toBeVisible()
+  return seller
+}
 
 test('real local description draft is reviewed, edited and applied privately', async ({ page }) => {
   test.skip(process.env.E2E_PROVIDERS !== '1', 'Requires the real local model explicitly enabled.')
@@ -27,7 +57,7 @@ test('real receipt image extraction, seller corrections and approval create a re
   test.skip(process.env.E2E_PROVIDERS !== '1' || !process.env.E2E_RECEIPT_IMAGE || !process.env.E2E_RECEIPT_REVIEW, 'Requires Ollama/Tesseract plus E2E_RECEIPT_IMAGE and a private reviewed-value JSON file E2E_RECEIPT_REVIEW.')
   test.setTimeout(360_000)
   const review = JSON.parse(readFileSync(process.env.E2E_RECEIPT_REVIEW!, 'utf8'))
-  const api = await signIn(page)
+  const api = await signInReceiptSeller(page)
   await page.goto('/#/receipts')
   await page.locator('[name="receipt-image"]').setInputFiles(process.env.E2E_RECEIPT_IMAGE!)
   const pending = page.waitForResponse(r => r.url().endsWith('/seller/receipt-drafts') && r.request().method() === 'POST', { timeout: 180_000 })
@@ -50,22 +80,29 @@ test('real receipt image extraction, seller corrections and approval create a re
   const expense = await posted(page, '/approve', () => page.getByRole('button', { name: 'Approve & record expense' }).click())
   await page.goto('/#/receipts')
   await page.getByRole('button', { name: 'Recorded expenses', exact: true }).click()
-  await expect(page.getByText(review.merchant, { exact: true })).toBeVisible()
-  expect(expense).toBeTruthy()
+  await expect(page.getByRole('heading', { name: review.merchant, exact: true })).toBeVisible()
+  const recorded = await api.get('seller/expenses')
+  expect(recorded.ok()).toBeTruthy()
+  expect((await recorded.json()).items.some((item: { id: string }) => item.id === expense.id)).toBeTruthy()
   await api.dispose()
 })
 
 async function approvePayPal(page: Page) {
-  const popupPromise = page.waitForEvent('popup')
-  await page.frameLocator('iframe[title="PayPal"]').locator('[data-funding-source="paypal"]').click()
-  const popup = await popupPromise
+  // The SDK also mounts an invisible frame with the same title while rendering.
+  const [popup] = await Promise.all([
+    page.waitForEvent('popup'),
+    page.frameLocator('iframe[title="PayPal"]:visible').locator('[data-funding-source="paypal"]').click(),
+  ])
   await popup.waitForURL(/https:\/\/(www\.)?sandbox\.paypal\.com\//)
   await popup.locator('#email').fill(process.env.E2E_PAYPAL_BUYER_EMAIL!)
-  const next = popup.locator('#btnNext')
+  const next = popup.getByRole('button', { name: /^next$/i })
+  const login = popup.getByRole('button', { name: /^log in$/i })
+  await next.or(login).waitFor({ state: 'visible' })
   if (await next.isVisible()) await next.click()
+  await login.waitFor({ state: 'visible' })
   await popup.locator('#password').fill(process.env.E2E_PAYPAL_BUYER_PASSWORD!)
-  await popup.locator('#btnLogin').click()
-  await popup.locator('#payment-submit-btn').click()
+  await login.click()
+  await popup.locator('#payment-submit-btn').or(popup.getByRole('button', { name: /^(pay|pay now|agree & pay|complete purchase)$/i })).click({ timeout: 30_000 })
   await expect(page.getByText(/backend verified a completed PayPal sandbox capture/i)).toBeVisible({ timeout: 120_000 })
 }
 
@@ -121,7 +158,8 @@ for (const outcome of ['approve', 'deny'] as const) {
       await sellerPage.route('**/refund-request/approve', async route => { await route.fetch(); await route.abort('failed') })
       await sellerPage.locator('[name="approve-refund"]').check()
       await sellerPage.getByRole('button', { name: 'Approve & request sandbox refund' }).click()
-      await sellerPage.unroute('**/refund-request/approve')
+      // Finish the real upstream request and simulated loss before refreshing.
+      await sellerPage.unrouteAll({ behavior: 'wait' })
       await sellerPage.getByRole('button', { name: 'Refresh refund & order status' }).click()
       const verify = sellerPage.getByRole('button', { name: 'Verify refund with PayPal' })
       if (await verify.isVisible()) await verify.click()
@@ -134,6 +172,22 @@ for (const outcome of ['approve', 'deny'] as const) {
     }
     await page.getByRole('button', { name: 'Refresh refund & order status' }).click()
     await expect(page.getByText(outcome === 'approve' ? /refunded/ : /denied/).first()).toBeVisible()
+
+    await page.goto('/#/orders')
+    await page.getByRole('button', { name: 'My refund requests', exact: true }).click()
+    const buyerRequest = page.getByRole('article').filter({ has: page.getByRole('heading', { name: `Order ${order.id}`, exact: true }) })
+    await expect(buyerRequest).toContainText(outcome === 'approve' ? 'Backend-verified sandbox refund completed.' : 'denied')
+    await sellerPage.goto('/#/orders')
+    await sellerPage.getByRole('button', { name: 'My seller orders', exact: true }).click()
+    await sellerPage.getByRole('button', { name: 'Seller refund inbox', exact: true }).click()
+    const sellerRequest = sellerPage.getByRole('article').filter({ has: sellerPage.getByRole('heading', { name: `Order ${order.id}`, exact: true }) })
+    await expect(sellerRequest).toContainText(outcome === 'approve' ? 'Backend-verified sandbox refund completed.' : 'denied')
+    await sellerPage.goto('/#/seller')
+    await sellerPage.getByRole('button', { name: 'Itemized sales report', exact: true }).click()
+    const sale = sellerPage.getByRole('article').filter({ has: sellerPage.getByRole('heading', { name: `Order ${order.id}`, exact: true }) })
+    await expect(sale).toBeVisible()
+    await expect(sale).toContainText('Gross sales')
+    await expect(sale).toContainText('Completed refunds')
     await sellerContext.close(); await sellerApi.dispose(); await sellerSession.dispose(); await buyerApi.dispose()
   })
 }
