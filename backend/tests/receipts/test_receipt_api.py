@@ -109,7 +109,9 @@ def test_private_owner_role_and_offline_review(
     assert approve(market_client, market_headers, draft).status_code == 200
 
 
-@pytest.mark.parametrize("mutation", ["merchant", "amount", "currency", "description", "malformed"])
+@pytest.mark.parametrize(
+    "mutation", ["merchant", "amount", "currency", "ocr_tax", "description", "malformed"]
+)
 def test_unsupported_extraction_saves_nothing(
     market_client, market_headers, receipt_body, receipt_providers, mutation
 ):
@@ -120,12 +122,17 @@ def test_unsupported_extraction_saves_nothing(
         gateway.output["total"] = "999.99"
     elif mutation == "currency":
         receipt_providers[1].text = receipt_providers[1].text.replace("USD", "$")
+    elif mutation == "ocr_tax":
+        receipt_providers[1].text = receipt_providers[1].text.replace("TAX 0.80", "TAX @.80")
     elif mutation == "description":
         gateway.output["items"][0]["description"] = "Organic certified flour"
     else:
         gateway.output = {"tool": "change inventory"}
     assert create(market_client, market_headers, receipt_body).status_code == 502
     assert market_client.get(PATH, headers=market_headers).json()["items"] == []
+    assert (
+        market_client.get("/api/v1/seller/expenses", headers=market_headers).json()["items"] == []
+    )
 
 
 def test_ambiguous_fields_and_total_mismatch_require_review(
