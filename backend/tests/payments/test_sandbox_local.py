@@ -8,7 +8,7 @@ from uuid import uuid4
 import pytest
 from alembic import command
 from alembic.config import Config
-from payments.sandbox_support import approval_url
+from payments.sandbox_support import approval_url, wait_for_approval
 
 from fairmade.payments.config import load_settings
 from fairmade.payments.gateway import PayPalSandboxGateway
@@ -18,6 +18,13 @@ pytestmark = pytest.mark.skipif(
     reason="Real sandbox transactions and human buyer approval are explicitly opt-in.",
 )
 BACKEND = Path(__file__).parents[2]
+
+
+@pytest.fixture(autouse=True)
+def disable_real_paypal():
+    """Override the offline default only in this explicitly opted-in module."""
+    assert os.environ.get("FAIRMADE_RUN_SANDBOX_PAYMENT_EVAL") == "true"
+    assert load_settings() is not None, "Configure the server-only PayPal sandbox variables."
 
 
 @pytest.fixture
@@ -59,12 +66,7 @@ def test_real_sandbox_capture_and_seller_approved_refund(
     handoff = BACKEND / ".pytest_cache" / "paypal-sandbox" / (str(uuid4()) + ".url")
     handoff.write_text("[InternetShortcut]\nURL=" + link + "\n", encoding="utf-8")
     print(f"SANDBOX_APPROVAL_REQUIRED open {handoff}", flush=True)
-    deadline = time.monotonic() + 600
-    while remote.get("status") != "APPROVED":
-        assert remote.get("status") == "CREATED", "Unexpected sandbox order state; inspect history."
-        assert time.monotonic() < deadline, "Buyer approval timed out; local history is retained."
-        time.sleep(3)
-        remote = provider.fetch(checkout["provider_order_id"])
+    wait_for_approval(provider.fetch, checkout["provider_order_id"])
     assert (
         market_client.get(order_path, headers=buyer_headers).json()["status"] == "pending_payment"
     )
