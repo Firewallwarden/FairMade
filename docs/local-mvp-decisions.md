@@ -589,6 +589,14 @@ explanations and warnings. Complete private evidence snapshots remain inspectabl
 Reopening does not reevaluate source age, current requirements or prices; historical
 and unverified status stays explicit. Selection survives pagination. Live browser
 acceptance remains pending Playwright.
+### Itemized sales reporting (2026-11-12)
+
+Implemented in `feature/frontend-sales-report`: the seller dashboard exposes a
+date-filtered, paginated order-level report using backend-provided economics.
+Unknown fees/costs/profit stay null; backend reasons, warnings and frozen source
+details remain visible. The report explains UTC capture periods and refunds known
+at report time, and links to seller orders. It does not calculate actual earnings
+or call payment providers. Live browser acceptance remains pending Playwright.
 
 For a new tradeoff, record the confirmed decision or documented limit, its source,
 implementation status, consequences, and the trigger/follow-up for revisiting it.
