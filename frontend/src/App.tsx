@@ -18,6 +18,7 @@ import { PreferencesPage } from './pages/PreferencesPage'
 import { ShoppingPlanPage } from './pages/ShoppingPlanPage'
 import { ComparePage } from './pages/ComparePage'
 import { SupplierRecordsPage } from './pages/SupplierRecordsPage'
+import { MaterialsPage } from './pages/MaterialsPage'
 import {
   StorefrontDirectoryPage,
   StorefrontPage,
@@ -50,6 +51,7 @@ export default function App() {
       planning: 'Shopping plans',
       compare: 'Compare products',
       suppliers: 'Private supplier records',
+      materials: 'Private material inventory',
       storefronts: 'Meet the makers',
       storefront: 'Maker storefront',
     }
@@ -69,6 +71,16 @@ export default function App() {
     }
   }, [calculator, route, session?.account.id])
   if (calculator) return <PricingPage />
+  if (route === '#/materials')
+    return <MaterialsPage key={session?.account.id ?? 'guest'} />
+  const materialId = route.match(/^#\/materials\/([a-f0-9-]{36})$/i)?.[1]
+  if (materialId)
+    return (
+      <MaterialsPage
+        key={`${session?.account.id}-${materialId}`}
+        id={materialId}
+      />
+    )
   if (route === '#/suppliers')
     return <SupplierRecordsPage key={session?.account.id ?? 'guest'} />
   const supplierId = route.match(/^#\/suppliers\/([a-f0-9-]{36})$/i)?.[1]
