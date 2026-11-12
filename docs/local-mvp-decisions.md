@@ -612,6 +612,13 @@ buyer request list with saved states, reasons, decisions and links to order cont
 Only the existing verified-refund predicate confirms completion; pending/uncertain
 states remain explicit. No new payment calls or backend state changes occur from
 this list. Browser acceptance remains pending the full Playwright workflow.
+### Pickup history (2026-11-12)
+
+Implemented in `feature/frontend-pickup-history`: buyers and verified sellers can
+page through private recorded fulfillment changes from order details. Timestamps,
+revisions and recorded instructions remain seller-reported; no independent handoff
+verification is implied. History refreshes after saved pickup changes and supports
+manual retry. Browser acceptance remains pending the full Playwright workflow.
 
 For a new tradeoff, record the confirmed decision or documented limit, its source,
 implementation status, consequences, and the trigger/follow-up for revisiting it.
