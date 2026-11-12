@@ -5,6 +5,7 @@ import { useResource } from '../hooks/useResource'
 import { ErrorNotice } from './Feedback'
 import { Field } from './FormFields'
 import { EvidenceDetails } from './EvidenceDetails'
+import { OptionalPreferences } from './OptionalPreferences'
 
 export function SelectedConversationContext({
   scope,
@@ -196,6 +197,7 @@ export function SellerAssistantContext({ productId }: { productId: string }) {
           </label>
           {recommendations && (
             <div className="calculator-grid">
+              <OptionalPreferences prefix="assistant-preference" />
               <label className="calculator-field">
                 Review priority
                 <select name="assistant-priority">
@@ -212,7 +214,7 @@ export function SellerAssistantContext({ productId }: { productId: string }) {
                 </select>
               </label>
               <p>
-                No optional preferences are assumed. Mandatory Quality Lock
+                Only entered preferences apply. Mandatory Quality Lock
                 exclusions apply in every mode.
               </p>
             </div>

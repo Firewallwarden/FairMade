@@ -17,6 +17,7 @@ import { ReceiptsPage } from './pages/ReceiptsPage'
 import { PreferencesPage } from './pages/PreferencesPage'
 import { ShoppingPlanPage } from './pages/ShoppingPlanPage'
 import { ComparePage } from './pages/ComparePage'
+import { SupplierRecordsPage } from './pages/SupplierRecordsPage'
 import {
   StorefrontDirectoryPage,
   StorefrontPage,
@@ -48,6 +49,7 @@ export default function App() {
       preferences: 'Buyer preferences',
       planning: 'Shopping plans',
       compare: 'Compare products',
+      suppliers: 'Private supplier records',
       storefronts: 'Meet the makers',
       storefront: 'Maker storefront',
     }
@@ -67,6 +69,16 @@ export default function App() {
     }
   }, [calculator, route, session?.account.id])
   if (calculator) return <PricingPage />
+  if (route === '#/suppliers')
+    return <SupplierRecordsPage key={session?.account.id ?? 'guest'} />
+  const supplierId = route.match(/^#\/suppliers\/([a-f0-9-]{36})$/i)?.[1]
+  if (supplierId)
+    return (
+      <SupplierRecordsPage
+        key={`${session?.account.id}-${supplierId}`}
+        id={supplierId}
+      />
+    )
   const compareRoute = route.match(/^#\/compare\/([a-f0-9,-]+)$/i)?.[1]
   if (compareRoute) {
     const ids = compareRoute.split(',')

@@ -113,6 +113,7 @@ export const getSupplierRecommendations = (
   report: string,
   mode: 'savings' | 'quality' | 'balanced',
   objective: 'purchase_outlay' | 'usable_unit',
+  preferences: QualityRule[] = [],
 ) =>
   privateRequest(
     `/products/${product}/supplier-recommendations`,
@@ -128,6 +129,14 @@ export const getSupplierRecommendations = (
             reason: text(row.selection_reason),
             exclusions: list(row.exclusion_reasons, text),
             objective_cost: nullable(row.objective_cost, money),
+            preference_checks: list(row.preference_checks, (value) => {
+              const check = object(value)
+              return {
+                label: text(check.label),
+                status: text(check.status),
+                message: text(check.message),
+              }
+            }),
           }
         }),
       }
@@ -138,7 +147,7 @@ export const getSupplierRecommendations = (
         supplier_report_id: report,
         mode,
         cost_objective: objective,
-        preferences: [],
+        preferences,
       },
     },
   )

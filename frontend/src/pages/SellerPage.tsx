@@ -71,6 +71,9 @@ function SellerDashboard() {
         <a className="calculator-secondary" href="#/receipts">
           Receipts & expenses
         </a>
+        <a className="calculator-secondary" href="#/suppliers">
+          Private supplier records
+        </a>
         <a className="calculator-secondary" href="#/storefront/settings">
           Manage your storefront
         </a>
