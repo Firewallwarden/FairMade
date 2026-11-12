@@ -30,6 +30,7 @@ export function WorkspaceLayout({
       <header className="site-header page-width workspace-header">
         <Brand />
         <nav aria-label="Main navigation" className="workspace-nav">
+          <a href="#/assistant" aria-current={section === 'assistant' ? 'page' : undefined}>Ask FairMade</a>
           <a
             href="#/market"
             aria-current={section === 'market' ? 'page' : undefined}

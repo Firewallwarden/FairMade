@@ -10,6 +10,7 @@ import { ListingPage } from './pages/ListingPage'
 import { OrdersPage } from './pages/OrdersPage'
 import { OrderPage } from './pages/OrderPage'
 import { WorkspaceLayout } from './components/WorkspaceLayout'
+import { AssistantPage } from './pages/AssistantPage'
 
 export default function App() {
   const session = useSession()
@@ -49,6 +50,11 @@ export default function App() {
     }
   }, [calculator, route, session?.account.id])
   if (calculator) return <PricingPage />
+  const assistantSource = route.match(/^#\/assistant\/(buyer|seller)\/([a-f0-9-]{36})$/i)
+  if (assistantSource) return <AssistantPage key={`${session?.account.id}-${route}`} source={{ role: assistantSource[1] === 'seller' ? 'seller' : 'buyer', id: assistantSource[2] }} />
+  const conversationId = route.match(/^#\/assistant\/conversations\/([a-f0-9-]{36})$/i)?.[1]
+  if (conversationId) return <AssistantPage key={`${session?.account.id}-${conversationId}`} id={conversationId} />
+  if (route === '#/assistant') return <AssistantPage key={session?.account.id ?? 'guest'} />
   if (route === '#/account')
     return <AccountPage key={session?.account.id ?? 'guest'} />
   if (route === '#/seller')

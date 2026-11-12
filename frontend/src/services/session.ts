@@ -16,6 +16,9 @@ export async function privateRequest<T>(
     json?: unknown
     signal?: AbortSignal
     headers?: HeadersInit
+    timeoutMs?: number
+    raw?: Blob
+    binary?: boolean
   } = {},
 ) {
   const session = sessions.get()

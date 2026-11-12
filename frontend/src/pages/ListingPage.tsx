@@ -61,6 +61,7 @@ export function ListingPage({ id }: { id: string }) {
       title={resource.data?.payload.product.title ?? 'A little more about it.'}
     >
       <a href="#/market">← Back to the market</a>
+      <div className="workspace-actions"><a className="calculator-secondary" href={`#/assistant/buyer/${id}`}>Ask FairMade about this price</a></div>
       <ErrorNotice error={resource.error || action.error} />
       {resource.loading && <p role="status">Loading this listing…</p>}
       {resource.data && (
