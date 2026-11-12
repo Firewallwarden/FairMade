@@ -30,11 +30,11 @@ These are gates, not claims that a provider ran. Use the linked run record for a
 - Supply a private real receipt image and reviewed values; exercise extraction, corrections, approval and expense lookup through the latest frontend.
 - Supply server-only PayPal sandbox settings and a separate sandbox buyer; exercise approval, backend-verified capture, pickup/history, refund approval/denial and uncertain-outcome recovery. An approval click is not payment completion.
 - Check assistant, receipt and refund entry points, loading/empty/error/retry states and keyboard access.
-- Confirm demo HTML source revision equals the published review head and application source state is clean. Identify a retained main snapshot separately.
+- Confirm demo HTML source revision equals deployed main; source state is clean for a checkout or exported-snapshot for an identified runtime export.
 
 ## Controlled integration
 
-- Keep feature PRs open for regroup/review; do not merge them automatically.
+- Merge feature PRs only when explicitly authorized; verify their merge commits on fetched main.
 - Keep dependent PRs draft against main until prerequisites are integrated and children are refreshed, revalidated and pass the readiness guard.
 - Preserve private runtime settings/data outside Git. Retire worktrees only after services, dependencies and IDE handles no longer reference them.
 - Shipping, production payouts, hosted security and live payments remain outside this local sandbox workflow.

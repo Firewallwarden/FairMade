@@ -47,7 +47,7 @@ PayPal loads only when backend configuration enables its sandbox integration. Cr
 
 `VITE_API_BASE_URL` optionally selects the public API base (default `/api/v1`). Vite variables enter browser bundles: never put credentials or server secrets in them. A separate API origin requires approved CORS configuration. Keep PayPal secrets, receipt fixtures and private provider settings outside Git.
 
-The HTML metadata `fairmade-source-revision` and `fairmade-source-state` identify the served checkout. After committing/pushing, rebuild/restart and verify the revision matches the published PR head and state is clean. Exported snapshots can supply their exact source through server-side `FAIRMADE_SOURCE_REVISION`; unknown sources remain labeled unknown.
+The HTML metadata `fairmade-source-revision` and `fairmade-source-state` identify the served checkout. After committing/pushing, rebuild/restart and verify the revision matches the published head (or deployed main). A checkout reports clean; an identified exported runtime reports exported-snapshot. Exported snapshots can supply their exact source through server-side `FAIRMADE_SOURCE_REVISION`; unknown sources remain labeled unknown.
 
 Only homepage inspiration cards use labeled illustrative products/prices and stock photography. They do not become checkout evidence. Keyboard and narrow-screen checks are part of the browser suite; these do not constitute a full accessibility audit.
 

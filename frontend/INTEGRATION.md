@@ -42,17 +42,14 @@ PayPal is sandbox only, enabled by server configuration. The SDK uses backend cr
 
 Sessions stay in memory and expire/revoke on the backend. Reload requires login. Page-local retry identifiers survive uncertain requests while that page remains open; inspect saved orders/drafts before creating another attempt.
 
-## Review and integration
+## Review and deployment
 
-PRs #83-#95 contain implementation and acceptance fixes. Browser-suite and handoff PRs include their prerequisites and remain draft while those prerequisites are unmerged. Every PR targets main. Refresh and revalidate after prerequisite squash merges; merging a stack in order alone is insufficient. No feature PR merge or production deployment is authorized by this handoff.
+Implementation PRs #83-#95 were squash merged and verified on fetched main before refreshing this handoff. The browser suite is in #96; its acceptance record distinguishes the refreshed default browser run from earlier live-provider evidence and uncompleted provider gates.
 
-Follow [local development](../docs/local-development.md) for persistent services outside worktrees. Run checks in dedicated feature worktrees. Verify fairmade-source-revision metadata against the published head before presenting a review demo; a stale central runtime does not demonstrate integration of unmerged changes.
+For future dependent PRs, refresh and revalidate after prerequisite squash merges; merging a stack in order alone is insufficient. Every PR targets main and merges require explicit authorization.
 
-On 2026-11-12, the review website at http://127.0.0.1:5174/ was checked in Chromium:
-its source metadata matched published browser PR #96 head
-`fb23ce16c894f0640fd9f9fc72a73f2b06df3e2a` and reported `clean`.
-The marketplace rendered and its API proxy returned 200 from the retained backend
-on port 8000. The separate central frontend on port 5173 still serves snapshot
-`16309c03ab36f445b30ed710aece35c13ee95543`; use port 5174 to review the new features.
-This temporary review server runs from its feature worktree. Its startup does not
-refresh the retained runtime snapshot, enable providers or merge feature PRs.
+Follow [local development](../docs/local-development.md) to refresh the persistent runtime from latest main while retaining private settings and data. The primary local demo is http://127.0.0.1:5173/ with API port 8000. Port 5174 is a separate feature-review server when one is running; it does not establish main integration.
+
+Before redeployment, stop owned services and take a consistent SQLite backup. Verify the selected commit in the runtime's current.json against origin/main and verify the exported source files. Launch the exported frontend with FAIRMADE_SOURCE_REVISION set to that selected commit in the launch process, so its HTML reports the exact revision and exported-snapshot state. This value is public source identity, not a private backend setting. Preserve private settings rather than enabling providers as a side effect of deployment.
+
+After restarting, verify the HTML source revision, backend health, API proxy and website on desktop and a narrow screen. Record deployment evidence separately from provider acceptance; do not treat a revision change as a new PayPal or receipt verification.
