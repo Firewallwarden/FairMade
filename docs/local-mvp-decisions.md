@@ -521,6 +521,25 @@ approved for disclosure. Mandatory Quality Locks, deterministic monetary
 calculations, backend authorization and verified payment completion remain
 requirements. They are not temporary compromises to remove for production.
 
+### Browser workflow evidence (2026-11-12)
+
+The user requested a full Playwright workflow suite. Implemented in
+`feature/frontend-browser-workflows`: real frontend actions against the unchanged
+backend, fresh migrated synthetic databases, ordinary account/admin application
+flows, desktop and narrow Chromium projects, and provider opt-in cases. No retained
+runtime database, fake paid status, cloud fallback or mocked successful model
+answer is used. Endpoint evidence excludes fixture seeding and records only
+sanitized method/path/status. Provider credentials and receipt fixtures stay private.
+
+See `frontend/e2e/ACCEPTANCE.md` for executed counts, failures and remaining gates.
+Receipt and PayPal cases are implemented but require private inputs before current
+browser acceptance can be completed. Mobile Chromium does not establish Safari
+coverage or a full accessibility audit. The suite reproduced two frontend defects;
+withdrawal visibility and authenticated photo-preview fixes live in their own PRs.
+Source-revision metadata identifies the served commit; validate a clean published
+head separately from a stale retained runtime snapshot. Dependent PRs remain draft
+until prerequisite squash merges are verified and each child is refreshed.
+
 ## Updating this register
 
 ### Older-record selector pagination (2026-11-12)
