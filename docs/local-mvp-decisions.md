@@ -523,6 +523,14 @@ requirements. They are not temporary compromises to remove for production.
 
 ## Updating this register
 
+### Historical quality evaluation inspection (2026-11-12)
+
+Implemented in `feature/frontend-quality-history`: paginated saved evaluations
+reopen their recorded rules, seller claims, checks and result. Revision and captured
+rules are compared with current requirements to flag historical incompatibility;
+results are never silently reevaluated or represented as independent verification.
+Selection survives history paging. Browser acceptance remains pending Playwright.
+
 For a new tradeoff, record the confirmed decision or documented limit, its source,
 implementation status, consequences, and the trigger/follow-up for revisiting it.
 Link the feature PR and update API/feature documentation as appropriate. Retain
