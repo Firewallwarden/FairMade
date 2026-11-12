@@ -532,6 +532,9 @@ saved state; existing order snapshots and previously received copies remain.
 This is distinct from listing deactivation and storefront withdrawal. The initial
 history uses the existing bounded endpoint; older-history pagination is a separate
 requested feature. Live browser acceptance remains pending the Playwright suite.
+The public-listing banner additionally checks the public endpoint: a private
+listing marked active can still be hidden after withdrawal or supersession.
+Publishing a replacement Passport does not imply that its listing was reapproved.
 
 For a new tradeoff, record the confirmed decision or documented limit, its source,
 implementation status, consequences, and the trigger/follow-up for revisiting it.
