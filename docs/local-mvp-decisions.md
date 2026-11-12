@@ -523,6 +523,14 @@ requirements. They are not temporary compromises to remove for production.
 
 ## Updating this register
 
+### Pickup history (2026-11-12)
+
+Implemented in `feature/frontend-pickup-history`: buyers and verified sellers can
+page through private recorded fulfillment changes from order details. Timestamps,
+revisions and recorded instructions remain seller-reported; no independent handoff
+verification is implied. History refreshes after saved pickup changes and supports
+manual retry. Browser acceptance remains pending the full Playwright workflow.
+
 ### Seller refund inbox (2026-11-12)
 
 Implemented in `feature/frontend-seller-refunds`, dependent on buyer-list PR #90:
