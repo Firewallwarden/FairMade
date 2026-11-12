@@ -85,7 +85,7 @@ actually completed during the submission period.
 | --- | --- |
 | Meaningful PayPal integration | Show real sandbox approval followed by backend-verified paid order. See [payment evidence](paypal-verification.md). |
 | Meaningful runtime AI | Show an actual Qwen answer using the selected product's evidence, not only development-tool use. |
-| Working prototype | [Setup](judge-quickstart.md), [frontend acceptance](../frontend/e2e/ACCEPTANCE.md) and the separate ongoing integration chat's final results. Record tested commit and provider results before submission. |
+| Working prototype | [Setup](judge-quickstart.md) and [frontend acceptance](../frontend/e2e/ACCEPTANCE.md). The separate verification workflow passed 12 real AI/OCR checks and 6 real sandbox checkout/refund checks, including setup checks, on desktop and narrow Chromium. Evidence integrated in main via PR #98. |
 | Text and tool disclosure | Copy the description and tools above; reconcile against the final demonstrated build. |
 | Public open-source repository | Secret scan completed as described below. Still private: the connected GitHub account has Write but no Admin permission, and its visibility-change request was rejected. An owner must change Settings / General / Danger Zone / Change repository visibility to Public, then verify access signed out. |
 | Detectable root license | Owner license choice is pending. Add the selected standard root LICENSE, merge through the authorized PR workflow and verify GitHub detects it. Preserve third-party asset licenses. |
@@ -118,3 +118,12 @@ Before closing the release gates, record: tested commit; clean runtime source
 revision; backend/frontend check outcomes; real AI outcome; real sandbox capture
 outcome; receipt outcome if shown; remaining skips or failures. Existing linked
 results are historical and must not be relabeled as this chat's test run.
+
+Update: PR #98 integrated the separate workflow's real-provider acceptance on
+main `73817fb`. Its application baseline was `d1039f4`; the PR changes test
+tooling/evidence, not application behavior. AI/OCR run
+`5e052632-beac-4776-a48a-89075851ef67` passed 12 checks and sandbox run
+`17c78e5b-a8d6-46f0-9e18-3be1e6933717` passed 6, with no failures/skips in
+those final runs. The full [acceptance record](../frontend/e2e/ACCEPTANCE.md#subsequent-real-provider-acceptance)
+preserves earlier failed attempts and coverage limits. No new test run is
+attributed to the submission-documentation chat.

@@ -697,7 +697,9 @@ The chosen functional-access route is the existing local Windows runtime;
 the event permits runnable setup instructions without hosting. No paid hosting
 or new infrastructure is introduced. See [submission gates](hackathon-submission.md#final-release-gates).
 The owner license choice, public repository release, actual recording/upload,
-Devpost submission and separate integration chat's final results remain pending
+and Devpost submission remain pending
 when this documentation is prepared. This is delivery status, not provider
 acceptance or production-readiness evidence. Preserve local judge access
 instructions and privately configured sandbox credentials during evaluation.
+The branch was refreshed after PR #98 integrated the separate verification chat's
+12 AI/OCR and 6 sandbox browser checks; the packet links that acceptance evidence.
