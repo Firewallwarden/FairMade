@@ -8,6 +8,7 @@ import { useResource } from '../../hooks/useResource'
 import { useAction } from '../../hooks/useAction'
 import { evaluateQuality, getLocks, saveLocks } from '../../services/seller'
 import type { QualityClaim, QualityRule } from '../../services/quality-contract'
+import { QualityHistory } from './QualityHistory'
 
 export function QualityStep({ productId }: { productId: string }) {
   const resource = useResource(
@@ -316,6 +317,7 @@ export function QualityStep({ productId }: { productId: string }) {
           </p>
         </div>
       )}
+      {resource.data && <QualityHistory productId={productId} current={resource.data} />}
       <button
         className="calculator-secondary"
         disabled={action.busy}
