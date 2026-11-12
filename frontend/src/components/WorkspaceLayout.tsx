@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { useEffect } from 'react'
 import { Brand } from './Brand'
 import { useSession } from '../services/session'
 import '../pages/pricing.css'
@@ -17,6 +18,9 @@ export function WorkspaceLayout({
 }) {
   const session = useSession()
   const section = window.location.hash.split('/')[1]
+  useEffect(() => {
+    document.getElementById('workspace-main')?.focus({ preventScroll: true })
+  }, [])
   return (
     <div>
       <a
