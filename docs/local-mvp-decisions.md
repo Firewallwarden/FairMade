@@ -523,6 +523,19 @@ requirements. They are not temporary compromises to remove for production.
 
 ## Updating this register
 
+### Passport withdrawal (2026-11-12)
+
+Implemented in `feature/frontend-passport-withdraw`: publication history exposes
+withdrawal only for published versions and asks for explicit confirmation.
+Backend-confirmed withdrawal clears local publication/listing previews and refreshes
+saved state; existing order snapshots and previously received copies remain.
+This is distinct from listing deactivation and storefront withdrawal. The initial
+history uses the existing bounded endpoint; older-history pagination is a separate
+requested feature. Live browser acceptance remains pending the Playwright suite.
+The public-listing banner additionally checks the public endpoint: a private
+listing marked active can still be hidden after withdrawal or supersession.
+Publishing a replacement Passport does not imply that its listing was reapproved.
+
 ### Saved Passport draft editing (2026-11-12)
 
 Implemented in `feature/frontend-passport-edit`: sellers can load owned drafts,
