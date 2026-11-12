@@ -85,3 +85,31 @@ TypeScript passed. Refreshed desktop/narrow Chromium run
 `f72b9d1c-4f60-4703-b5df-0baee8533924` passed 64 checks with 14 explicit provider
 skips, zero failures and zero retries. Earlier live-provider evidence and the
 remaining receipt/PayPal/mobile-provider limitations above still apply.
+
+## Subsequent real-provider acceptance
+
+On 2026-11-12, the backend verification workflow exercised the unchanged application
+from main `d1039f4` with real Ollama 0.24.0 / `qwen3:8b` and Tesseract
+5.5.3.20260724, using the synthetic receipt image documented in
+`docs/receipt-verification.md` and its known reviewed values. Run
+`5e052632-beac-4776-a48a-89075851ef67` passed **12 checks, zero failures and
+zero skips**, including two setup checks. Both desktop and narrow Chromium passed:
+
+- Buyer and seller referential follow-ups and reopening persisted conversations.
+- Consent-based preference proposals and a separately reviewed save.
+- Generated description review, editing and private approval.
+- Receipt image upload, real OCR/model extraction, reviewed corrections, explicit
+  saved-preview approval and recorded-expense lookup.
+
+The first run exposed two test defects: the final merchant text selector matched
+both a record heading and a preview value, and the mobile project reused the
+desktop seller's imported image. The corrected test targets the expense heading,
+checks the recorded expense ID, and creates a separate normally approved synthetic
+seller for each receipt case. Backend duplicate protection is unchanged. The
+initial failures remain in run `663ecd2d-831f-45a9-bc95-ccf8b0c839a5`.
+
+This closes the local-model/mobile and synthetic-image OCR browser gates above;
+it does not establish representative personal receipt/photo accuracy. PayPal
+merchant credentials were separately authenticated successfully against the real
+sandbox OAuth endpoint, but checkout/refund browser cases still require the
+separate private sandbox Personal buyer login. No paid/refunded state was invented.
