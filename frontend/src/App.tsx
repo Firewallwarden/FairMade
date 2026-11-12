@@ -11,6 +11,8 @@ import { OrdersPage } from './pages/OrdersPage'
 import { OrderPage } from './pages/OrderPage'
 import { WorkspaceLayout } from './components/WorkspaceLayout'
 import { AssistantPage } from './pages/AssistantPage'
+import { FavoritesPage } from './pages/FavoritesPage'
+import { StorefrontDirectoryPage, StorefrontPage, StorefrontSettingsPage } from './pages/StorefrontPage'
 
 export default function App() {
   const session = useSession()
@@ -50,6 +52,11 @@ export default function App() {
     }
   }, [calculator, route, session?.account.id])
   if (calculator) return <PricingPage />
+  if (route === '#/favorites') return <FavoritesPage key={session?.account.id ?? 'guest'} />
+  if (route === '#/storefront/settings') return <StorefrontSettingsPage key={session?.account.id ?? 'guest'} />
+  if (route === '#/storefronts') return <StorefrontDirectoryPage />
+  const storefrontId = route.match(/^#\/storefront\/([a-f0-9-]{36})$/i)?.[1]
+  if (storefrontId) return <StorefrontPage key={storefrontId} id={storefrontId} />
   const assistantSource = route.match(/^#\/assistant\/(buyer|seller)\/([a-f0-9-]{36})$/i)
   if (assistantSource) return <AssistantPage key={`${session?.account.id}-${route}`} source={{ role: assistantSource[1] === 'seller' ? 'seller' : 'buyer', id: assistantSource[2] }} />
   const conversationId = route.match(/^#\/assistant\/conversations\/([a-f0-9-]{36})$/i)?.[1]

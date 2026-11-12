@@ -16,6 +16,7 @@ import { usd } from '../utils/presentation'
 import { publicMediaUrl } from '../services/media'
 import type { CartRequest } from '../services/order-contract'
 import { ApiError } from '../services/http'
+import { SaveFavorite } from './FavoritesPage'
 
 export function ListingPage({ id }: { id: string }) {
   const resource = useResource(
@@ -61,6 +62,7 @@ export function ListingPage({ id }: { id: string }) {
       title={resource.data?.payload.product.title ?? 'A little more about it.'}
     >
       <a href="#/market">← Back to the market</a>
+      <SaveFavorite listingId={id} />
       <div className="workspace-actions"><a className="calculator-secondary" href={`#/assistant/buyer/${id}`}>Ask FairMade about this price</a></div>
       <ErrorNotice error={resource.error || action.error} />
       {resource.loading && <p role="status">Loading this listing…</p>}
