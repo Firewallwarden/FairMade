@@ -4,11 +4,20 @@ React + TypeScript + Vite + Tailwind CSS. A warm botanical marketplace with real
 
 ## Run locally
 
-From `frontend/`, run `npm install`, then `npm run dev`. Open the local URL Vite prints. In Windows PowerShell, use `npm.cmd` if execution policy blocks `npm`.
+Use the [local development guide](../docs/local-development.md) to initialize and
+start the central runtime outside all Git checkouts. The frontend is served at
+`http://127.0.0.1:5173`, with its API proxy on port 8000. Open primary `main` for
+IDE/chat reference and use dedicated worktrees for feature changes. Avoid keeping
+Vite or demo API processes attached to a worktree that needs cleanup.
 
 `npm run build` checks TypeScript and creates production files in `dist/`. `npm run preview` serves the build. `npm run lint` checks code with Oxlint.
 
-`npm test` runs service and contract tests using Node's native TypeScript support (Node 22.18+). Start the API on port 8000 using the backend README; Vite proxies `/api` to it. See [the integration checklist](INTEGRATION.md) for actual verification and remaining dependencies.
+`npm test` runs service and contract tests using Node's native TypeScript support
+(Node 22.18+). Run build/lint/tests in a feature worktree. The setup guide covers
+shared dependencies, explicit committed feature snapshots for browser checks and
+server-only settings. See [the integration checklist](INTEGRATION.md) for historical
+verification; the newer PayPal/OCR verification reports supersede its old provider
+blockers.
 
 ## Experiences and local demo boundaries
 
