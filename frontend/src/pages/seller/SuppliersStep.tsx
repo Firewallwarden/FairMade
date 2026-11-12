@@ -1,7 +1,9 @@
+import { HistorySelection } from '../../components/HistorySelection'
 import { useCallback, useState } from 'react'
 import type { FormEvent } from 'react'
 import {
   getSourcingInputs,
+  getSourcingInput,
   createSourcingInput,
   getSupplierQuotes,
   createSupplierQuote,
@@ -79,20 +81,7 @@ export function SuppliersStep({ productId }: { productId: string }) {
       </form>
       {resource.loading && <p role="status">Loading sourcing inputs…</p>}
       {resource.data && (
-        <label className="calculator-field">
-          Choose an input (latest 100)
-          <select
-            value={selected}
-            onChange={(event) => setSelected(event.target.value)}
-          >
-            <option value="">Select an ingredient/material</option>
-            {resource.data.items.map((input) => (
-              <option key={input.id} value={input.id}>
-                {input.label} · {input.rules.length} requirement(s)
-              </option>
-            ))}
-          </select>
-        </label>
+        <HistorySelection disabled={action.busy} productId={productId} kind="sourcing-inputs" title="Sourcing inputs" value={selected} onSelect={setSelected} />
       )}
       {selected && (
         <InputWorkspace
@@ -115,16 +104,11 @@ function InputWorkspace({
   const resource = useResource(
     useCallback(
       async (signal) => {
-        const [inputs, quotes, reports] = await Promise.all([
-          getSourcingInputs(productId, signal),
+        const [input, quotes, reports] = await Promise.all([
+          getSourcingInput(productId, inputId, signal),
           getSupplierQuotes(productId, inputId, signal),
           getSupplierReports(productId, inputId, signal),
         ])
-        const input = inputs.items.find((item) => item.id === inputId)
-        if (!input)
-          throw new Error(
-            'This input is not in the latest page. Reload sourcing inputs.',
-          )
         return { input, quotes, reports }
       },
       [productId, inputId],
@@ -513,7 +497,7 @@ function InputWorkspace({
               </fieldset>
             </form>
           </details>
-          <h3>Choose quotes to compare (latest 100)</h3>
+          <h3>Choose quotes to compare</h3>
           <form
             onSubmit={(event) => {
               event.preventDefault()
@@ -547,23 +531,7 @@ function InputWorkspace({
               className="calculator-form"
             >
               <legend className="sr-only">Compare supplier quotes</legend>
-              {resource.data.quotes.items.map((quote) => (
-                <label className="workspace-check" key={quote.id}>
-                  <input
-                    type="checkbox"
-                    name="supplier-quote"
-                    value={quote.id}
-                  />
-                  <span>
-                    {quote.supplier_name} · {usd(quote.price)} /{' '}
-                    {quote.quantity.value} {quote.quantity.unit} ·{' '}
-                    {quote.availability}
-                    <br />
-                    {quote.location} · {quote.observed_on} · {quote.source.name}{' '}
-                    · {quote.source.reference}
-                  </span>
-                </label>
-              ))}
+              <HistorySelection disabled={action.busy} productId={productId} kind="supplier-quotes" title="Supplier quotes" inputId={inputId} name="supplier-quote" multiple />
               <div className="calculator-grid">
                 <Field
                   name="required-supply-quantity"
@@ -600,29 +568,15 @@ function InputWorkspace({
               </div>
             </fieldset>
           </form>
-          <label className="calculator-field">
-            Previous reports
-            <select
-              value={report?.id ?? ''}
-              disabled={action.busy}
-              onChange={(event) => {
-                const id = event.target.value
+          <HistorySelection disabled={action.busy} productId={productId} kind="supplier-comparisons" title="Supplier comparison reports" inputId={inputId} value={report?.id ?? ''} onSelect={(id) => {
+
                 setRecommendations(null)
                 if (id)
                   void action.run(async () =>
                     setReport(await getSupplierReport(productId, inputId, id)),
                   )
                 else setReport(null)
-              }}
-            >
-              <option value="">Select a saved report</option>
-              {resource.data.reports.items.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.as_of_date} · {item.id.slice(0, 8)}
-                </option>
-              ))}
-            </select>
-          </label>
+              }} />
         </>
       )}
       {report && (

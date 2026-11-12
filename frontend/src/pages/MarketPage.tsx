@@ -4,7 +4,7 @@ import { WorkspaceLayout } from '../components/WorkspaceLayout'
 import { Field } from '../components/FormFields'
 import { ErrorNotice } from '../components/Feedback'
 import { LeafSprig } from '../components/LeafSprig'
-import { browseMarket } from '../services/commerce'
+import { searchListings } from '../services/discovery'
 import { useResource } from '../hooks/useResource'
 import { fieldValue } from '../utils/form'
 import { usd } from '../utils/presentation'
@@ -19,14 +19,16 @@ export function MarketPage() {
     availability: '',
     sort: 'newest',
     reference_unit: '',
+    nearby: false, latitude: '', longitude: '', radius: '25',
   })
+  const [nearby, setNearby] = useState(false)
   const [sort, setSort] = useState('newest')
   const [selected, setSelected] = useState<CatalogCard[]>([])
   const normalizedSort = sort === 'unit_price' || sort === 'value'
   const [offset, setOffset] = useState(0)
   const resource = useResource(
     useCallback(
-      (signal) => browseMarket(filters, offset, signal),
+      (signal) => searchListings(filters, offset, signal),
       [filters, offset],
     ),
   )
@@ -39,6 +41,10 @@ export function MarketPage() {
       location: fieldValue(form, 'market-location'),
       availability: fieldValue(form, 'market-availability'),
       sort,
+      nearby,
+      latitude: fieldValue(form, 'origin-latitude'),
+      longitude: fieldValue(form, 'origin-longitude'),
+      radius: fieldValue(form, 'origin-radius'),
       reference_unit: normalizedSort
         ? fieldValue(form, 'market-reference-unit')
         : '',
@@ -65,6 +71,7 @@ export function MarketPage() {
               title="Location label"
               maxLength={200}
               placeholder="e.g. Exampletown"
+              disabled={nearby}
             />
             <label className="calculator-field">
               Product type
@@ -119,6 +126,19 @@ export function MarketPage() {
               </select>
             </label>
           </div>
+          <label className="workspace-check">
+            <input type="checkbox" checked={nearby} onChange={event => setNearby(event.target.checked)} />
+            Search products within a radius
+          </label>
+          {nearby && <fieldset className="calculator-form">
+            <legend>Search origin and radius</legend>
+            <p>Enter an approximate origin. Coordinates are used for this search and are not saved in your profile. Distances use seller-chosen approximate storefront areas, not pickup addresses or driving routes. Location-label filtering is unavailable in radius mode.</p>
+            <div className="calculator-grid">
+              <Field name="origin-latitude" title="Origin latitude" type="number" min="-90" max="90" step="0.000001" required />
+              <Field name="origin-longitude" title="Origin longitude" type="number" min="-180" max="180" step="0.000001" required />
+              <Field name="origin-radius" title="Radius (km)" type="number" min="1" max="500" step="0.1" defaultValue="25" required />
+            </div>
+          </fieldset>}
           <div className="workspace-actions">
             <button className="button-primary" type="submit">
               Find your kind of good
@@ -167,6 +187,7 @@ export function MarketPage() {
       {resource.loading && <p role="status">Finding goods at the market…</p>}
       {resource.data && (
         <>
+          {resource.data.notices.length > 0 && <section className="workspace-panel" aria-label="Discovery limitations"><ul>{resource.data.notices.map((notice, index) => <li key={index}>{notice}</li>)}</ul></section>}
           {!resource.data.items.length && (
             <div className="workspace-empty">
               <h2>A little room to grow.</h2>
@@ -215,6 +236,7 @@ export function MarketPage() {
                   </a>
                 </h2>
                 <p>{card.payload.summary}</p>
+                {card.distance !== null && <p>Estimated distance: {card.distance} km · {card.area} (approximate area)</p>}
                 <p>
                   <strong>{usd(card.payload.price.amount)}</strong> /{' '}
                   {card.payload.product.selling_unit}

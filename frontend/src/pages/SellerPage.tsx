@@ -10,6 +10,7 @@ import { useResource } from '../hooks/useResource'
 import { useAction } from '../hooks/useAction'
 import { productTypes } from '../types/contracts'
 import { choice } from '../services/decode'
+import { SalesOrderReport } from '../components/SalesOrderReport'
 
 export function SellerPage() {
   const session = useSession()
@@ -39,6 +40,7 @@ export function SellerPage() {
 }
 
 function SellerDashboard() {
+  const [showSales, setShowSales] = useState(false)
   const [offset, setOffset] = useState(0)
   const resource = useResource(
     useCallback((signal) => getProducts(offset, signal), [offset]),
@@ -68,6 +70,7 @@ function SellerDashboard() {
         <li>Publish</li>
       </ol>
       <div className="workspace-actions">
+        <button className="calculator-secondary" aria-expanded={showSales} onClick={() => setShowSales(!showSales)}>Itemized sales report</button>
         <a className="calculator-secondary" href="#/receipts">
           Receipts & expenses
         </a>
@@ -84,6 +87,7 @@ function SellerDashboard() {
           Manage your storefront
         </a>
       </div>
+      {showSales && <SalesOrderReport />}
       <section className="workspace-panel">
         <h2>Something made with care.</h2>
         <p>

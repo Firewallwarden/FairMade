@@ -37,9 +37,11 @@ export type QuoteRequest = {
 const base = (product: string) =>
   `/products/${product}/sourcing-inputs` as const
 export const getSourcingInputs = (product: string, signal?: AbortSignal) =>
-  privateRequest(`${base(product)}?limit=100`, page(decodeSourcingInput), {
+  privateRequest(`${base(product)}?limit=20&offset=0`, page(decodeSourcingInput), {
     signal,
   })
+export const getSourcingInput = (product: string, input: string, signal?: AbortSignal) =>
+  privateRequest(`${base(product)}/${input}`, decodeSourcingInput, { signal })
 export const createSourcingInput = (product: string, label: string) =>
   privateRequest(base(product), decodeSourcingInput, {
     method: 'POST',
@@ -62,7 +64,7 @@ export const getSupplierQuotes = (
   signal?: AbortSignal,
 ) =>
   privateRequest(
-    `${base(product)}/${input}/supplier-quotes?limit=100`,
+    `${base(product)}/${input}/supplier-quotes?limit=20&offset=0`,
     page(decodeQuote),
     { signal },
   )
@@ -81,7 +83,7 @@ export const getSupplierReports = (
   signal?: AbortSignal,
 ) =>
   privateRequest(
-    `${base(product)}/${input}/supplier-comparisons?limit=100`,
+    `${base(product)}/${input}/supplier-comparisons?limit=20&offset=0`,
     page((value) => {
       const data = object(value)
       return { id: text(data.id), as_of_date: text(data.as_of_date) }

@@ -16,6 +16,8 @@ import { usd } from '../utils/presentation'
 import { OrderMessages } from '../components/OrderMessages'
 import { PickupPanel, RefundPanel } from '../components/OrderCare'
 import { WriteProductReview } from '../components/ProductReviews'
+import { cancelSellerOrder } from '../services/seller-orders'
+import { ReleasedOrderAvailability } from '../components/ReleasedOrderAvailability'
 
 export function OrderPage({ id, seller }: { id: string; seller: boolean }) {
   const session = useSession()
@@ -149,6 +151,18 @@ function OrderDetails({ id, seller }: { id: string; seller: boolean }) {
               </p>
             </details>
             <div className="workspace-actions">
+              {seller && order.status === 'pending_payment' && (
+                <button className="calculator-secondary" disabled={action.busy} onClick={() => {
+                  if (!window.confirm('Cancel this unpaid order and release its reserved stock? The backend will verify that cancellation is still allowed.')) return
+                  void action.run(async () => {
+                    try {
+                      await cancelSellerOrder(id)
+                    } finally {
+                      resource.reload()
+                    }
+                  }, 'The backend confirmed cancellation and released the reservation.')
+                }}>Cancel unpaid order as seller</button>
+              )}
               <button
                 className="calculator-secondary"
                 disabled={action.busy}
@@ -189,7 +203,11 @@ function OrderDetails({ id, seller }: { id: string; seller: boolean }) {
                   </button>
                 )}
             </div>
+            {seller && order.status !== 'pending_payment' && order.status !== 'cancelled' && <p>
+              Cancellation is unavailable while this order is {order.status.replaceAll('_', ' ')}. Paid or uncertain payments require the refund or verification controls.
+            </p>}
           </section>
+          {seller && order.status === 'cancelled' && <ReleasedOrderAvailability order={order} />}
           {!seller && canPay && (
             <PayPalCheckout orderId={id} onUpdated={resource.reload} />
           )}
