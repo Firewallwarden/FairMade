@@ -1,5 +1,13 @@
 # FairMade
 
+**Judges:** start with the [judge setup and walkthrough](docs/judge-quickstart.md).
+The functional demo is a local Windows desktop-browser build with a Python API;
+hosting is not required. See the [submission description and tools](docs/hackathon-submission.md)
+and [under-three-minute recording plan](docs/demo-video.md).
+
+FairMade's original source code is available under the [MIT License](LICENSE).
+Third-party photos and fonts retain their own licenses; see [asset credits](frontend/README.md#asset-credits).
+
 For a local Windows development/test environment, follow the
 [step-by-step setup guide](docs/local-development.md): central services outside
 Git checkouts, dependencies, Ollama 0.24.0, Tesseract and private per-machine
