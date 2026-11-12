@@ -1,11 +1,13 @@
 import type { decodeCatalogContent } from '../services/catalog-contract'
 import { usd } from '../utils/presentation'
-import { publicMediaUrl } from '../services/media'
+import { PrivatePhoto } from './PrivatePhoto'
 
 export function CatalogPreview({
   content,
+  productId,
 }: {
   content: ReturnType<typeof decodeCatalogContent>
+  productId: string
 }) {
   return (
     <section className="workspace-panel" aria-label="Public listing preview">
@@ -39,11 +41,10 @@ export function CatalogPreview({
       <div className="listing-gallery">
         {content.photos.map((photo) => (
           <figure key={photo.id}>
-            <img
-              src={publicMediaUrl(photo.src)}
+            <PrivatePhoto
+              productId={productId}
+              photoId={photo.id}
               alt={photo.alt_text}
-              width={photo.width}
-              height={photo.height}
             />
             <figcaption>{photo.alt_text}</figcaption>
           </figure>
