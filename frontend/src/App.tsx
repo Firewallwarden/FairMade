@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
+import { PageBoundary } from './components/PageBoundary'
 import { LandingPage } from './pages/LandingPage'
 import { PricingPage } from './pages/PricingPage'
 import { AccountPage } from './pages/AccountPage'
 import { useSession } from './services/session'
 import { SellerPage } from './pages/SellerPage'
-import { SellerProductPage } from './pages/SellerProductPage'
 import { MarketPage } from './pages/MarketPage'
 import { ListingPage } from './pages/ListingPage'
 import { OrdersPage } from './pages/OrdersPage'
@@ -13,20 +13,61 @@ import { WorkspaceLayout } from './components/WorkspaceLayout'
 import { AssistantPage } from './pages/AssistantPage'
 import { FavoritesPage } from './pages/FavoritesPage'
 import { MyReviewsPage } from './pages/MyReviewsPage'
-import { ReceiptsPage } from './pages/ReceiptsPage'
-import { PreferencesPage } from './pages/PreferencesPage'
-import { ShoppingPlanPage } from './pages/ShoppingPlanPage'
-import { ComparePage } from './pages/ComparePage'
-import { SupplierRecordsPage } from './pages/SupplierRecordsPage'
-import { MaterialsPage } from './pages/MaterialsPage'
-import { LivestockPage } from './pages/LivestockPage'
 import {
   StorefrontDirectoryPage,
   StorefrontPage,
   StorefrontSettingsPage,
 } from './pages/StorefrontPage'
 
+const SellerProductPage = lazy(() =>
+  import('./pages/SellerProductPage').then((m) => ({
+    default: m.SellerProductPage,
+  })),
+)
+const ReceiptsPage = lazy(() =>
+  import('./pages/ReceiptsPage').then((m) => ({ default: m.ReceiptsPage })),
+)
+const PreferencesPage = lazy(() =>
+  import('./pages/PreferencesPage').then((m) => ({
+    default: m.PreferencesPage,
+  })),
+)
+const ShoppingPlanPage = lazy(() =>
+  import('./pages/ShoppingPlanPage').then((m) => ({
+    default: m.ShoppingPlanPage,
+  })),
+)
+const ComparePage = lazy(() =>
+  import('./pages/ComparePage').then((m) => ({ default: m.ComparePage })),
+)
+const SupplierRecordsPage = lazy(() =>
+  import('./pages/SupplierRecordsPage').then((m) => ({
+    default: m.SupplierRecordsPage,
+  })),
+)
+const MaterialsPage = lazy(() =>
+  import('./pages/MaterialsPage').then((m) => ({ default: m.MaterialsPage })),
+)
+const LivestockPage = lazy(() =>
+  import('./pages/LivestockPage').then((m) => ({ default: m.LivestockPage })),
+)
+
 export default function App() {
+  return (
+    <PageBoundary>
+      <Suspense
+        fallback={
+          <WorkspaceLayout title="Getting things ready.">
+            <p role="status">Loading this page…</p>
+          </WorkspaceLayout>
+        }
+      >
+        <AppRoutes />
+      </Suspense>
+    </PageBoundary>
+  )
+}
+function AppRoutes() {
   const session = useSession()
   const [route, setRoute] = useState(window.location.hash)
   const calculator = route === '#/pricing'
