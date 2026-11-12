@@ -36,6 +36,52 @@ with the opt-in provider case skipped. Ruff lint and formatting checks passed
 for the three changed test/helper modules. No additional transaction was created
 to obtain these regression results.
 
+## Completed browser checkout check
+
+Later on 2026-11-11 (America/Chicago), the user completed a separate USD 34.00
+purchase through FairMade's actual marketplace and PayPal SDK button. The user
+confirmed that checkout returned to FairMade and displayed the payment-confirmed
+page with paid status. A read-only inspection of the retained database independently
+confirmed a completed capture with a nonempty capture ID and verification time,
+paid order status through the application's normal status projection, and stock
+decreasing from 8 to 6 for two purchased units. The earlier verification order
+remains refunded; the new browser-demo order remains paid.
+
+Tested revisions were backend `f4dd89f8862cfd2467f085c8966ed9bb889ce198` and
+frontend `feature/frontend-demo` at `1a7f8eab534a1b4197d33061eb39edebd068c51d`.
+The existing frontend source was unchanged and its TypeScript/production build
+passed using Node 22.23.5. This manual browser acceptance is separate from the
+offline suite and the interrupted-and-recovered backend test. It does not claim
+that the frontend branch has been integrated into main, that every browser or
+failure scenario was tested, or that live payments are supported.
+
+The local, credential-free record summary is retained in the
+`FairMade-checkout-browser` verification worktree at
+`backend/.pytest_cache/checkout-browser/browser-backend-result.json`.
+
+### Use this flow for the demonstration
+
+1. Start the actual backend on loopback port 8000 with the five sandbox settings
+   below loaded into its process. The pytest launcher does not configure a
+   separately running API server.
+2. Start the accepted frontend with its supported Node runtime. The tested Vite
+   server was at `http://127.0.0.1:5173`, proxying `/api` to port 8000. No PayPal
+   secret belongs in Vite configuration.
+3. Sign in to FairMade as the test buyer, open a published marketplace product,
+   review its subtotal and reserve stock. Use the PayPal button on the saved
+   FairMade order page; approve with the separate personal sandbox account.
+4. Confirm return to FairMade and the backend-verified paid receipt. If status is
+   uncertain, inspect/reconcile that saved order before another purchase.
+
+The earlier standalone `.url` handoff bypassed the JavaScript SDK completion
+callback and its order had no configured redirect return URL. That handoff is
+only a backend approval aid; it is not the browser demo checkout. PayPal could
+record APPROVED while that standalone page continued spinning. The complete SDK
+flow returned successfully without changing frontend code. Do not use the raw
+approval shortcut for the demo or treat approval alone as payment completion.
+PayPal documents the SDK callback and backend capture in its
+[standard checkout flow](https://developer.paypal.com/studio/checkout/standard/integrate).
+
 ## Local configuration
 
 Use a PayPal sandbox business account/REST app and a separate personal sandbox
@@ -63,8 +109,10 @@ From this checkout, run PowerShell using the configured backend SDK executable:
     -PythonExecutable 'C:\path\to\configured\python.exe'
 ```
 
-The test reports a local .url shortcut under backend/.pytest_cache/paypal-sandbox.
-Open that file and approve with the separate sandbox buyer within ten minutes.
+For backend-only verification, the test reports a local .url shortcut under
+backend/.pytest_cache/paypal-sandbox. Open that file and approve with the separate
+sandbox buyer within ten minutes. The standalone page is not a browser completion
+check; use the SDK flow above for the demo.
 Only the provider-returned HTTPS sandbox checkout link for the matching order
 is accepted. Neither credentials nor the URL are printed in test output. Never
 commit that local file or display account credentials in the demo video.
