@@ -1,5 +1,6 @@
 import type { ConversationScope } from '../services/assistant-contract.ts'
 import { fieldValue } from './form.ts'
+import { readOptionalPreferences } from './optional-preferences.ts'
 
 export function sellerConversationScope(
   productId: string,
@@ -58,7 +59,11 @@ export function sellerConversationScope(
       throw new Error('Choose a supported recommendation priority.')
     if (objective !== 'purchase_outlay' && objective !== 'usable_unit')
       throw new Error('Choose a supported cost objective.')
-    scope.recommendations = { mode, cost_objective: objective, preferences: [] }
+    scope.recommendations = {
+      mode,
+      cost_objective: objective,
+      preferences: readOptionalPreferences(fields, 'assistant-preference'),
+    }
   }
   return scope
 }

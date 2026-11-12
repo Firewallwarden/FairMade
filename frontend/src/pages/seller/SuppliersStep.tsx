@@ -22,6 +22,14 @@ import { Field, TextArea } from '../../components/FormFields'
 import { ErrorNotice } from '../../components/Feedback'
 import { fieldValue } from '../../utils/form'
 import { ruleDescription, usd } from '../../utils/presentation'
+import {
+  OptionalPreferences,
+  AdditionalQuoteClaims,
+} from '../../components/OptionalPreferences'
+import {
+  readAdditionalClaims,
+  readOptionalPreferences,
+} from '../../utils/optional-preferences'
 
 export function SuppliersStep({ productId }: { productId: string }) {
   const resource = useResource(
@@ -176,7 +184,11 @@ function InputWorkspace({
         location: fieldValue(fields, 'supplier-location'),
         observed_on: fieldValue(fields, 'supplier-date'),
         valid_until: fieldValue(fields, 'supplier-expiry') || null,
-        claims,
+        claims: readAdditionalClaims(
+          fields,
+          claims,
+          input.rules.map((rule) => rule.key),
+        ),
         notes: fieldValue(fields, 'supplier-notes') || null,
       })
       form.reset()
@@ -492,6 +504,7 @@ function InputWorkspace({
                     </label>
                   ))}
                 </div>
+                <AdditionalQuoteClaims />
                 <div className="workspace-actions">
                   <button type="submit" className="button-primary">
                     Save private quote
@@ -675,11 +688,17 @@ function InputWorkspace({
                       'purchase_outlay',
                       'usable_unit',
                     ] as const),
+                    readOptionalPreferences(fields, 'supplier-preference'),
                   ),
                 ),
               )
             }}
+            onChange={() => setRecommendations(null)}
           >
+            <OptionalPreferences
+              prefix="supplier-preference"
+              onEdit={() => setRecommendations(null)}
+            />
             <div className="calculator-grid">
               <label className="calculator-field">
                 Review priority
@@ -698,8 +717,8 @@ function InputWorkspace({
               </label>
             </div>
             <p>
-              No optional preference claims are assumed. Mandatory exclusions
-              apply in every mode.
+              Only explicitly entered preferences are considered. Mandatory
+              exclusions apply in every mode.
             </p>
             <button className="calculator-secondary" disabled={action.busy}>
               Review eligible options
@@ -711,14 +730,23 @@ function InputWorkspace({
         <section className="calculator-notice">
           <h3>Options for input review</h3>
           {recommendations.rows.map((row, index) => (
-            <p key={index}>
-              {row.supplier_name}:{' '}
-              {row.eligible ? row.reason.replaceAll('_', ' ') : 'Excluded'} ·{' '}
-              {row.objective_cost === null
-                ? 'Cost unknown'
-                : usd(row.objective_cost)}{' '}
-              · {row.exclusions.join(', ').replaceAll('_', ' ')}
-            </p>
+            <article key={index}>
+              <p>
+                {row.supplier_name}:{' '}
+                {row.eligible ? row.reason.replaceAll('_', ' ') : 'Excluded'} ·{' '}
+                {row.objective_cost === null
+                  ? 'Cost unknown'
+                  : usd(row.objective_cost)}{' '}
+                · {row.exclusions.join(', ').replaceAll('_', ' ')}
+              </p>
+              <ul>
+                {row.preference_checks.map((check, checkIndex) => (
+                  <li key={checkIndex}>
+                    {check.label}: {check.status} · {check.message}
+                  </li>
+                ))}
+              </ul>
+            </article>
           ))}
           <ul>
             {recommendations.notices.map((notice, index) => (
