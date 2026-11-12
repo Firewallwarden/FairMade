@@ -32,6 +32,7 @@ import { comparisonUnits, sellingUnits } from '../../types/contracts'
 import { choice } from '../../services/decode'
 import { CompositionFields } from './CompositionFields'
 import { readComposition } from '../../utils/composition'
+import { PassportPublications } from './PassportPublications'
 
 const disclosureLabels = {
   include_labor: 'Labor cost per unit',
@@ -76,6 +77,7 @@ export function PublishStep({ product }: { product: SellerProduct }) {
     ReturnType<typeof getPassportPreview>
   > | null>(null)
   const [publication, setPublication] = useState('')
+  const [passportWithdrawn, setPassportWithdrawn] = useState(false)
   const [listingPreview, setListingPreview] = useState<Awaited<
     ReturnType<typeof getListingPreview>
   > | null>(null)
@@ -153,6 +155,7 @@ export function PublishStep({ product }: { product: SellerProduct }) {
         preview.preview_hash,
       )
       setPublication(published.id)
+      setPassportWithdrawn(false)
     }, 'Passport published with the exact disclosures you approved. Your listing still needs separate approval.')
   }
 
@@ -454,6 +457,7 @@ export function PublishStep({ product }: { product: SellerProduct }) {
                           (item) => item.state === 'published',
                         )
                         setPublication(active?.id ?? '')
+                        setPassportWithdrawn(!active)
                       })
                   }}
                 >
@@ -519,6 +523,15 @@ export function PublishStep({ product }: { product: SellerProduct }) {
           )}
         </>
       )}
+      {draftId && <PassportPublications key={draftId} productId={product.id} draftId={draftId} onWithdrawn={() => {
+        setPublication('')
+        setPreview(null)
+        setListingPreview(null)
+        setPublishedListing('')
+        setListing(null)
+        setPassportWithdrawn(true)
+        resource.reload()
+      }} />}
       {publication && (
         <section className="workspace-panel">
           <h2>Give it a place at the market.</h2>
@@ -664,7 +677,7 @@ export function PublishStep({ product }: { product: SellerProduct }) {
           </form>
         </>
       )}
-      {(publishedListing || resource.data?.listing?.state === 'active') && (
+      {!passportWithdrawn && (publishedListing || resource.data?.listing?.state === 'active') && (
         <div className="workspace-panel">
           <h2>Your goods are at the market.</h2>
           <a
