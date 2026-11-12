@@ -597,6 +597,21 @@ Unknown fees/costs/profit stay null; backend reasons, warnings and frozen source
 details remain visible. The report explains UTC capture periods and refunds known
 at report time, and links to seller orders. It does not calculate actual earnings
 or call payment providers. Live browser acceptance remains pending Playwright.
+### Seller refund inbox (2026-11-12)
+
+Implemented in `feature/frontend-seller-refunds`, dependent on buyer-list PR #90:
+verified sellers can open a paginated inbox from their seller orders and navigate
+to existing decision/reconciliation controls. It reuses the focused request list
+to keep pending/completed semantics consistent. Backend seller authorization remains
+authoritative. Browser acceptance remains pending the full Playwright workflow.
+
+### Buyer refund-request list (2026-11-12)
+
+Implemented in `feature/frontend-buyer-refunds`: purchases exposes a paginated
+buyer request list with saved states, reasons, decisions and links to order controls.
+Only the existing verified-refund predicate confirms completion; pending/uncertain
+states remain explicit. No new payment calls or backend state changes occur from
+this list. Browser acceptance remains pending the full Playwright workflow.
 
 For a new tradeoff, record the confirmed decision or documented limit, its source,
 implementation status, consequences, and the trigger/follow-up for revisiting it.
