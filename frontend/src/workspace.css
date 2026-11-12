@@ -248,3 +248,8 @@ button:disabled {
     gap: 12px 18px;
   }
 }
+.evidence-data { margin-block: 10px; font-size: .9rem; }
+.evidence-data > div { border-left: 2px solid #d4d7ca; padding-left: 12px; margin-block: 10px; }
+.evidence-data dt { text-transform: capitalize; font-weight: 600; }
+.evidence-data dd { margin: 4px 0 8px; overflow-wrap: anywhere; }
+.assistant-turn { border-left: 4px solid #a2b39a; }

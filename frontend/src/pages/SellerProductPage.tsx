@@ -68,6 +68,7 @@ function ProductWorkspace({ id }: { id: string }) {
   return (
     <>
       <a href="#/seller">← Your products</a>
+      <div className="workspace-actions"><a className="button-primary" href={`#/assistant/seller/${id}`}>Ask FairMade about this product</a></div>
       <ErrorNotice error={resource.error || action.error} />
       {resource.loading && <p role="status">Loading product…</p>}
       {action.notice && (

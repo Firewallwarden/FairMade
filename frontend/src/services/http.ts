@@ -59,7 +59,7 @@ function responseError(status: number, body: unknown): ApiError {
   )
 }
 
-type ApiOptions = Omit<RequestInit, 'body'> & { json?: unknown; token?: string }
+type ApiOptions = Omit<RequestInit, 'body'> & { json?: unknown; token?: string; timeoutMs?: number; raw?: Blob; binary?: boolean }
 
 export function createApiClient(
   baseUrl: string,
@@ -70,13 +70,13 @@ export function createApiClient(
     decode: (data: unknown) => T,
     options: ApiOptions = {},
   ): Promise<T> {
-    const { json, token, ...init } = options
+    const { json, token, timeoutMs = 20000, raw, binary, ...init } = options
     const headers = new Headers(init.headers)
-    headers.set('Accept', 'application/json')
+    headers.set('Accept', binary ? 'image/jpeg' : 'application/json')
     if (json !== undefined) headers.set('Content-Type', 'application/json')
     if (token) headers.set('Authorization', `Bearer ${token}`)
     let response: Response
-    const timeout = AbortSignal.timeout(20000)
+    const timeout = AbortSignal.timeout(Math.min(180000, Math.max(1000, timeoutMs)))
     try {
       response = await fetcher(`${baseUrl.replace(/\/$/, '')}${path}`, {
         ...init,
@@ -84,7 +84,7 @@ export function createApiClient(
         cache: 'no-store',
         credentials: 'omit',
         signal: init.signal ? AbortSignal.any([init.signal, timeout]) : timeout,
-        body: json === undefined ? undefined : JSON.stringify(json),
+        body: raw ?? (json === undefined ? undefined : JSON.stringify(json)),
       })
     } catch (error) {
       if (timeout.aborted)
@@ -100,6 +100,7 @@ export function createApiClient(
       )
     }
     let body: unknown
+    if (binary && response.ok) return decode(await response.blob())
     if (response.status !== 204) {
       try {
         body = await response.json()
