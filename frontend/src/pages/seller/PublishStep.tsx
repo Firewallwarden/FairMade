@@ -30,6 +30,8 @@ import type { SellerProduct } from '../../services/seller'
 import { getComparisons } from '../../services/comparisons'
 import { comparisonUnits, sellingUnits } from '../../types/contracts'
 import { choice } from '../../services/decode'
+import { CompositionFields } from './CompositionFields'
+import { readComposition } from '../../utils/composition'
 
 const disclosureLabels = {
   include_labor: 'Labor cost per unit',
@@ -88,6 +90,7 @@ export function PublishStep({ product }: { product: SellerProduct }) {
     event.preventDefault()
     const fields = new FormData(event.currentTarget)
     void action.run(async () => {
+      const composition = readComposition(fields)
       setPreview(null)
       setPublication('')
       setListingPreview(null)
@@ -124,8 +127,10 @@ export function PublishStep({ product }: { product: SellerProduct }) {
         title: fieldValue(fields, 'passport-title'),
         price: fieldValue(fields, 'passport-price'),
         public_description: fieldValue(fields, 'passport-description') || null,
+        composition,
         disclosures: {
           ...disclosures,
+          include_composition: fields.has('include_composition'),
           cost_categories: costCategories.filter((category) =>
             fields.getAll('cost-disclosure').includes(category),
           ),
@@ -269,8 +274,9 @@ export function PublishStep({ product }: { product: SellerProduct }) {
             <h2>Choose the story your price tells.</h2>
             <p>
               All disclosures start off. Select only the information you want
-              made public. Private ingredients, labor entries and recipes are
-              never included.
+              made public. Raw private ingredients, labor entries and recipes
+              stay private. Only a separate composition declaration you author
+              and approve can describe public finished-product contents.
             </p>
             {!resource.data.analyses.items.length ? (
               <p>
@@ -400,6 +406,15 @@ export function PublishStep({ product }: { product: SellerProduct }) {
                     </label>
                   ))}
                   <h3>Other disclosures</h3>
+                  <CompositionFields
+                    onEdit={() => {
+                      setPreview(null)
+                      setPublication('')
+                      setListingPreview(null)
+                      setDraftId('')
+                      setReview(null)
+                    }}
+                  />
                   {Object.entries(disclosureLabels).map(([key, label]) => (
                     <label className="workspace-check" key={key}>
                       <input type="checkbox" name={key} />

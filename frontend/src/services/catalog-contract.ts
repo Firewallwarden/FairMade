@@ -10,6 +10,7 @@ import {
   timestamp,
 } from './decode.ts'
 import { decodeRule } from './quality-contract.ts'
+import { decodeComposition } from './composition-contract.ts'
 
 export function decodeProductInfo(value: unknown) {
   const data = object(value)
@@ -41,6 +42,7 @@ export function decodePassport(value: unknown) {
     product: decodeProductInfo(data.product),
     price: decodePrice(data.price),
     reviewed_on: text(data.reviewed_on),
+    composition: nullable(data.composition, decodeComposition),
     costs: nullable(data.costs, (value) => {
       const costs = object(value)
       const totals = object(costs.category_costs_per_unit)

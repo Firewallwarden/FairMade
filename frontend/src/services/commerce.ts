@@ -9,6 +9,8 @@ import {
 import { decodeCart, decodeOrder, decodePayment } from './order-contract'
 import type { CartRequest } from './order-contract'
 import { page } from './decode'
+import { object } from './decode'
+import { decodeOrdering } from './market-contract'
 
 export function browseMarket(
   filters: {
@@ -16,6 +18,8 @@ export function browseMarket(
     product_type: string
     location: string
     availability: string
+    sort?: string
+    reference_unit?: string
   },
   offset: number,
   signal?: AbortSignal,
@@ -24,9 +28,16 @@ export function browseMarket(
   Object.entries(filters).forEach(([key, value]) => {
     if (value.trim()) query.set(key, value.trim())
   })
-  return apiRequest(`/marketplace/listings?${query}`, page(decodeCard), {
-    signal,
-  })
+  return apiRequest(
+    `/marketplace/listings?${query}`,
+    (value) => ({
+      ...page(decodeCard)(value),
+      ordering: decodeOrdering(object(value).ordering),
+    }),
+    {
+      signal,
+    },
+  )
 }
 export const getCatalogListing = (id: string, signal?: AbortSignal) =>
   apiRequest(`/marketplace/listings/${id}`, decodeDetail, { signal })

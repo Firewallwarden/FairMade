@@ -16,6 +16,7 @@ import { MyReviewsPage } from './pages/MyReviewsPage'
 import { ReceiptsPage } from './pages/ReceiptsPage'
 import { PreferencesPage } from './pages/PreferencesPage'
 import { ShoppingPlanPage } from './pages/ShoppingPlanPage'
+import { ComparePage } from './pages/ComparePage'
 import {
   StorefrontDirectoryPage,
   StorefrontPage,
@@ -46,6 +47,7 @@ export default function App() {
       receipts: 'Receipts and expenses',
       preferences: 'Buyer preferences',
       planning: 'Shopping plans',
+      compare: 'Compare products',
       storefronts: 'Meet the makers',
       storefront: 'Maker storefront',
     }
@@ -65,6 +67,19 @@ export default function App() {
     }
   }, [calculator, route, session?.account.id])
   if (calculator) return <PricingPage />
+  const compareRoute = route.match(/^#\/compare\/([a-f0-9,-]+)$/i)?.[1]
+  if (compareRoute) {
+    const ids = compareRoute.split(',')
+    if (
+      ids.length >= 2 &&
+      ids.length <= 4 &&
+      new Set(ids).size === ids.length &&
+      ids.every((id) => /^[a-f0-9-]{36}$/i.test(id))
+    )
+      return (
+        <ComparePage key={`${session?.account.id}-${compareRoute}`} ids={ids} />
+      )
+  }
   if (route === '#/planning') return <ShoppingPlanPage />
   const planRoute = route.match(/^#\/planning\/([a-f0-9-]{36})(\/seller)?$/i)
   if (planRoute)

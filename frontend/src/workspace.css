@@ -115,6 +115,27 @@
 .workspace-panel li + li {
   margin-top: 8px;
 }
+.product-comparison-table {
+  min-width: 720px;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+.product-comparison-table th,
+.product-comparison-table td {
+  text-align: left;
+  vertical-align: top;
+  padding: 18px;
+  border-bottom: 1px solid #d4d7ca;
+  min-width: 180px;
+}
+.product-comparison-table th {
+  font-weight: 600;
+}
+.product-comparison-table caption {
+  text-align: left;
+  padding-block: 12px 20px;
+}
 .workspace-actions {
   display: flex;
   align-items: center;

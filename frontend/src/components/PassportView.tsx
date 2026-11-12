@@ -85,6 +85,42 @@ export function PassportView({ passport }: { passport: Passport }) {
         </p>
       </details>
       <details>
+        <summary>Ingredients & materials</summary>
+        {passport.composition ? (
+          <>
+            <p>
+              {passport.composition.completeness === 'seller_declared_complete'
+                ? 'Seller declares this list complete; that statement is unverified.'
+                : 'Partial seller declaration; other components may be omitted.'}
+            </p>
+            <ul>
+              {passport.composition.items.map((item, index) => (
+                <li key={index}>
+                  <strong>{item.label}</strong> · {item.kind}
+                  {item.reported_role &&
+                    ` · Reported role: ${item.reported_role}`}
+                  {item.reported_specification &&
+                    ` · Reported specification: ${item.reported_specification}`}
+                  {item.declared_quantity &&
+                    ` · Declared quantity: ${item.declared_quantity.value} ${item.declared_quantity.unit}`}
+                </li>
+              ))}
+            </ul>
+          </>
+        ) : (
+          <p>
+            No finished-product ingredient or material declaration was approved.
+            Contents are unknown; they are not inferred from the product name or
+            private recipe.
+          </p>
+        )}
+        <p>
+          Seller declarations do not establish allergen absence, safety,
+          nutrition, compatibility or suitability. Private production inputs
+          remain separate.
+        </p>
+      </details>
+      <details>
         <summary>Local price context</summary>
         {passport.market_context ? (
           <>

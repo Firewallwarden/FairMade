@@ -36,6 +36,9 @@ export type EvaluationRequest = {
 }
 
 export type PassportRequest = {
+  composition?:
+    | import('../services/composition-contract').CompositionDisclosure
+    | null
   review_id: string
   title: string
   price: string
@@ -47,6 +50,7 @@ export type PassportRequest = {
     include_quality_requirements?: boolean
     include_quality_summary?: boolean
     include_market_context?: boolean
+    include_composition?: boolean
   }
 }
 
