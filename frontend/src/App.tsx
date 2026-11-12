@@ -19,6 +19,7 @@ import { ShoppingPlanPage } from './pages/ShoppingPlanPage'
 import { ComparePage } from './pages/ComparePage'
 import { SupplierRecordsPage } from './pages/SupplierRecordsPage'
 import { MaterialsPage } from './pages/MaterialsPage'
+import { LivestockPage } from './pages/LivestockPage'
 import {
   StorefrontDirectoryPage,
   StorefrontPage,
@@ -52,6 +53,7 @@ export default function App() {
       compare: 'Compare products',
       suppliers: 'Private supplier records',
       materials: 'Private material inventory',
+      livestock: 'Private livestock records',
       storefronts: 'Meet the makers',
       storefront: 'Maker storefront',
     }
@@ -71,6 +73,17 @@ export default function App() {
     }
   }, [calculator, route, session?.account.id])
   if (calculator) return <PricingPage />
+  const livestock = route.match(
+    /^#\/livestock\/(groups|animals)(?:\/([a-f0-9-]{36}))?$/i,
+  )
+  if (livestock)
+    return (
+      <LivestockPage
+        key={`${session?.account.id}-${route}`}
+        kind={livestock[1] === 'groups' ? 'groups' : 'animals'}
+        id={livestock[2]}
+      />
+    )
   if (route === '#/materials')
     return <MaterialsPage key={session?.account.id ?? 'guest'} />
   const materialId = route.match(/^#\/materials\/([a-f0-9-]{36})$/i)?.[1]
