@@ -223,11 +223,12 @@ test database.
 - Test meaningful interactions and API error states using the tooling established
   by the frontend owner. Include responsive and keyboard checks when UI changes.
 
-The current checked-in `frontend/` contains instructions only: there is no
-`package.json`, frontend application, or runnable frontend checks yet. When that
-tooling is added, document the actual install, lint, type-check, test, and build
-scripts here. Run only scripts that exist in that checkout and report missing
-checks honestly.
+The frontend now provides `npm.cmd run build` (TypeScript and Vite),
+`npm.cmd run lint` (Oxlint), and `npm.cmd test` (native Node TypeScript tests;
+Node 22.18+). Run these checks from a feature worktree's `frontend/` directory.
+Follow the [local development guide](docs/local-development.md) for the central
+runtime, dependencies, Ollama 0.24.0/Qwen3, Tesseract and per-machine PayPal sandbox
+credentials. Keep services and retained demo data outside all Git checkouts.
 
 ## FairMade domain rules and review expectations
 
