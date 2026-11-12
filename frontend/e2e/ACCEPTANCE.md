@@ -113,3 +113,32 @@ it does not establish representative personal receipt/photo accuracy. PayPal
 merchant credentials were separately authenticated successfully against the real
 sandbox OAuth endpoint, but checkout/refund browser cases still require the
 separate private sandbox Personal buyer login. No paid/refunded state was invented.
+
+## Credentialed PayPal browser acceptance
+
+After the sandbox Personal buyer login was supplied privately, run
+`17c78e5b-a8d6-46f0-9e18-3be1e6933717` passed **6 checks, zero failures and zero
+skips** in 1.9 minutes, including two setup checks. Desktop and narrow Chromium
+each completed a real sandbox purchase followed by seller-approved refund and
+a separate purchase followed by seller denial of the refund request.
+
+The scenarios verified backend capture, eligible review creation/edit/withdrawal,
+seller pickup changes and buyer pickup history, populated buyer/seller refund
+lists, populated itemized sales, and recovery after deliberately dropping the
+approval response **after the real backend refund request**. The isolated database
+retains four completed checkouts, two verified refunds and two denied requests.
+The persistent demo database was not used for these new transactions.
+
+The previously unexecuted test helper needed provider-UI corrections: select the
+visible SDK frame; wait for the accessible Next/Log In steps before filling the
+password; recognize the current Pay approval button; and wait for the in-flight
+network handler before removing it. Earlier failed runs remain retained; they do
+not indicate failed payments merely because a selector or assertion failed. In
+particular, run `248bcb87-8706-4b19-ac23-f0327834a528` completed a capture and refund
+before exposing the simulated-response handler race.
+
+Together with the 12 real-model/OCR checks above, these results close the selected
+local provider gates on desktop and narrow Chromium. They do not imply live
+production payments, physical-device Safari/Firefox coverage or representative
+personal-receipt accuracy. Credentials, provider bodies and personal receipt
+fixtures are not committed, and provider screenshots/traces remain disabled.

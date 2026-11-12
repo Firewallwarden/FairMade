@@ -88,16 +88,21 @@ test('real receipt image extraction, seller corrections and approval create a re
 })
 
 async function approvePayPal(page: Page) {
-  const popupPromise = page.waitForEvent('popup')
-  await page.frameLocator('iframe[title="PayPal"]').locator('[data-funding-source="paypal"]').click()
-  const popup = await popupPromise
+  // The SDK also mounts an invisible frame with the same title while rendering.
+  const [popup] = await Promise.all([
+    page.waitForEvent('popup'),
+    page.frameLocator('iframe[title="PayPal"]:visible').locator('[data-funding-source="paypal"]').click(),
+  ])
   await popup.waitForURL(/https:\/\/(www\.)?sandbox\.paypal\.com\//)
   await popup.locator('#email').fill(process.env.E2E_PAYPAL_BUYER_EMAIL!)
-  const next = popup.locator('#btnNext')
+  const next = popup.getByRole('button', { name: /^next$/i })
+  const login = popup.getByRole('button', { name: /^log in$/i })
+  await next.or(login).waitFor({ state: 'visible' })
   if (await next.isVisible()) await next.click()
+  await login.waitFor({ state: 'visible' })
   await popup.locator('#password').fill(process.env.E2E_PAYPAL_BUYER_PASSWORD!)
-  await popup.locator('#btnLogin').click()
-  await popup.locator('#payment-submit-btn').click()
+  await login.click()
+  await popup.locator('#payment-submit-btn').or(popup.getByRole('button', { name: /^(pay|pay now|agree & pay|complete purchase)$/i })).click({ timeout: 30_000 })
   await expect(page.getByText(/backend verified a completed PayPal sandbox capture/i)).toBeVisible({ timeout: 120_000 })
 }
 
@@ -153,7 +158,8 @@ for (const outcome of ['approve', 'deny'] as const) {
       await sellerPage.route('**/refund-request/approve', async route => { await route.fetch(); await route.abort('failed') })
       await sellerPage.locator('[name="approve-refund"]').check()
       await sellerPage.getByRole('button', { name: 'Approve & request sandbox refund' }).click()
-      await sellerPage.unroute('**/refund-request/approve')
+      // Finish the real upstream request and simulated loss before refreshing.
+      await sellerPage.unrouteAll({ behavior: 'wait' })
       await sellerPage.getByRole('button', { name: 'Refresh refund & order status' }).click()
       const verify = sellerPage.getByRole('button', { name: 'Verify refund with PayPal' })
       if (await verify.isVisible()) await verify.click()
@@ -166,6 +172,22 @@ for (const outcome of ['approve', 'deny'] as const) {
     }
     await page.getByRole('button', { name: 'Refresh refund & order status' }).click()
     await expect(page.getByText(outcome === 'approve' ? /refunded/ : /denied/).first()).toBeVisible()
+
+    await page.goto('/#/orders')
+    await page.getByRole('button', { name: 'My refund requests', exact: true }).click()
+    const buyerRequest = page.getByRole('article').filter({ has: page.getByRole('heading', { name: `Order ${order.id}`, exact: true }) })
+    await expect(buyerRequest).toContainText(outcome === 'approve' ? 'Backend-verified sandbox refund completed.' : 'denied')
+    await sellerPage.goto('/#/orders')
+    await sellerPage.getByRole('button', { name: 'My seller orders', exact: true }).click()
+    await sellerPage.getByRole('button', { name: 'Seller refund inbox', exact: true }).click()
+    const sellerRequest = sellerPage.getByRole('article').filter({ has: sellerPage.getByRole('heading', { name: `Order ${order.id}`, exact: true }) })
+    await expect(sellerRequest).toContainText(outcome === 'approve' ? 'Backend-verified sandbox refund completed.' : 'denied')
+    await sellerPage.goto('/#/seller')
+    await sellerPage.getByRole('button', { name: 'Itemized sales report', exact: true }).click()
+    const sale = sellerPage.getByRole('article').filter({ has: sellerPage.getByRole('heading', { name: `Order ${order.id}`, exact: true }) })
+    await expect(sale).toBeVisible()
+    await expect(sale).toContainText('Gross sales')
+    await expect(sale).toContainText('Completed refunds')
     await sellerContext.close(); await sellerApi.dispose(); await sellerSession.dispose(); await buyerApi.dispose()
   })
 }
