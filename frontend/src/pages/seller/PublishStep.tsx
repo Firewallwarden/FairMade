@@ -34,6 +34,8 @@ import { choice } from '../../services/decode'
 import { CompositionFields } from './CompositionFields'
 import { readComposition } from '../../utils/composition'
 import { PassportPublications } from './PassportPublications'
+import { getCatalogListing } from '../../services/commerce'
+import { ApiError } from '../../services/http'
 
 const disclosureLabels = {
   include_labor: 'Labor cost per unit',
@@ -88,6 +90,17 @@ export function PublishStep({ product }: { product: SellerProduct }) {
     ReturnType<typeof getInventory>
   > | null>(null)
   const [publishedListing, setPublishedListing] = useState('')
+  const candidateListing = listing ?? resource.data?.listing
+  const publicListing = useResource(useCallback(async (signal) => {
+    if (!candidateListing || passportWithdrawn ||
+      (publication && candidateListing.content.passport_publication_id !== publication)) return null
+    try {
+      return await getCatalogListing(candidateListing.id, signal)
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 404) return null
+      throw error
+    }
+  }, [candidateListing, passportWithdrawn, publication]))
 
   function makePassport(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -205,7 +218,7 @@ export function PublishStep({ product }: { product: SellerProduct }) {
 
   return (
     <div>
-      <ErrorNotice error={resource.error || action.error} />
+      <ErrorNotice error={resource.error || action.error || publicListing.error} />
       {action.notice && (
         <p className="calculator-notice" role="status">
           {action.notice}
@@ -633,7 +646,7 @@ export function PublishStep({ product }: { product: SellerProduct }) {
           </form>
         </>
       )}
-      {!passportWithdrawn && (publishedListing || resource.data?.listing?.state === 'active') && (
+      {publicListing.data && !passportWithdrawn && (publishedListing || resource.data?.listing?.state === 'active') && (
         <div className="workspace-panel">
           <h2>Your goods are at the market.</h2>
           <a
