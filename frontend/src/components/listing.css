@@ -1,0 +1,209 @@
+.listing-overview {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
+  align-items: start;
+  gap: clamp(28px, 4vw, 56px);
+  margin-block: 28px 56px;
+}
+.listing-overview > * {
+  min-width: 0;
+}
+.listing-overview p {
+  line-height: 1.7;
+}
+.listing-heading h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2.8rem, 4.5vw, 4.2rem);
+  font-weight: 500;
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+  overflow-wrap: anywhere;
+  margin-block: 12px 18px;
+}
+.listing-description {
+  margin-block: 28px;
+}
+.listing-description h2,
+.listing-purchase h2,
+.listing-order h3 {
+  font: 600 1rem/1.5 var(--font-sans);
+  letter-spacing: 0;
+  margin: 0 0 10px;
+}
+.listing-description > p {
+  font-size: 1.05rem;
+}
+.listing-purchase {
+  background: #edf0e5;
+  border: 1px solid #cdd5c3;
+  border-radius: 18px;
+  padding: clamp(20px, 3vw, 30px);
+}
+.listing-purchase .listing-price {
+  font-family: var(--font-display);
+  font-size: 3.2rem;
+  line-height: 1.2;
+  margin: 8px 0 16px;
+}
+.listing-purchase .listing-price span {
+  font: 400 1rem/1.5 var(--font-sans);
+  color: #535b4e;
+  display: inline-block;
+}
+.listing-purchase .workspace-status {
+  background: #dce5d3;
+}
+.listing-unit-details {
+  display: grid;
+  gap: 12px;
+  margin-block: 22px 10px;
+  font-size: 0.9rem;
+}
+.listing-unit-details > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+}
+.listing-unit-details dt {
+  color: #535b4e;
+}
+.listing-unit-details dd {
+  margin: 0;
+  text-align: right;
+  font-weight: 600;
+}
+.listing-order {
+  margin-top: 24px;
+  border-top: 1px solid #c5cebb;
+  padding-top: 24px;
+}
+.listing-order section > p {
+  margin-block: 12px 20px;
+  font-size: 0.9rem;
+}
+.listing-order .workspace-actions {
+  margin-bottom: 0;
+}
+.listing-order .button-primary {
+  width: 100%;
+}
+.listing-signin {
+  display: grid;
+  gap: 12px;
+}
+.listing-signin span {
+  color: #535b4e;
+  font-size: 0.9rem;
+}
+.listing-pickup-note {
+  margin-top: 24px;
+}
+.listing-pickup-note strong {
+  font-size: 0.9rem;
+}
+.listing-support-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  align-items: center;
+  margin-top: 22px;
+  font-size: 0.9rem;
+}
+.listing-support-actions > a {
+  text-underline-offset: 4px;
+  padding-block: 12px;
+}
+.product-gallery-main {
+  aspect-ratio: 4 / 5;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #e8ebdf;
+  border: 1px solid #d4d7ca;
+}
+.product-gallery-main > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.product-photo-empty {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 32px;
+  gap: 14px;
+}
+.product-photo-empty svg {
+  width: 70px;
+  height: 80px;
+  margin-bottom: 12px;
+  color: #71846a;
+}
+.product-photo-empty p {
+  font: 500 1.8rem/1.2 var(--font-display);
+}
+.product-photo-empty span {
+  max-width: 240px;
+  color: #535b4e;
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+.product-photo-caption {
+  margin-top: 12px;
+  font-size: 0.8rem;
+  color: #535b4e;
+}
+.product-gallery-thumbnails {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 8px 4px;
+  margin-top: 12px;
+}
+.product-gallery-thumbnails button {
+  border: 2px solid transparent;
+  border-radius: 10px;
+  padding: 3px;
+  flex: 0 0 70px;
+  background: transparent;
+}
+.product-gallery-thumbnails button[aria-pressed='true'] {
+  border-color: var(--color-forest);
+}
+.product-gallery-thumbnails img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+.passport-view {
+  border-top: 4px solid #a2b39a;
+}
+.passport-view > h2 {
+  margin-block: 12px 22px;
+}
+.passport-view > details {
+  margin-block: 0;
+  padding-block: 20px;
+}
+.passport-view > details > summary {
+  font-size: 1.1rem;
+}
+.passport-view > details[open] > summary {
+  margin-bottom: 18px;
+}
+@media (max-width: 800px) {
+  .listing-overview {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    margin-bottom: 36px;
+  }
+  .product-gallery-main {
+    aspect-ratio: 4 / 3;
+  }
+  .listing-heading h1 {
+    font-size: clamp(2.7rem, 8vw, 3.8rem);
+  }
+}

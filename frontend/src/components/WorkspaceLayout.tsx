@@ -7,10 +7,12 @@ import '../workspace.css'
 export function WorkspaceLayout({
   title,
   intro,
+  showHeading = true,
   children,
 }: {
   title: string
   intro?: string
+  showHeading?: boolean
   children: ReactNode
 }) {
   const session = useSession()
@@ -116,11 +118,15 @@ export function WorkspaceLayout({
         tabIndex={-1}
         className="page-width workspace-main"
       >
-        <p className="eyebrow">
-          A little more local. A little more understood.
-        </p>
-        <h1>{title}</h1>
-        {intro && <p className="workspace-intro">{intro}</p>}
+        {showHeading && (
+          <>
+            <p className="eyebrow">
+              A little more local. A little more understood.
+            </p>
+            <h1>{title}</h1>
+            {intro && <p className="workspace-intro">{intro}</p>}
+          </>
+        )}
         {children}
       </main>
       <footer className="page-width calculator-footer">
