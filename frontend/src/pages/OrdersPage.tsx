@@ -5,6 +5,9 @@ import { useSession } from '../services/session'
 import { getOrders } from '../services/commerce'
 import { useResource } from '../hooks/useResource'
 import { usd } from '../utils/presentation'
+import { RefundRequestList } from '../components/RefundRequestList'
+import { getBuyerRefundRequests } from '../services/refund-list'
+import { SellerRefundInbox } from '../components/SellerRefundInbox'
 
 export function OrdersPage() {
   const session = useSession()
@@ -23,6 +26,7 @@ export function OrdersPage() {
 }
 
 function OrderList({ sellerAllowed }: { sellerAllowed: boolean }) {
+  const [showRefunds, setShowRefunds] = useState(false)
   const [seller, setSeller] = useState(false)
   const [offset, setOffset] = useState(0)
   const resource = useResource(
@@ -58,6 +62,11 @@ function OrderList({ sellerAllowed }: { sellerAllowed: boolean }) {
         </div>
       )}
       <ErrorNotice error={resource.error} />
+      {seller && <SellerRefundInbox />}
+      {!seller && <>
+        <button className="calculator-secondary" aria-expanded={showRefunds} onClick={() => setShowRefunds(!showRefunds)}>My refund requests</button>
+        {showRefunds && <RefundRequestList title="My refund requests" loadPage={getBuyerRefundRequests} />}
+      </>}
       {resource.loading && <p role="status">Loading orders…</p>}
       {resource.data && (
         <>
