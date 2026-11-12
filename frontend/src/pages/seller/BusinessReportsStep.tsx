@@ -1,3 +1,4 @@
+import { HistorySelection } from '../../components/HistorySelection'
 import { useCallback, useState } from 'react'
 import { getAnalyses } from '../../services/seller'
 import {
@@ -91,21 +92,7 @@ export function BusinessReportsStep({ productId }: { productId: string }) {
                   }, 'Private future-order cost basis saved.')
               }}
             >
-              <label className="calculator-field">
-                Saved cost analysis
-                <select
-                  name="sales-basis"
-                  defaultValue={resource.data.basis.analysis_id ?? ''}
-                >
-                  <option value="">No cost source / clear selection</option>
-                  {resource.data.analyses.items.map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {new Date(item.created_at).toLocaleString()} ·{' '}
-                      {item.id.slice(0, 8)}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              <HistorySelection disabled={action.busy} productId={productId} kind="analyses" title="Future-order cost basis" name="sales-basis" initialValue={resource.data.basis.analysis_id ?? ''} />
               <div className="workspace-actions">
                 <button
                   type="submit"
@@ -214,32 +201,11 @@ export function BusinessReportsStep({ productId }: { productId: string }) {
                     required
                     defaultValue="30"
                   />
-                  <label className="calculator-field">
-                    Pricing source
-                    <select name="insight-analysis">
-                      <option value="">Backend’s current selection</option>
-                      {resource.data.analyses.items.map((item) => (
-                        <option value={item.id} key={item.id}>
-                          {item.id.slice(0, 8)} ·{' '}
-                          {new Date(item.created_at).toLocaleString()}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
+                  <HistorySelection disabled={action.busy} productId={productId} kind="analyses" title="Pricing source" name="insight-analysis" />
                 </div>
               )}
               {mode === 'advice' && (
-                <label className="calculator-field">
-                  Saved pricing review
-                  <select name="advice-review" required>
-                    <option value="">Choose a saved review</option>
-                    {resource.data.reviews.items.map((item) => (
-                      <option key={item.id} value={item.id}>
-                        {item.reviewed_on} · {item.id.slice(0, 8)}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                <HistorySelection disabled={action.busy} productId={productId} kind="pricing-reviews" title="Saved pricing review" name="advice-review" required />
               )}
               {mode === 'forecast' && (
                 <div className="calculator-grid">

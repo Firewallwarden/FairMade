@@ -3,7 +3,7 @@ import { integer, list, money, nullable, object, page, text } from './decode'
 
 export const getPricingReviews = (id: string, signal?: AbortSignal) =>
   privateRequest(
-    `/products/${id}/pricing-reviews?limit=100`,
+    `/products/${id}/pricing-reviews?limit=20&offset=0`,
     page((value) => {
       const data = object(value)
       return { id: text(data.id), reviewed_on: text(data.reviewed_on) }

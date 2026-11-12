@@ -1,3 +1,4 @@
+import { HistorySelection } from '../components/HistorySelection'
 import { useCallback, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { WorkspaceLayout } from '../components/WorkspaceLayout'
@@ -108,20 +109,7 @@ function StartConversation({
             <legend className="sr-only">Start assistant conversation</legend>
             {source.role === 'seller' ? (
               <>
-                <label className="calculator-field">
-                  Saved pricing source
-                  <select name="assistant-analysis">
-                    <option value="">
-                      Use review’s analysis or latest saved analysis
-                    </option>
-                    {resource.data.analyses.map((item) => (
-                      <option key={item.id} value={item.id}>
-                        {new Date(item.created_at).toLocaleString()} ·{' '}
-                        {item.id.slice(0, 8)}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                <HistorySelection productId={source.id} kind="analyses" title="Saved pricing source" name="assistant-analysis" />
                 <label className="workspace-check">
                   <input type="checkbox" name="assistant-recipe" />
                   Include my private recipe inputs in this seller-only

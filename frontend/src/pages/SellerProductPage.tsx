@@ -1,3 +1,4 @@
+import { HistorySelection } from '../components/HistorySelection'
 import { useCallback, useState } from 'react'
 import type { FormEvent } from 'react'
 import { WorkspaceLayout } from '../components/WorkspaceLayout'
@@ -253,13 +254,8 @@ function CostStep({ product }: { product: SellerProduct }) {
         {saved.loading && <p role="status">Loading saved analyses…</p>}
         {saved.data &&
           (saved.data.items.length ? (
-            <label className="calculator-field">
-              Review one of the latest 100 analyses
-              <select
-                value={savedId}
-                disabled={action.busy}
-                onChange={(event) => {
-                  const id = event.target.value
+            <HistorySelection disabled={action.busy} productId={product.id} kind="analyses" title="Saved analyses" value={savedId} onSelect={(id) => {
+
                   setSavedId(id)
                   setHistorical(null)
                   if (id)
@@ -270,17 +266,7 @@ function CostStep({ product }: { product: SellerProduct }) {
                         unit: analysis.product_snapshot.selling_unit,
                       })
                     })
-                }}
-              >
-                <option value="">Choose a saved analysis</option>
-                {saved.data.items.map((analysis) => (
-                  <option value={analysis.id} key={analysis.id}>
-                    {new Date(analysis.created_at).toLocaleString()} ·{' '}
-                    {analysis.id.slice(0, 8)}
-                  </option>
-                ))}
-              </select>
-            </label>
+                }} />
           ) : (
             <p>No saved analyses yet. Add your batch inputs below.</p>
           ))}

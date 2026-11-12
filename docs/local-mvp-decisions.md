@@ -523,6 +523,19 @@ requirements. They are not temporary compromises to remove for production.
 
 ## Updating this register
 
+### Older-record selector pagination (2026-11-12)
+
+Implemented in `feature/frontend-history-pagination`, dependent on withdrawal PR
+#84: saved analyses, quality evidence, observations/comparisons, sourcing inputs,
+quotes/reports, pricing reviews and Passport drafts have bounded 20-record pages.
+Single and multiple selections remain pinned while paging, with at most 100
+multiple selections. Publication history pages and retains an inspected snapshot.
+Older sourcing inputs load from their detail endpoint rather than searching the
+first page. Assistants and receipt quote pickers use the same paginated selectors.
+No all-history fetch or persistent browser cache is introduced. Initial source
+availability checks remain bounded. Browser selection/paging acceptance is pending
+the dedicated Playwright suite; saved historical results are not reevaluated.
+
 ### Passport withdrawal (2026-11-12)
 
 Implemented in `feature/frontend-passport-withdraw`: publication history exposes

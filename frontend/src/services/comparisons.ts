@@ -66,7 +66,7 @@ function decodeReport(value: unknown) {
 }
 export const getObservations = (id: string, signal?: AbortSignal) =>
   privateRequest(
-    `/products/${id}/price-observations?limit=100`,
+    `/products/${id}/price-observations?limit=20&offset=0`,
     page(decodeObservation),
     { signal },
   )
@@ -77,7 +77,7 @@ export const createObservation = (id: string, json: ObservationRequest) =>
   })
 export const getComparisons = (id: string, signal?: AbortSignal) =>
   privateRequest(
-    `/products/${id}/price-comparisons?limit=100`,
+    `/products/${id}/price-comparisons?limit=20&offset=0`,
     page((value) => {
       const data = object(value)
       return { id: text(data.id), as_of_date: text(data.as_of_date) }
