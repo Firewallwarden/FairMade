@@ -21,11 +21,13 @@ from fairmade.passports.schemas import (
     PublishApproval,
     ReplaceDraft,
 )
+from fairmade.private_http import NoStoreRoute
 from fairmade.schemas import ErrorResponse, Page
 
 router = APIRouter(
     prefix="/api/v1/products/{product_id}/passports",
     tags=["seller Passports"],
+    route_class=NoStoreRoute,
     responses={
         **AUTH_ERRORS,
         403: {"model": ErrorResponse},

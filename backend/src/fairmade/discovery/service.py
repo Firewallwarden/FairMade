@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from fairmade.auth import api_error
 from fairmade.availability.query import public_availability
+from fairmade.catalog_ordering import service as ordering
 from fairmade.discovery import repository
 from fairmade.discovery.schemas import AreaSearch, ListingSearch, NearbyListing, NearbyStorefront
 from fairmade.geography import ApproximateArea, distance_km
@@ -75,10 +76,13 @@ def listings(db: Session, body: ListingSearch) -> dict:
     rows = repository.listing_candidates(db, body)
     check_size(rows)
     ranked = []
+    candidates = []
     for row in rows:
         listing, profile = row[0], row[1]
         area, distance = area_distance(body, profile)
         if distance <= float(body.radius_km) + 1e-9:
+            if body.sort is not None:
+                candidates.append(ordering.candidate(row))
             ranked.append(
                 (
                     distance,
@@ -91,4 +95,16 @@ def listings(db: Session, body: ListingSearch) -> dict:
                     ),
                 )
             )
+    if body.sort is not None:
+        scope = ordering.options(body.sort, body.product_type, body.reference_unit)
+        selected = ordering.ranked(candidates, scope)
+        identifiers, metadata = selected.page(body.limit, body.offset)
+        by_id = {item[1]: item[2] for item in ranked}
+        return {
+            "items": [by_id[identifier] for identifier in identifiers],
+            "limit": body.limit,
+            "offset": body.offset,
+            "notices": NOTICES,
+            "ordering": metadata,
+        }
     return page(body, ranked)

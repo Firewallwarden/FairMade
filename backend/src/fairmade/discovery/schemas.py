@@ -1,17 +1,19 @@
 """Read-only search bodies keep transient buyer coordinates out of URLs."""
 
 from decimal import Decimal
-from typing import Annotated, Generic, Literal, TypeVar
+from typing import Annotated, Generic, Literal, Self, TypeVar
 from uuid import UUID
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from fairmade.availability.schemas import AvailabilityStatus
+from fairmade.catalog_ordering.schemas import OrderingMetadata, OrderingOptions, SortMode
 from fairmade.geography import ApproximateArea, SearchOrigin
 from fairmade.marketplace.schemas import CatalogCard
 from fairmade.pricing.schemas import Contract, Label
 from fairmade.schemas import ProductType
 from fairmade.storefronts.schemas import PublicStorefront
+from fairmade.unit_pricing.schemas import ReferenceUnit
 
 
 class AreaSearch(Contract):
@@ -25,6 +27,18 @@ class AreaSearch(Contract):
 class ListingSearch(AreaSearch):
     product_type: ProductType | None = None
     availability: AvailabilityStatus | None = None
+    sort: SortMode | None = None
+    reference_unit: ReferenceUnit | None = None
+
+    @model_validator(mode="after")
+    def ordering_scope(self) -> Self:
+        if self.sort is not None or self.reference_unit is not None:
+            OrderingOptions(
+                mode=self.sort or "newest",
+                product_type=self.product_type,
+                reference_unit=self.reference_unit,
+            )
+        return self
 
 
 class NearbyStorefront(Contract):
@@ -48,3 +62,4 @@ class DiscoveryPage(Contract, Generic[T]):
     offset: int
     distance_basis: Literal["approximate_area_great_circle"] = "approximate_area_great_circle"
     notices: list[str]
+    ordering: OrderingMetadata | None = None

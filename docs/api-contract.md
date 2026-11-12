@@ -2,6 +2,91 @@
 
 ## Status and common conventions
 
+Saved cost calendars are an additive backend proposal at POST
+/api/v1/products/{product_id}/cost-calendar, with strict months one through
+thirty-six (default twenty-four). Seller questions/saved scopes accept optional
+cost_calendar. Closed save-month snapshots and annual comparisons are descriptive;
+validated seasonality is not claimed. See
+[the exact scope, missing evidence and handoff](saved-cost-calendar.md).
+
+Conditional price recommendations are an additive backend proposal at POST
+/api/v1/products/{product_id}/pricing-recommendations with an owned review_id.
+Seller questions/saved scopes accept pricing_review_id, pinning its analysis.
+The range combines explicit economics/context after current quality gates;
+no price is selected or published. See
+[the policy, exact bounds, units and handoff](conditional-pricing-recommendations.md).
+
+Ingredient/material explanations are an additive backend proposal. Passport
+drafts accept optional composition and disclosures.include_composition, hidden
+by default and published only through exact-preview approval. Buyer answers use
+approved declarations; seller questions/scopes can opt into include_recipe_inputs
+for private production-input explanations. See
+[the fields, privacy, compatibility and frontend handoff](composition-explanations.md).
+
+Supplier review recommendations are an additive backend proposal at POST
+/api/v1/products/{product_id}/supplier-recommendations. Seller questions and
+saved scopes accept recommendations alongside supplier_report_id. Mandatory
+eligibility precedes savings/quality/balanced modes; selection does not approve
+a finished-product substitution. See [the modes, exact objectives and handoff](supplier-recommendation-modes.md).
+
+Seller insight reports are an additive backend proposal at POST
+/api/v1/products/{product_id}/insights. Seller questions and saved scopes accept
+optional insights with a bounded period_days. Reports cover current modeled
+margin warnings, saved cost changes, reviewed expenses, production output and
+recorded material waste; they do not mutate business data or send notifications.
+See [the insight contract, privacy and limits](seller-insights.md).
+
+Public listing pages now propose optional sort modes newest, price_asc,
+price_desc, quality, unit_price and value across catalog, storefront listings
+and nearby listing search. Unit/value ordering requires a product type and
+reference unit, and ordered pages add explicit public-evidence metadata.
+See [ordering policy, unknowns, bounds and frontend handoff](marketplace-ordering.md).
+No migration is required; shared frontend acceptance remains pending.
+
+Order-bound buyer/seller messages are an additive backend proposal at
+/api/v1/orders/{order_id}/messages (GET/POST): private participant access,
+retry-safe sends and cursor history. Apply migration 0029 after 0028. See
+[message schemas, privacy, limits and frontend handoff](order-messaging.md).
+Pre-purchase inquiries are explicitly a later improvement; frontend acceptance
+remains pending. Messages do not change commerce state or feed AI memory.
+
+Observed-sales forecasting is an additive backend proposal at
+POST /api/v1/products/{product_id}/forecasts. Seller questions and saved seller
+scopes add optional forecast: {lookback_days, horizon_days}; exact unit baselines
+are read-only and use backend-verified sandbox sales only. See
+[source limits, formulas, memory and frontend handoff](observed-sales-forecast.md).
+No new migration is required beyond 0026; frontend acceptance remains pending.
+
+Read-only product pair suggestions are an additive backend proposal at POST
+/api/v1/buyer/bundles/suggest and POST /api/v1/seller/bundles/suggest. Buyer
+questions/scopes accept exactly one listing_ids, basket or bundles scope;
+seller questions/scopes accept optional bundles anchored to their owned product.
+See [prices, ranking, privacy, memory and handoff](product-bundle-suggestions.md).
+No new migration or automatic promotion/purchase is introduced.
+
+Single-storefront basket planning is an additive backend proposal at
+POST /api/v1/buyer/baskets/optimize. Buyer assistant questions and saved buyer
+scopes now accept either the existing listing_ids or a basket request. See
+[quantities, exact optimization, memory, exclusions and handoff](buyer-basket-optimization.md).
+No new migration is required beyond 0028. Frontend acceptance remains pending;
+multi-seller shopping plans are explicitly deferred for later enhancement.
+
+Opt-in buyer personalization is an additive backend proposal at
+/api/v1/buyer/personalization (GET/PUT/DELETE), /suggestions (POST) and /remember
+(POST). Confirmed profile memory, current favorites and verified sandbox
+purchase signals now inform buyer answers. See
+[consent, memory, ranking and frontend handoff](buyer-personalization.md).
+Migration 0028 is required; frontend integration remains pending.
+
+Receipt extraction/review is an additive backend proposal under
+/api/v1/seller/receipt-drafts, with owner GET /api/v1/seller/expenses.
+Drafts require explicit seller approval before an immutable expense is recorded.
+See [the receipt contract, local setup and frontend handoff](receipt-expenses.md).
+Migration 0027 is required. Frontend acceptance and real image OCR validation
+remain pending; existing cost and sales APIs are unchanged.
+Seller history questions now add owner-only reviewed receipt expense aggregates.
+See [scope, period and double-counting limits](assistant-receipt-expenses.md).
+
 The account, seller-application, product, saved-analysis, quality, comparison, review, Passport, marketplace, inventory, order, sandbox-payment, refund, supplier-sourcing, seller-sales, favorite, and storefront endpoints
 below are implemented by the backend for **local development**. Their shared integration contract is
 **accepted for the local demo** for accounts/sessions, seller applications,
@@ -19,6 +104,35 @@ refresh or Remember me. Reload requires login; the fixed backend expiry and
 logout revocation remain authoritative. Seller access requires the existing
 manual administrator review. No endpoint or payload changes are authorized by
 this acceptance.
+
+Local seller and buyer assistant endpoints are also implemented as an opt-in
+backend foundation. Their additive HTTP proposal, source boundaries, response
+fields, error codes and frontend rendering requirements are specified in
+[the local assistant contract](local-assistants.md).
+POST /api/v1/assistants/seller accepts question, product_id and optional
+analysis_id/supplier_report_id. POST /api/v1/assistants/buyer accepts question
+and either one to four unique listing_ids or a basket scope. Both require bearer authentication; seller
+questions additionally require verified seller access and product ownership.
+Responses separate deterministic facts from cited qualitative AI paragraphs
+and return allowlisted evidence and notices. Model prose must not replace the
+exact financial facts. Frontend integration remains pending.
+Seller questions additionally support bounded sales and saved cost-history
+evidence through optional history_period and documented relative-period phrases.
+See [the sales/history extension](assistant-sales-history.md).
+Selected supplier reports now include explicit eligibility/exclusion explanations,
+current claim checks and eligible-only cost minima with ties. See
+[the supplier explanation extension](assistant-supplier-explanations.md).
+Private AI description generation and exact seller review use separate
+/api/v1/products/{product_id}/description-drafts routes. Generation never edits
+or publishes a product; explicit approval applies only the private description.
+See [the draft/review contract](ai-description-drafts.md).
+
+Saved owner-bound seller/buyer conversations are an additive backend proposal
+under /api/v1/assistants/conversations: create/list/get/delete, plus POST/GET
+/{id}/turns. Scope is fixed, retries and revisions are explicit, and current
+evidence is revalidated. Apply migration 0026. See
+[the full conversation contract and browser handoff](assistant-conversations.md).
+The original question endpoints remain stateless; frontend acceptance is pending.
 
 **Authorization change from #5:** registration now creates a buyer account.
 Private product/history endpoints require the seller role and return 403 until
