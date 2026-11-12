@@ -545,6 +545,17 @@ saved state; existing order snapshots and previously received copies remain.
 This is distinct from listing deactivation and storefront withdrawal. The initial
 history uses the existing bounded endpoint; older-history pagination is a separate
 requested feature. Live browser acceptance remains pending the Playwright suite.
+### Saved Passport draft editing (2026-11-12)
+
+Implemented in `feature/frontend-passport-edit`: sellers can load owned drafts,
+edit title, price, description and disclosure policy, and save against the loaded
+revision. Saved review and composition content are preserved. Editing invalidates
+publication previews; saving or reloading enables a fresh server preview and
+explicit approval. Stale writes remain backend-rejected and the editor offers a
+reload that discards unsaved edits. Existing published snapshots are unchanged.
+Composition content editing and review replacement remain outside this editor;
+create a new draft for those changes. Build, lint and 45 unit tests passed;
+live browser acceptance is pending the dedicated browser suite.
 
 For a new tradeoff, record the confirmed decision or documented limit, its source,
 implementation status, consequences, and the trigger/follow-up for revisiting it.

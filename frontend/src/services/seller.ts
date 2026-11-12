@@ -24,6 +24,7 @@ import type { QualityRule } from './quality-contract'
 import { decodeCatalogContent, decodePassport } from './catalog-contract'
 import type { PricingRequest } from '../types/pricing'
 import { ApiError } from './http'
+import { decodeEditablePassport } from './passport-contract'
 
 export function decodeProduct(value: unknown) {
   const data = object(value)
@@ -216,6 +217,13 @@ export const createPassport = (id: string, json: PassportRequest) =>
   privateRequest(`/products/${id}/passports`, decodeDraft, {
     method: 'POST',
     json,
+  })
+export const getPassportDraft = (id: string, draft: string) =>
+  privateRequest(`/products/${id}/passports/${draft}`, decodeEditablePassport)
+export const updatePassportDraft = (id: string, draft: string, revision: number, json: PassportRequest) =>
+  privateRequest(`/products/${id}/passports/${draft}`, decodeEditablePassport, {
+    method: 'PUT',
+    json: { ...json, expected_revision: revision },
   })
 export const getPassportDrafts = (id: string, signal?: AbortSignal) =>
   privateRequest(`/products/${id}/passports?limit=20&offset=0`, page(decodeDraft), {
