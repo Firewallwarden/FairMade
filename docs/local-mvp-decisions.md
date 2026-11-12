@@ -30,12 +30,27 @@ memory-only browser sessions, and updates to these two shared documents.
 Reloading requires login; tokens are never written to browser storage and are
 not refreshed. Backend expiry, revocation and manual seller approval still apply.
 
-The initial stateless cost calculator builds, passes lint and eight service/contract
-tests. Browser checks covered validation, errors, synthetic-response rendering,
-result invalidation and a 390px layout. These are frontend checks, not proof of
-live backend calculations or credentialed PayPal capture. Subsequent milestones
-will update actual verification evidence here. Broader backend contracts and
-production session/storage changes remain outside this acceptance.
+The dedicated frontend demo worktree now implements account access, seller
+products/saved analyses, Quality Locks, sourced comparisons, exact disclosure
+approvals, marketplace browsing and buyer/seller orders. Build, lint and 14
+frontend tests pass. A further 460 targeted backend tests pass with provider
+doubles; existing dependency warnings remain. Chrome exercised real FastAPI
+against an isolated migrated demo database, including the documented separate
+administrator approval, product/pricing/publication, search, privacy, reservation,
+cancellation/stock release and comparison-to-Passport paths. Initial synthetic
+rendering checks are retained as history, not claimed as live backend results.
+
+PayPal sandbox SDK/capture/reconciliation UI is wired, but the local backend
+reports payments disabled. Credentialed browser approval/capture and recovery
+remain unverified until its owner supplies server-only sandbox configuration.
+No backend source was edited. The frontend feature branches were published on
+2026-11-10 after synchronization and validation. No merge into main, deployment,
+live payment or production readiness is claimed. See the [frontend checklist](../frontend/INTEGRATION.md)
+for the remaining secondary UI slices and actual verification limits. Reload
+intentionally loses the memory-only session and any in-flight reservation retry
+key; check Orders after an uncertain request before creating another reservation.
+Broader backend contracts and production session/storage changes remain outside
+this acceptance.
 
 | ID | Choice and evidence | Current status and limits | Follow-up / review trigger |
 | --- | --- | --- | --- |
@@ -446,7 +461,7 @@ each detail or approved a production replacement.
 | MVP-009 | USD-only deterministic economics; explicit modeled fees; limited unit conversions and bounded requests/reports. [Economics formulas and limits](fair-price-engine.md). | Implemented. Taxes, shipping, discounts and multi-currency settlement are not modeled in checkout totals. | Before broader commerce: agree tax/shipping/discount rules and supported currencies/units, exact rounding and provider reconciliation. Do not invent fees or exchange rates. |
 | MVP-010 | Manually entered unverified market/supplier evidence and deterministic quality checks; external price retrieval and verification deferred. [Engine roadmap](fair-price-engine.md). | Implemented provenance/freshness, Quality Locks, reports and approved Passports. Original no-LLM boundary is superseded only by approved local assistant MVP-021. A passing claim check or publication is not certification or objective fairness. | Review approved sources, verification, freshness and quality equivalence before external integrations/recommendations. New provider spending/infrastructure still require approval. |
 | MVP-011 | Sellable-product stock/holds are implemented, but raw-material inventory, production consumption, fulfillment and return restocking are separate. [Order/inventory contract](api-contract.md). | Implemented local commerce foundation. Refunds do not automatically reverse production costs or restock. | Define production and fulfillment workflows and stock reconciliation before coupling these features. Test concurrency, expiry, retries and recovery at the intended usage level. |
-| MVP-012 | Backend JSON APIs/examples exist; shared frontend contract acceptance and real browser/end-to-end integration remain pending. [API contract status](api-contract.md). | Backend-tested local implementation; this register does not claim a working frontend or successful provider/browser checkout. | Coordinate frontend acceptance, browser session/CORS/payment behavior and end-to-end checks before calling a user journey complete. |
+| MVP-012 | Backend JSON APIs/examples originally awaited frontend acceptance/integration. [API contract status](api-contract.md). | Demo contracts accepted 2026-11-09; real frontend/browser integration now covers accounts, seller pricing/publication, market and unpaid orders in an isolated database. Credentialed PayPal approval/capture remains pending. | Complete the sandbox browser payment/recovery checks and remaining secondary UI slices before claiming the full user journey complete. |
 | MVP-013 | Nearby search uses manually chosen points at most two decimal places, straight-line spherical distance, a 1..500 km radius, and a 1,000-candidate bounding-box limit. [Discovery #26](https://github.com/Firewallwarden/FairMade/pull/26). | Integrated into main by #26. No maps/geocoding service or buyer-location storage. Results do not guarantee travel distance, pickup address, anonymity or stock. A too-broad query errors explicitly rather than returning a truncated nearest-first page. | Improve location entry and spatial search as usage grows; review radius/precision policy and disclosure UX with the frontend. Choose any provider/infrastructure separately. Keep privacy, bounded requests and current publication/authorization checks when replacing this implementation. |
 
 ## Confirmed product model decisions

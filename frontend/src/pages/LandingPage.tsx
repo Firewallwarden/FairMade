@@ -4,7 +4,6 @@ import { Brand } from '../components/Brand'
 import { Botanical } from '../components/Botanical'
 import { LeafSprig } from '../components/LeafSprig'
 import { RoleSwitch } from '../components/RoleSwitch'
-import { SignupPreview } from '../components/SignupPreview'
 import { ProductCard } from '../components/ProductCard'
 import { getFeaturedProducts } from '../services/products'
 import type { AccountRole } from '../types/account'
@@ -14,48 +13,46 @@ const currentYear = new Date().getFullYear()
 const buyerSteps = [
   [
     'Find your kind of good.',
-    'A vision for discovering the backyard growers, small bakeries, and independent shops that make a neighborhood feel like home.',
+    'Browse seller-approved listings from the growers, bakers, and independent makers building their place at the market.',
   ],
   [
     'Get to know the price.',
-    'Our planned Fair Price Passport will share seller-approved cost details, distinguish estimates from evidence, and explain what’s still unknown.',
+    'Open the Fair Price Passport to see seller-approved cost details, reported quality standards, and what’s still unknown.',
   ],
   [
     'Choose with understanding.',
-    'See the work behind what you buy, ask better questions, and decide what matters to you. Shopping and checkout are still to come.',
+    'Review a backend-calculated subtotal and reserve stock. PayPal sandbox checkout is available when the backend is configured.',
   ],
 ]
 const sellerSteps = [
   [
     'Start with what you make.',
-    'A dozen eggs, your first sourdough loaves, a small batch of soap. The future seller workspace starts with your goods and your inputs.',
+    'A dozen eggs, your first sourdough loaves, a small batch of soap. Create a private product after your seller application is approved.',
   ],
   [
     'Make room for your work.',
-    'Planned pricing tools will account for materials, time, and overhead, with estimates clearly labeled and your quality requirements protected.',
+    'Account for materials, time, and overhead. Save a cost analysis, set your Quality Locks, and review clearly labeled backend estimates.',
   ],
   [
     'Tell the story behind it.',
-    'You’ll choose which cost details to share with buyers. Publishing, pricing analysis, and payments are still being built.',
+    'Choose which cost details to share, review the public Passport and listing, and explicitly approve what reaches buyers.',
   ],
 ]
 
 export function LandingPage() {
   const [role, setRole] = useState<AccountRole>('buyer')
-  const [accountRole, setAccountRole] = useState<AccountRole>('buyer')
   const [heroFailed, setHeroFailed] = useState(false)
   const buyer = role === 'buyer'
 
   function switchRole(next: AccountRole) {
     setRole(next)
-    setAccountRole(next)
     setHeroFailed(false)
   }
 
   return (
     <div id="home">
       <Header role={role} />
-      <main id="main">
+      <main id="main" tabIndex={-1}>
         <section className="hero page-width" aria-labelledby="welcome-heading">
           <div className="hero-copy">
             <RoleSwitch role={role} onChange={switchRole} />
@@ -89,7 +86,7 @@ export function LandingPage() {
               <div className="hero-actions">
                 <a
                   className="button-primary"
-                  href={buyer ? '#marketplace' : '#create-account'}
+                  href={buyer ? '#/market' : '#/seller'}
                 >
                   {buyer
                     ? 'Take a look around'
@@ -250,6 +247,9 @@ export function LandingPage() {
                 USD prices are illustrative; photos don’t verify product claims
                 or local availability.
               </p>
+              <a className="button-primary" href="#/market">
+                Explore current listings
+              </a>
             </>
           ) : (
             <div className="maker-grid">
@@ -317,11 +317,11 @@ export function LandingPage() {
                 </h2>
               </div>
               <p className="coming-note">
-                What we’re growing toward
+                Try the local demo
                 <br />
                 <span>
-                  Pricing tools, live listings, and checkout are coming in
-                  future releases.
+                  Cost analysis and approved listings use the backend. Checkout
+                  requires server-side PayPal sandbox setup.
                 </span>
               </p>
             </div>
@@ -339,8 +339,10 @@ export function LandingPage() {
                 ),
               )}
             </div>
-            <a className="text-link" href="#create-account">
-              {buyer ? 'Make yourself at home' : 'Explore the seller signup'}{' '}
+            <a className="text-link" href="#/account">
+              {buyer
+                ? 'Make yourself at home'
+                : 'Start your seller application'}{' '}
               <span aria-hidden="true">↗</span>
             </a>
           </div>
@@ -371,11 +373,17 @@ export function LandingPage() {
           <Botanical className="promise-botanical mirrored" />
         </section>
 
-        <SignupPreview
-          key={role}
-          role={accountRole}
-          onRoleChange={setAccountRole}
-        />
+        <section id="create-account" className="page-width workspace-panel">
+          <p className="eyebrow">There’s room for your kind of good</p>
+          <h2>Find your place at the market.</h2>
+          <p>
+            Create a buyer account or sign in. Makers can request seller access
+            for manual review.
+          </p>
+          <a className="button-primary" href="#/account">
+            Sign in or join FairMade
+          </a>
+        </section>
       </main>
       <footer className="page-width site-footer">
         <div>
@@ -383,13 +391,15 @@ export function LandingPage() {
           <p>A little more local. A little more understood.</p>
         </div>
         <div className="footer-links">
-          <a href="#marketplace">{buyer ? 'The market' : 'For our makers'}</a>
+          <a href={buyer ? '#/market' : '#/seller'}>
+            {buyer ? 'The market' : 'For our makers'}
+          </a>
           <a href="#our-promise">Our promise</a>
-          <a href="#create-account">Find your place ↗</a>
+          <a href="#/account">Find your place ↗</a>
         </div>
         <div className="footer-bottom">
           <p>© {currentYear} FairMade · A farmers market in the making.</p>
-          <p>Frontend preview · Built for the PayPal AI Hackathon</p>
+          <p>Local demo · PayPal sandbox only</p>
         </div>
       </footer>
     </div>
