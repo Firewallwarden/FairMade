@@ -523,6 +523,15 @@ requirements. They are not temporary compromises to remove for production.
 
 ## Updating this register
 
+### Itemized sales reporting (2026-11-12)
+
+Implemented in `feature/frontend-sales-report`: the seller dashboard exposes a
+date-filtered, paginated order-level report using backend-provided economics.
+Unknown fees/costs/profit stay null; backend reasons, warnings and frozen source
+details remain visible. The report explains UTC capture periods and refunds known
+at report time, and links to seller orders. It does not calculate actual earnings
+or call payment providers. Live browser acceptance remains pending Playwright.
+
 ### Reopening complete pricing reviews (2026-11-12)
 
 Implemented in `feature/frontend-pricing-review-history`: sellers can paginate
