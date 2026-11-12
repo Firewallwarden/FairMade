@@ -50,7 +50,7 @@ Follow [local development](../docs/local-development.md) for persistent services
 
 On 2026-11-12, the review website at http://127.0.0.1:5174/ was checked in Chromium:
 its source metadata matched published browser PR #96 head
-`b3a2116a8c63c0e8dc62e69b4ac013c2e0d7bc38` and reported `clean`.
+`fb23ce16c894f0640fd9f9fc72a73f2b06df3e2a` and reported `clean`.
 The marketplace rendered and its API proxy returned 200 from the retained backend
 on port 8000. The separate central frontend on port 5173 still serves snapshot
 `16309c03ab36f445b30ed710aece35c13ee95543`; use port 5174 to review the new features.
