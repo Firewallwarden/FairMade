@@ -523,6 +523,16 @@ requirements. They are not temporary compromises to remove for production.
 
 ## Updating this register
 
+### Radius-based product discovery (2026-11-12)
+
+Implemented in `feature/frontend-radius-discovery`: marketplace search supports
+transient user-entered coordinates and radius through the agreed POST endpoint.
+Supported query/type/availability/order filters and pagination are retained;
+location-label filtering is disabled in radius mode because that endpoint does not
+accept it. Distances and backend notices identify approximate seller-chosen areas,
+not addresses or travel routes. No geolocation permission, coordinate URL/storage,
+or new mapping service is introduced. Browser acceptance remains pending Playwright.
+
 ### Seller cancellation (2026-11-12)
 
 Implemented in `feature/frontend-seller-cancel`: sellers can request cancellation
