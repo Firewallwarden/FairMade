@@ -36,7 +36,9 @@ retry history instead of deleting rows to bypass the guard.
 
 Start from the [order workflow](../orders/README.md) but do not cancel the order.
 Its variables are $api, $order and $buyerHeaders. The snippet below is synthetic
-integration guidance and has not been executed against a credentialed merchant.
+integration guidance. The [verification report](../../../docs/paypal-verification.md)
+records the real backend recovery check and successful manual SDK browser purchase,
+including tested revisions and limitations.
 
 ```powershell
 $checkoutUrl = "$api/orders/$($order.id)/paypal-checkout"
@@ -58,8 +60,11 @@ credentials or send client totals to the backend.
 
 Verify a completed record, a paid order, one inventory deduction and consistent
 history. Also try denying approval, double clicks, retries and an expired order.
-The automated suite covers these through mocks; actual sandbox approval/capture
-and browser checks still require local configuration and integration.
+The automated suite covers these through mocks. A successful credentialed browser
+purchase is recorded in the verification report; configure and use that same SDK
+flow in the demonstration. Opening a raw approval shortcut without its SDK
+callback or a configured redirect return flow does not establish browser
+completion, even when PayPal reports the order APPROVED.
 
 ## Recover uncertain results
 
