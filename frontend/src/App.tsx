@@ -51,6 +51,7 @@ const MaterialsPage = lazy(() =>
 const LivestockPage = lazy(() =>
   import('./pages/LivestockPage').then((m) => ({ default: m.LivestockPage })),
 )
+const AdminApplicationsPage = lazy(() => import('./pages/AdminApplicationsPage').then(m => ({ default: m.AdminApplicationsPage })))
 
 export default function App() {
   return (
@@ -81,6 +82,7 @@ function AppRoutes() {
     const titles: Record<string, string> = {
       pricing: 'Cost calculator',
       account: 'Your account',
+      'admin-applications': 'Seller application review',
       seller: 'Seller workspace',
       market: 'The market',
       orders: 'Your orders',
@@ -114,6 +116,9 @@ function AppRoutes() {
     }
   }, [calculator, route, session?.account.id])
   if (calculator) return <PricingPage />
+  if (route === '#/admin-applications') return <AdminApplicationsPage key={session?.account.id ?? 'guest'} />
+  const applicationId = route.match(/^#\/admin-applications\/([a-f0-9-]{36})$/i)?.[1]
+  if (applicationId) return <AdminApplicationsPage key={`${session?.account.id}-${applicationId}`} id={applicationId} />
   const livestock = route.match(
     /^#\/livestock\/(groups|animals)(?:\/([a-f0-9-]{36}))?$/i,
   )

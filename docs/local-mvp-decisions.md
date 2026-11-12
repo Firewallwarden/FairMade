@@ -523,6 +523,16 @@ requirements. They are not temporary compromises to remove for production.
 
 ## Updating this register
 
+### Administrator verification UI (2026-11-12)
+
+Implemented in `feature/frontend-admin-verification`: current administrators have
+a paginated application queue and detail/decision screen linked from Account.
+Decisions submit expected_revision, outcome and applicant-visible reason, require
+confirmation, and reload stale conflicts for review. Self-review is disabled in
+the UI and denied authoritatively by the backend. No bootstrap, new criteria,
+certification claim or role-grant shortcut is introduced. Final decisions remain
+terminal in this local MVP. Browser/permission acceptance remains pending Playwright.
+
 ### Pickup history (2026-11-12)
 
 Implemented in `feature/frontend-pickup-history`: buyers and verified sellers can
