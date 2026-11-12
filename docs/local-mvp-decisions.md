@@ -523,6 +523,15 @@ requirements. They are not temporary compromises to remove for production.
 
 ## Updating this register
 
+### Reopening complete pricing reviews (2026-11-12)
+
+Implemented in `feature/frontend-pricing-review-history`: sellers can paginate
+saved reviews and reopen recorded economics, Quality Lock/market context,
+explanations and warnings. Complete private evidence snapshots remain inspectable.
+Reopening does not reevaluate source age, current requirements or prices; historical
+and unverified status stays explicit. Selection survives pagination. Live browser
+acceptance remains pending Playwright.
+
 ### Historical quality evaluation inspection (2026-11-12)
 
 Implemented in `feature/frontend-quality-history`: paginated saved evaluations

@@ -17,6 +17,7 @@ import { ErrorNotice } from '../../components/Feedback'
 import { EvidenceDetails } from '../../components/EvidenceDetails'
 import { fieldValue } from '../../utils/form'
 import { usd } from '../../utils/presentation'
+import { PricingReviewHistory } from './PricingReviewHistory'
 
 type Reports =
   | { kind: 'insights'; data: Awaited<ReturnType<typeof getInsights>> }
@@ -64,6 +65,7 @@ export function BusinessReportsStep({ productId }: { productId: string }) {
         Missing evidence remains unknown.
       </p>
       <ErrorNotice error={resource.error || action.error} />
+      <PricingReviewHistory productId={productId} />
       {resource.loading && <p role="status">Loading report sources…</p>}
       {resource.data && (
         <>
