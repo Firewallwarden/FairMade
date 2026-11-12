@@ -8,15 +8,33 @@ establish that the separate frontend SDK/browser integration is working.
 
 ## Current status
 
-On 2026-11-11, none of the five sandbox settings was configured in the agent's
-process, user/machine environments or standard project-local environment files.
-No credentialed PayPal request, approval, capture or refund has been verified.
-Offline adapter/refund tests and approval-link checks are separate evidence;
-their passing result must not be advertised as a real sandbox transaction.
-The targeted offline suite passed 89 tests with the one real-provider case
-skipped. Launcher syntax and rejection of live settings before execution passed.
-After malformed provider metadata cases were added, the approval-link checks
-were rerun separately: twelve passed, with the real-provider case still skipped.
+On 2026-11-11, credentials were configured in a local file outside Git and the
+buyer approved a USD 34.00 sandbox order. Real backend capture and the
+seller-approved full refund were verified, together with capture/refund retry
+safety, inventory settlement once and no automatic restocking on refund.
+
+The original test run stopped on a provider read timeout during approval polling.
+PayPal subsequently reported that same order as APPROVED, despite the checkout
+page displaying a spinner. Recovery reopened the retained database, logged into
+its existing synthetic accounts, and exercised the normal FairMade capture and
+refund APIs against that original provider order. It created no replacement order
+and bypassed no payment, ownership, expiry or verification rules. The local
+recovery report is retained at
+`backend/.pytest_cache/paypal-sandbox/run-20261111-224418/resume-result.json`.
+This is successful backend recovery evidence, not an uninterrupted pytest pass
+or proof of the separate frontend SDK/browser integration.
+
+The verifier now overrides the shared offline fixture only inside its explicitly
+opted-in module; ordinary tests still disable real PayPal. Approval polling
+retries read-only provider failures within the original ten-minute deadline.
+An unexpected order state or unconfirmed approval stops the check and retains
+history. Offline adapter/refund tests remain separate evidence and do not
+substitute for a credentialed sandbox transaction.
+
+After these verifier fixes, the offline payment/refund suite passed 98 tests
+with the opt-in provider case skipped. Ruff lint and formatting checks passed
+for the three changed test/helper modules. No additional transaction was created
+to obtain these regression results.
 
 ## Local configuration
 
