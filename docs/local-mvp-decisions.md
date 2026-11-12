@@ -677,3 +677,13 @@ superseded entries with a replacement link rather than deleting their rationale.
 Review this log before planning hosted deployment, live payments, or a feature
 that relies on a listed limitation. New unresolved product choices still require
 the user's answer.
+
+### Frontend navigation and acceptance handoff (2026-11-12)
+
+`docs/frontend-completion-handoff` updates frontend README, integration map and
+demo checklist to reflect implemented assistants, receipts, refunds and newer
+seller tools. Current browser evidence is linked explicitly, with provider gates
+and historical backend evidence distinguished. No disabled-provider or unexecuted
+case is described as a successful current browser workflow. Prerequisites #83-#96
+were verified on main and this branch refreshed before final review. Runtime
+source identity and retained-data checks remain separate from provider acceptance.
