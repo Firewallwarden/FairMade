@@ -11,6 +11,8 @@ import { PublishStep } from './seller/PublishStep'
 import { ComparisonStep } from './seller/ComparisonStep'
 import { PresentationStep } from './seller/PresentationStep'
 import { DescriptionStep } from './seller/DescriptionStep'
+import { BusinessReportsStep } from './seller/BusinessReportsStep'
+import { SuppliersStep } from './seller/SuppliersStep'
 import { useSession } from '../services/session'
 import {
   getAnalyses,
@@ -50,7 +52,13 @@ function ProductWorkspace({ id }: { id: string }) {
     useCallback((signal) => getProduct(id, signal), [id]),
   )
   const [step, setStep] = useState<
-    'calculate' | 'quality' | 'compare' | 'publish' | 'present'
+    | 'calculate'
+    | 'quality'
+    | 'compare'
+    | 'publish'
+    | 'present'
+    | 'supply'
+    | 'reports'
   >('calculate')
   const action = useAction()
 
@@ -70,7 +78,11 @@ function ProductWorkspace({ id }: { id: string }) {
   return (
     <>
       <a href="#/seller">← Your products</a>
-      <div className="workspace-actions"><a className="button-primary" href={`#/assistant/seller/${id}`}>Ask FairMade about this product</a></div>
+      <div className="workspace-actions">
+        <a className="button-primary" href={`#/assistant/seller/${id}`}>
+          Ask FairMade about this product
+        </a>
+      </div>
       <ErrorNotice error={resource.error || action.error} />
       {resource.loading && <p role="status">Loading product…</p>}
       {action.notice && (
@@ -124,7 +136,27 @@ function ProductWorkspace({ id }: { id: string }) {
             </details>
           </section>
           <nav className="workspace-actions" aria-label="Product workflow">
-            <button className="calculator-secondary" aria-current={step === 'present' ? 'step' : undefined} onClick={() => setStep('present')}>Photos & description</button>
+            <button
+              className="calculator-secondary"
+              aria-current={step === 'supply' ? 'step' : undefined}
+              onClick={() => setStep('supply')}
+            >
+              Supplier savings
+            </button>
+            <button
+              className="calculator-secondary"
+              aria-current={step === 'reports' ? 'step' : undefined}
+              onClick={() => setStep('reports')}
+            >
+              Business reports
+            </button>
+            <button
+              className="calculator-secondary"
+              aria-current={step === 'present' ? 'step' : undefined}
+              onClick={() => setStep('present')}
+            >
+              Photos & description
+            </button>
             <button
               className="calculator-secondary"
               aria-current={step === 'calculate' ? 'step' : undefined}
@@ -155,9 +187,16 @@ function ProductWorkspace({ id }: { id: string }) {
             </button>
           </nav>
           {step === 'calculate' && <CostStep product={resource.data} />}
+          {step === 'supply' && <SuppliersStep productId={id} />}
+          {step === 'reports' && <BusinessReportsStep productId={id} />}
           {step === 'quality' && <QualityStep productId={id} />}
           {step === 'compare' && <ComparisonStep product={resource.data} />}
-          {step === 'present' && <><PresentationStep productId={id} /><DescriptionStep productId={id} onApplied={resource.reload} /></>}
+          {step === 'present' && (
+            <>
+              <PresentationStep productId={id} />
+              <DescriptionStep productId={id} onApplied={resource.reload} />
+            </>
+          )}
           {step === 'publish' && <PublishStep product={resource.data} />}
         </>
       )}
