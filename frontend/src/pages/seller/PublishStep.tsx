@@ -32,6 +32,12 @@ import { comparisonUnits, sellingUnits } from '../../types/contracts'
 import { choice } from '../../services/decode'
 import { CompositionFields } from './CompositionFields'
 import { readComposition } from '../../utils/composition'
+import { PassportPublications } from './PassportPublications'
+import { getCatalogListing } from '../../services/commerce'
+import { ApiError } from '../../services/http'
+
+import { PassportEditor } from './PassportEditor'
+import { getPassportDraft } from '../../services/seller'
 
 const disclosureLabels = {
   include_labor: 'Labor cost per unit',
@@ -72,10 +78,13 @@ export function PublishStep({ product }: { product: SellerProduct }) {
     ReturnType<typeof createReview>
   > | null>(null)
   const [draftId, setDraftId] = useState('')
+  const [editableDraft, setEditableDraft] = useState<Awaited<ReturnType<typeof getPassportDraft>> | null>(null)
+  const [draftSaved, setDraftSaved] = useState(false)
   const [preview, setPreview] = useState<Awaited<
     ReturnType<typeof getPassportPreview>
   > | null>(null)
   const [publication, setPublication] = useState('')
+  const [passportWithdrawn, setPassportWithdrawn] = useState(false)
   const [listingPreview, setListingPreview] = useState<Awaited<
     ReturnType<typeof getListingPreview>
   > | null>(null)
@@ -85,12 +94,24 @@ export function PublishStep({ product }: { product: SellerProduct }) {
     ReturnType<typeof getInventory>
   > | null>(null)
   const [publishedListing, setPublishedListing] = useState('')
+  const candidateListing = listing ?? resource.data?.listing
+  const publicListing = useResource(useCallback(async (signal) => {
+    if (!candidateListing || passportWithdrawn ||
+      (publication && candidateListing.content.passport_publication_id !== publication)) return null
+    try {
+      return await getCatalogListing(candidateListing.id, signal)
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 404) return null
+      throw error
+    }
+  }, [candidateListing, passportWithdrawn, publication]))
 
   function makePassport(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const fields = new FormData(event.currentTarget)
     void action.run(async () => {
       const composition = readComposition(fields)
+      setEditableDraft(null)
       setPreview(null)
       setPublication('')
       setListingPreview(null)
@@ -153,6 +174,7 @@ export function PublishStep({ product }: { product: SellerProduct }) {
         preview.preview_hash,
       )
       setPublication(published.id)
+      setPassportWithdrawn(false)
     }, 'Passport published with the exact disclosures you approved. Your listing still needs separate approval.')
   }
 
@@ -201,7 +223,7 @@ export function PublishStep({ product }: { product: SellerProduct }) {
 
   return (
     <div>
-      <ErrorNotice error={resource.error || action.error} />
+      <ErrorNotice error={resource.error || action.error || publicListing.error} />
       {action.notice && (
         <p className="calculator-notice" role="status">
           {action.notice}
@@ -290,6 +312,7 @@ export function PublishStep({ product }: { product: SellerProduct }) {
                   setPublication('')
                   setListingPreview(null)
                   setDraftId('')
+                  setEditableDraft(null)
                   setReview(null)
                 }}
               >
@@ -441,10 +464,15 @@ export function PublishStep({ product }: { product: SellerProduct }) {
                   onChange={(event) => {
                     const id = event.target.value
                     setDraftId(id)
+                    setEditableDraft(null)
+                    setDraftSaved(false)
                     setPreview(null)
                     setPublication('')
+                    setListingPreview(null)
                     if (id)
                       void action.run(async () => {
+                        setEditableDraft(await getPassportDraft(product.id, id))
+                        setDraftSaved(true)
                         setPreview(await getPassportPreview(product.id, id))
                         const publications = await getPublications(
                           product.id,
@@ -454,6 +482,7 @@ export function PublishStep({ product }: { product: SellerProduct }) {
                           (item) => item.state === 'published',
                         )
                         setPublication(active?.id ?? '')
+                        setPassportWithdrawn(!active)
                       })
                   }}
                 >
@@ -490,6 +519,24 @@ export function PublishStep({ product }: { product: SellerProduct }) {
           </p>
         </section>
       )}
+      {editableDraft && <>
+        <PassportEditor key={editableDraft.id} productId={product.id} draft={editableDraft}
+          onEdit={() => {
+            setPreview(null)
+            setPublication('')
+            setListingPreview(null)
+            setDraftSaved(false)
+          }}
+          onSaved={(saved) => {
+            setEditableDraft(saved)
+            setDraftSaved(true)
+            resource.reload()
+          }} />
+        <button className="calculator-secondary" disabled={action.busy || !draftSaved} onClick={() => {
+          setPreview(null)
+          void action.run(async () => setPreview(await getPassportPreview(product.id, editableDraft.id)))
+        }}>Generate fresh Passport preview</button>
+      </>}
       {preview && (
         <>
           <PassportView passport={preview.payload} />
@@ -519,6 +566,15 @@ export function PublishStep({ product }: { product: SellerProduct }) {
           )}
         </>
       )}
+      {draftId && <PassportPublications key={draftId} productId={product.id} draftId={draftId} onWithdrawn={() => {
+        setPublication('')
+        setPreview(null)
+        setListingPreview(null)
+        setPublishedListing('')
+        setListing(null)
+        setPassportWithdrawn(true)
+        resource.reload()
+      }} />}
       {publication && (
         <section className="workspace-panel">
           <h2>Give it a place at the market.</h2>
@@ -664,7 +720,7 @@ export function PublishStep({ product }: { product: SellerProduct }) {
           </form>
         </>
       )}
-      {(publishedListing || resource.data?.listing?.state === 'active') && (
+      {publicListing.data && !passportWithdrawn && (publishedListing || resource.data?.listing?.state === 'active') && (
         <div className="workspace-panel">
           <h2>Your goods are at the market.</h2>
           <a
