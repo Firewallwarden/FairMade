@@ -77,6 +77,9 @@ function SellerDashboard() {
         <a className="calculator-secondary" href="#/materials">
           Material inventory
         </a>
+        <a className="calculator-secondary" href="#/livestock/groups">
+          Livestock records
+        </a>
         <a className="calculator-secondary" href="#/storefront/settings">
           Manage your storefront
         </a>

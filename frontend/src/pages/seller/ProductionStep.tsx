@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Field, TextArea } from '../../components/FormFields'
 import { BatchEntries } from '../../components/BatchEntries'
+import { LivestockPicker } from '../../components/LivestockSourceFields'
 import { ErrorNotice } from '../../components/Feedback'
 import { EvidenceDetails } from '../../components/EvidenceDetails'
 import { useResource } from '../../hooks/useResource'
@@ -194,7 +195,18 @@ function ProductionForm({
         correction_reason: corrects
           ? fieldValue(fields, 'production-correction-reason')
           : null,
-        livestock_source: null,
+        livestock_source: fieldValue(fields, 'livestock-source')
+          ? {
+              kind: choice(fieldValue(fields, 'livestock-kind'), [
+                'group',
+                'animal',
+              ] as const),
+              id: fieldValue(fields, 'livestock-source'),
+              expected_revision: Number(
+                fieldValue(fields, 'livestock-revision'),
+              ),
+            }
+          : null,
       }
       if (request.sellable_units > request.total_units)
         throw new Error('Sellable output cannot exceed total output.')
@@ -291,6 +303,7 @@ function ProductionForm({
             )}
           </div>
           <BatchEntries prefix="production" costLimit={200} />
+          <LivestockPicker />
           <TextArea
             name="production-notes"
             title="Private report notes (optional)"
