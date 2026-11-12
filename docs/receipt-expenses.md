@@ -1,5 +1,9 @@
 # Receipt extraction and reviewed expenses
 
+The [real verification checklist](receipt-verification.md) distinguishes actual
+PNG/JPEG OCR checks, real text-model checks and provider doubles. Full OCR
+verification still requires the local Tesseract installation described there.
+
 Implemented backend proposal; frontend acceptance and integration are pending.
 The user chose local Tesseract OCR plus the existing Ollama/Qwen3 8B text model.
 Neither component is downloaded automatically by an API request. No paid service,
@@ -132,7 +136,8 @@ administrator interaction. Review the installer/version/provenance rather than
 silently downloading an arbitrary executable. The development installation
 attempt was canceled; a full real OCR image smoke test remains pending.
 
-Use the existing configured backend environment and run migrations through 0027.
+Use the existing configured backend environment and run migrations to current head.
+Receipt tables were introduced in 0027; later application migrations still apply.
 Then configure the server process, adjusting the local executable path:
 
 ~~~powershell
