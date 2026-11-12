@@ -47,3 +47,12 @@ Sessions stay in memory and expire/revoke on the backend. Reload requires login.
 PRs #83-#95 contain implementation and acceptance fixes. Browser-suite and handoff PRs include their prerequisites and remain draft while those prerequisites are unmerged. Every PR targets main. Refresh and revalidate after prerequisite squash merges; merging a stack in order alone is insufficient. No feature PR merge or production deployment is authorized by this handoff.
 
 Follow [local development](../docs/local-development.md) for persistent services outside worktrees. Run checks in dedicated feature worktrees. Verify fairmade-source-revision metadata against the published head before presenting a review demo; a stale central runtime does not demonstrate integration of unmerged changes.
+
+On 2026-11-12, the review website at http://127.0.0.1:5174/ was checked in Chromium:
+its source metadata matched published browser PR #96 head
+`b3a2116a8c63c0e8dc62e69b4ac013c2e0d7bc38` and reported `clean`.
+The marketplace rendered and its API proxy returned 200 from the retained backend
+on port 8000. The separate central frontend on port 5173 still serves snapshot
+`16309c03ab36f445b30ed710aece35c13ee95543`; use port 5174 to review the new features.
+This temporary review server runs from its feature worktree. Its startup does not
+refresh the retained runtime snapshot, enable providers or merge feature PRs.
