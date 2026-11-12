@@ -24,7 +24,6 @@ export function AccountPage() {
     ReturnType<typeof getApplication>
   > | null>(null)
   const [applicationLoaded, setApplicationLoaded] = useState(false)
-  const [version, setVersion] = useState(0)
   const message = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -43,7 +42,7 @@ export function AccountPage() {
         if (!controller.signal.aborted) setApplicationLoaded(true)
       })
     return () => controller.abort()
-  }, [session, version])
+  }, [session])
 
   useEffect(() => {
     if (notice) message.current?.focus()
@@ -229,15 +228,6 @@ export function AccountPage() {
                 className="calculator-secondary"
                 disabled={busy}
                 onClick={() =>
-                  action(refreshAccount, 'Account access refreshed.')
-                }
-              >
-                Refresh account access
-              </button>
-              <button
-                className="calculator-secondary"
-                disabled={busy}
-                onClick={() =>
                   action(logout, 'Signed out. The server session was revoked.')
                 }
               >
@@ -279,7 +269,8 @@ export function AccountPage() {
                 )}
                 {application.status === 'approved' && (
                   <p>
-                    Refresh account access to load your current server roles.
+                    Your application is approved. Checking its status also
+                    checks your current seller permissions.
                   </p>
                 )}
                 {application.status === 'denied' && (
@@ -291,12 +282,17 @@ export function AccountPage() {
                 <button
                   className="calculator-secondary"
                   disabled={busy}
-                  onClick={() => {
-                    setApplicationLoaded(false)
-                    setVersion(version + 1)
-                  }}
+                  onClick={() =>
+                    action(async () => {
+                      const latest = await getApplication()
+                      setApplication(latest)
+                      if (latest.status === 'approved') await refreshAccount()
+                    }, 'Application status checked.')
+                  }
                 >
-                  Check application status
+                  {busy
+                    ? 'Checking application status…'
+                    : 'Check application status'}
                 </button>
               </>
             ) : (
