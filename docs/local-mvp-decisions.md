@@ -531,6 +531,51 @@ rules are compared with current requirements to flag historical incompatibility;
 results are never silently reevaluated or represented as independent verification.
 Selection survives history paging. Browser acceptance remains pending Playwright.
 
+### Radius-based product discovery (2026-11-12)
+
+Implemented in `feature/frontend-radius-discovery`: marketplace search supports
+transient user-entered coordinates and radius through the agreed POST endpoint.
+Supported query/type/availability/order filters and pagination are retained;
+location-label filtering is disabled in radius mode because that endpoint does not
+accept it. Distances and backend notices identify approximate seller-chosen areas,
+not addresses or travel routes. No geolocation permission, coordinate URL/storage,
+or new mapping service is introduced. Browser acceptance remains pending Playwright.
+
+### Seller cancellation (2026-11-12)
+
+Implemented in `feature/frontend-seller-cancel`: sellers can request cancellation
+of pending unpaid orders with confirmation. Backend eligibility remains authoritative;
+rejections are displayed and order/payment state is reloaded after every attempt.
+Cancelled orders display freshly fetched listing availability, with hidden or failed
+lookups kept unknown and a retry control. Public availability is a snapshot, not a
+reservation or substitute for private inventory. Live browser checks remain pending
+the requested Playwright workflow.
+
+### Passport withdrawal (2026-11-12)
+
+Implemented in `feature/frontend-passport-withdraw`: publication history exposes
+withdrawal only for published versions and asks for explicit confirmation.
+Backend-confirmed withdrawal clears local publication/listing previews and refreshes
+saved state; existing order snapshots and previously received copies remain.
+This is distinct from listing deactivation and storefront withdrawal. The initial
+history uses the existing bounded endpoint; older-history pagination is a separate
+requested feature. Live browser acceptance remains pending the Playwright suite.
+The public-listing banner additionally checks the public endpoint: a private
+listing marked active can still be hidden after withdrawal or supersession.
+Publishing a replacement Passport does not imply that its listing was reapproved.
+
+### Saved Passport draft editing (2026-11-12)
+
+Implemented in `feature/frontend-passport-edit`: sellers can load owned drafts,
+edit title, price, description and disclosure policy, and save against the loaded
+revision. Saved review and composition content are preserved. Editing invalidates
+publication previews; saving or reloading enables a fresh server preview and
+explicit approval. Stale writes remain backend-rejected and the editor offers a
+reload that discards unsaved edits. Existing published snapshots are unchanged.
+Composition content editing and review replacement remain outside this editor;
+create a new draft for those changes. Build, lint and 45 unit tests passed;
+live browser acceptance is pending the dedicated browser suite.
+
 For a new tradeoff, record the confirmed decision or documented limit, its source,
 implementation status, consequences, and the trigger/follow-up for revisiting it.
 Link the feature PR and update API/feature documentation as appropriate. Retain
