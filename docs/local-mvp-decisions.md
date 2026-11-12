@@ -696,9 +696,10 @@ description/tool disclosure and a 2:45 recording plan in shared documentation.
 The chosen functional-access route is the existing local Windows runtime;
 the event permits runnable setup instructions without hosting. No paid hosting
 or new infrastructure is introduced. See [submission gates](hackathon-submission.md#final-release-gates).
-The owner license choice, public repository release, actual recording/upload,
-and Devpost submission remain pending
-when this documentation is prepared. This is delivery status, not provider
+The owner selected MIT, included as the root LICENSE in PR #99, and made the
+repository public (confirmed by GitHub metadata). License detection on main
+remains a post-merge check. Actual recording/upload and Devpost submission remain
+pending. This is delivery status, not provider
 acceptance or production-readiness evidence. Preserve local judge access
 instructions and privately configured sandbox credentials during evaluation.
 The branch was refreshed after PR #98 integrated the separate verification chat's

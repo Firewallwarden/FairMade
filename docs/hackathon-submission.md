@@ -87,8 +87,8 @@ actually completed during the submission period.
 | Meaningful runtime AI | Show an actual Qwen answer using the selected product's evidence, not only development-tool use. |
 | Working prototype | [Setup](judge-quickstart.md) and [frontend acceptance](../frontend/e2e/ACCEPTANCE.md). The separate verification workflow passed 12 real AI/OCR checks and 6 real sandbox checkout/refund checks, including setup checks, on desktop and narrow Chromium. Evidence integrated in main via PR #98. |
 | Text and tool disclosure | Copy the description and tools above; reconcile against the final demonstrated build. |
-| Public open-source repository | Secret scan completed as described below. Still private: the connected GitHub account has Write but no Admin permission, and its visibility-change request was rejected. An owner must change Settings / General / Danger Zone / Change repository visibility to Public, then verify access signed out. |
-| Detectable root license | Owner license choice is pending. Add the selected standard root LICENSE, merge through the authorized PR workflow and verify GitHub detects it. Preserve third-party asset licenses. |
+| Public open-source repository | Owner changed visibility to Public; GitHub metadata confirms `isPrivate: false`. Secret scan completed as described below. Recheck anonymous access before submitting. |
+| Detectable root license | Owner selected MIT. Standard root [LICENSE](../LICENSE) is included in PR #99; merge it and verify GitHub detects MIT on main. Third-party asset licenses remain in effect. |
 | Public video under 3 minutes | Record actual functioning desktop app, upload to mfranca915 as Public and paste the watch URL into Devpost. [Recording plan](demo-video.md). |
 | Rights to materials | Retain [photo credits](../frontend/README.md#asset-credits) and font OFL files. Review the final recording for third-party material; omit unapproved logos/music. |
 | Submitter information and eligibility | Submitter completes eligibility, ownership, team and rule attestations in Devpost. |
@@ -111,6 +111,9 @@ prove absence of every possible secret or private detail. Scanner files and
 redacted output remain outside Git under the local submission-audit directory.
 The visibility update failed; read-only metadata confirmed Write access without
 Admin permission. No repository setting change is claimed.
+The owner subsequently changed visibility to Public; API metadata now confirms
+the repository is public. The owner also selected MIT, included in this PR's root
+LICENSE. Detection on the default branch remains a post-merge check.
 
 ## Evidence handoff from the integration chat
 
