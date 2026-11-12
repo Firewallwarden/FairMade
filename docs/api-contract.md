@@ -89,8 +89,21 @@ See [scope, period and double-counting limits](assistant-receipt-expenses.md).
 
 The account, seller-application, product, saved-analysis, quality, comparison, review, Passport, marketplace, inventory, order, sandbox-payment, refund, supplier-sourcing, seller-sales, favorite, and storefront endpoints
 below are implemented by the backend for **local development**. Their shared integration contract is
-**proposed; frontend acceptance and browser integration are pending**. No frontend
-changes are included. The existing stateless calculator retains its #2 behavior.
+**accepted for the local demo** for accounts/sessions, seller applications,
+products, saved analyses, Quality Locks, comparisons/pricing reviews, Passports,
+listings, inventory, orders and sandbox payments. The frontend owner accepted
+these existing backend shapes on 2026-11-09 and authorized this status update.
+Other capabilities remain proposals until separately accepted. Historical
+section-level notes about pending frontend acceptance are superseded only for
+this named demo scope. Browser/live-provider verification is tracked separately
+and is not established by contract acceptance. The stateless calculator retains
+its #2 behavior.
+
+Browser sessions use memory only: no cookies, localStorage, sessionStorage,
+refresh or Remember me. Reload requires login; the fixed backend expiry and
+logout revocation remain authoritative. Seller access requires the existing
+manual administrator review. No endpoint or payload changes are authorized by
+this acceptance.
 
 Local seller and buyer assistant endpoints are also implemented as an opt-in
 backend foundation. Their additive HTTP proposal, source boundaries, response
@@ -125,7 +138,7 @@ The original question endpoints remain stateless; frontend acceptance is pending
 Private product/history endpoints require the seller role and return 403 until
 that access is granted after verification. Account responses add `roles`; the
 OpenAPI identity schema is now named `AccountResponse` rather than `SellerResponse`.
-Frontend integration must review these changes before relying on this proposal.
+Frontend integration preserves these reviewed buyer-default and seller-access rules.
 
 Base URL for local development: `http://127.0.0.1:8000`. Send JSON bodies with
 `Content-Type: application/json`. UUIDs are JSON strings. Timestamps are UTC
