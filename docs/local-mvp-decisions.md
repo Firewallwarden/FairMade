@@ -523,6 +523,16 @@ requirements. They are not temporary compromises to remove for production.
 
 ## Updating this register
 
+### Private listing-photo previews (2026-11-12)
+
+Browser acceptance reproduced a broken image when a seller previewed a newly
+selected photo: the public image endpoint correctly returned 404 before approval.
+`fix/frontend-private-photo-preview` uses the existing authenticated private-photo
+transport in the seller preview. The selected normalized image bytes remain
+private until separate listing approval; public image visibility rules are unchanged.
+The browser suite checks loaded preview pixels while the public URL remains 404,
+then anonymous image access after approval.
+
 ### Older-record selector pagination (2026-11-12)
 
 Implemented in `feature/frontend-history-pagination`, dependent on withdrawal PR

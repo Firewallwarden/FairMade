@@ -627,7 +627,7 @@ export function PublishStep({ product }: { product: SellerProduct }) {
       )}
       {listingPreview && (
         <>
-          <CatalogPreview content={listingPreview.payload} />
+          <CatalogPreview content={listingPreview.payload} productId={product.id} />
           {listingPreview.publication_blockers.length > 0 && (
             <p role="alert">
               Publication is blocked:{' '}
