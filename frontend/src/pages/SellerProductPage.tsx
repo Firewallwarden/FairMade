@@ -13,6 +13,8 @@ import { PresentationStep } from './seller/PresentationStep'
 import { DescriptionStep } from './seller/DescriptionStep'
 import { BusinessReportsStep } from './seller/BusinessReportsStep'
 import { SuppliersStep } from './seller/SuppliersStep'
+import { RecipeStep } from './seller/RecipeStep'
+import { ProductionStep } from './seller/ProductionStep'
 import { useSession } from '../services/session'
 import {
   getAnalyses,
@@ -59,6 +61,8 @@ function ProductWorkspace({ id }: { id: string }) {
     | 'present'
     | 'supply'
     | 'reports'
+    | 'recipe'
+    | 'production'
   >('calculate')
   const action = useAction()
 
@@ -171,6 +175,20 @@ function ProductWorkspace({ id }: { id: string }) {
           >
             <button
               className="calculator-secondary"
+              aria-current={step === 'recipe' ? 'step' : undefined}
+              onClick={() => setStep('recipe')}
+            >
+              Recipe costing
+            </button>
+            <button
+              className="calculator-secondary"
+              aria-current={step === 'production' ? 'step' : undefined}
+              onClick={() => setStep('production')}
+            >
+              Completed production
+            </button>
+            <button
+              className="calculator-secondary"
               aria-current={step === 'present' ? 'step' : undefined}
               onClick={() => setStep('present')}
             >
@@ -192,6 +210,8 @@ function ProductWorkspace({ id }: { id: string }) {
             </button>
           </nav>
           {step === 'calculate' && <CostStep product={resource.data} />}
+          {step === 'recipe' && <RecipeStep product={resource.data} />}
+          {step === 'production' && <ProductionStep product={resource.data} />}
           {step === 'supply' && <SuppliersStep productId={id} />}
           {step === 'reports' && <BusinessReportsStep productId={id} />}
           {step === 'quality' && <QualityStep productId={id} />}
