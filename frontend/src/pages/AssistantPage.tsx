@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import { WorkspaceLayout } from '../components/WorkspaceLayout'
 import { ErrorNotice, SignInPrompt } from '../components/Feedback'
 import { EvidenceDetails } from '../components/EvidenceDetails'
+import { RememberBuyerTurn } from '../components/RememberBuyerTurn'
 import {
   SellerAssistantContext,
   SelectedConversationContext,
@@ -311,6 +312,9 @@ function ConversationView({ id }: { id: string }) {
           )}
           {resource.data.turns.items.map((turn) => (
             <article className="workspace-panel assistant-turn" key={turn.id}>
+              {resource.data?.conversation.role === 'buyer' && (
+                <RememberBuyerTurn conversationId={id} turnId={turn.id} />
+              )}
               <p className="eyebrow">Your question · turn {turn.revision}</p>
               <h2>{turn.question}</h2>
               {!turn.answer ? (
