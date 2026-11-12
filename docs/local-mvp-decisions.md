@@ -523,6 +523,14 @@ requirements. They are not temporary compromises to remove for production.
 
 ## Updating this register
 
+### Buyer refund-request list (2026-11-12)
+
+Implemented in `feature/frontend-buyer-refunds`: purchases exposes a paginated
+buyer request list with saved states, reasons, decisions and links to order controls.
+Only the existing verified-refund predicate confirms completion; pending/uncertain
+states remain explicit. No new payment calls or backend state changes occur from
+this list. Browser acceptance remains pending the full Playwright workflow.
+
 For a new tradeoff, record the confirmed decision or documented limit, its source,
 implementation status, consequences, and the trigger/follow-up for revisiting it.
 Link the feature PR and update API/feature documentation as appropriate. Retain
