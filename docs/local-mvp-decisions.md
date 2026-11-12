@@ -342,8 +342,13 @@ automatic expiry or correction/void workflow. Chat retention does not apply.
 Before broader use, review localized dates/currencies, discounts/returns,
 semantic duplicate detection, record corrections/voids, expense allocation and
 assistant retrieval, retention/erasure/backup policy, isolated OCR/decoding,
-abuse/resource controls and frontend integration. The local installer was
-canceled; real full image OCR evaluation remains pending until configured.
+abuse/resource controls and frontend integration. After earlier blocked setup,
+the user installed Tesseract 5.5.3.20260724 with English data on 2026-11-11.
+Real synthetic PNG/JPEG OCR-to-reviewed-expense and restart checks now pass;
+[29-test evidence and limitations](receipt-verification.md) distinguish those
+checks from text-only inference and still-separate frontend/real-photo evaluation.
+Unreadable numeric characters remain unknown for seller review; neither model
+arithmetic nor automatic OCR repair is accepted as printed monetary evidence.
 
 ### Saved conversations: DOMAIN-003
 
