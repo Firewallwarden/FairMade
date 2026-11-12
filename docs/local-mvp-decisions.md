@@ -556,6 +556,15 @@ reload that discards unsaved edits. Existing published snapshots are unchanged.
 Composition content editing and review replacement remain outside this editor;
 create a new draft for those changes. Build, lint and 45 unit tests passed;
 live browser acceptance is pending the dedicated browser suite.
+### Seller cancellation (2026-11-12)
+
+Implemented in `feature/frontend-seller-cancel`: sellers can request cancellation
+of pending unpaid orders with confirmation. Backend eligibility remains authoritative;
+rejections are displayed and order/payment state is reloaded after every attempt.
+Cancelled orders display freshly fetched listing availability, with hidden or failed
+lookups kept unknown and a retry control. Public availability is a snapshot, not a
+reservation or substitute for private inventory. Live browser checks remain pending
+the requested Playwright workflow.
 
 For a new tradeoff, record the confirmed decision or documented limit, its source,
 implementation status, consequences, and the trigger/follow-up for revisiting it.
