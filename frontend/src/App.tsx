@@ -12,6 +12,7 @@ import { OrderPage } from './pages/OrderPage'
 import { WorkspaceLayout } from './components/WorkspaceLayout'
 import { AssistantPage } from './pages/AssistantPage'
 import { FavoritesPage } from './pages/FavoritesPage'
+import { MyReviewsPage } from './pages/MyReviewsPage'
 import { StorefrontDirectoryPage, StorefrontPage, StorefrontSettingsPage } from './pages/StorefrontPage'
 
 export default function App() {
@@ -52,6 +53,7 @@ export default function App() {
     }
   }, [calculator, route, session?.account.id])
   if (calculator) return <PricingPage />
+  if (route === '#/reviews') return <MyReviewsPage key={session?.account.id ?? 'guest'} />
   if (route === '#/favorites') return <FavoritesPage key={session?.account.id ?? 'guest'} />
   if (route === '#/storefront/settings') return <StorefrontSettingsPage key={session?.account.id ?? 'guest'} />
   if (route === '#/storefronts') return <StorefrontDirectoryPage />
