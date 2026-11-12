@@ -565,6 +565,15 @@ Cancelled orders display freshly fetched listing availability, with hidden or fa
 lookups kept unknown and a retry control. Public availability is a snapshot, not a
 reservation or substitute for private inventory. Live browser checks remain pending
 the requested Playwright workflow.
+### Radius-based product discovery (2026-11-12)
+
+Implemented in `feature/frontend-radius-discovery`: marketplace search supports
+transient user-entered coordinates and radius through the agreed POST endpoint.
+Supported query/type/availability/order filters and pagination are retained;
+location-label filtering is disabled in radius mode because that endpoint does not
+accept it. Distances and backend notices identify approximate seller-chosen areas,
+not addresses or travel routes. No geolocation permission, coordinate URL/storage,
+or new mapping service is introduced. Browser acceptance remains pending Playwright.
 
 For a new tradeoff, record the confirmed decision or documented limit, its source,
 implementation status, consequences, and the trigger/follow-up for revisiting it.
