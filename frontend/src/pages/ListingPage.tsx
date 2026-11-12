@@ -17,6 +17,7 @@ import { publicMediaUrl } from '../services/media'
 import type { CartRequest } from '../services/order-contract'
 import { ApiError } from '../services/http'
 import { SaveFavorite } from './FavoritesPage'
+import { PublicProductReviews } from '../components/ProductReviews'
 
 export function ListingPage({ id }: { id: string }) {
   const resource = useResource(
@@ -123,6 +124,7 @@ export function ListingPage({ id }: { id: string }) {
             </p>
           </section>
           <PassportView passport={resource.data.passport} />
+          <PublicProductReviews listingId={id} />
           {!session ? (
             <SignInPrompt />
           ) : (
