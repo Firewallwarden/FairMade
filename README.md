@@ -1,5 +1,10 @@
 # FairMade
 
+For a local Windows development/test environment, follow the
+[step-by-step setup guide](docs/local-development.md): central services outside
+Git checkouts, dependencies, Ollama 0.24.0, Tesseract and private per-machine
+PayPal sandbox configuration.
+
 **Fair pricing. Sustainable businesses. Confident buying.**
 
 FairMade is an AI-powered marketplace and business intelligence platform designed to promote fair, transparent, and sustainable commerce between independent sellers and consumers.

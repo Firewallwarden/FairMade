@@ -20,6 +20,34 @@ separate from backend availability.
 
 ## Confirmed user choices
 
+### Central local runtime and dependency baseline — 2026-11-12
+
+The user requested central services outside both primary and feature worktrees,
+main as the IDE/chat reference checkout, and cleanup of integrated worktrees.
+The [local development guide](local-development.md) and focused initialization/
+management scripts implement revision snapshots, shared dependencies, private
+per-machine settings and persistent SQLite outside Git at
+`%LOCALAPPDATA%\FairMade\runtime`. Services bind to loopback; no production
+deployment or additional provider is introduced. Database integrity and all 54
+table counts were verified when migrating both existing demo databases.
+
+The user confirmed **Ollama 0.24.0** as the backend development baseline; its
+loopback version endpoint now confirms that version. The configured model remains
+`qwen3:8b`, which was not yet present in the local model list at this check;
+AI/receipt extraction stays disabled until model setup is completed separately.
+Tesseract 5.5.3.20260724 with
+English data is installed. Prior successful PayPal sandbox capture/refund and
+browser verification remain valid; each machine must still configure its own
+server-only sandbox credentials outside Git. No new payment was made for cleanup.
+An existing chat host may retain the old current directory until reopened from
+main; that platform limitation is separate from source integration and service
+migration. The local scripts are Windows-specific, not hosted infrastructure.
+The central main snapshot passed frontend build/lint and 43 tests. Its fresh
+Python environment passed 1,623 backend tests with 30 skipped and one dependency
+warning; source is identical across the migrated backend revisions. Service
+lifecycle, existing-data preservation, duplicate-start refusal and exclusion of
+checkout-local runtime paths were exercised. Provider opt-ins remain separate.
+
 ### Frontend demo acceptance — 2026-11-09
 
 The frontend owner selected the existing cream/sage botanical design, a guided
