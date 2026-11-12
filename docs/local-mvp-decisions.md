@@ -523,6 +523,14 @@ requirements. They are not temporary compromises to remove for production.
 
 ## Updating this register
 
+### Seller refund inbox (2026-11-12)
+
+Implemented in `feature/frontend-seller-refunds`, dependent on buyer-list PR #90:
+verified sellers can open a paginated inbox from their seller orders and navigate
+to existing decision/reconciliation controls. It reuses the focused request list
+to keep pending/completed semantics consistent. Backend seller authorization remains
+authoritative. Browser acceptance remains pending the full Playwright workflow.
+
 ### Buyer refund-request list (2026-11-12)
 
 Implemented in `feature/frontend-buyer-refunds`: purchases exposes a paginated

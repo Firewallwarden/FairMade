@@ -7,6 +7,7 @@ import { useResource } from '../hooks/useResource'
 import { usd } from '../utils/presentation'
 import { RefundRequestList } from '../components/RefundRequestList'
 import { getBuyerRefundRequests } from '../services/refund-list'
+import { SellerRefundInbox } from '../components/SellerRefundInbox'
 
 export function OrdersPage() {
   const session = useSession()
@@ -61,6 +62,7 @@ function OrderList({ sellerAllowed }: { sellerAllowed: boolean }) {
         </div>
       )}
       <ErrorNotice error={resource.error} />
+      {seller && <SellerRefundInbox />}
       {!seller && <>
         <button className="calculator-secondary" aria-expanded={showRefunds} onClick={() => setShowRefunds(!showRefunds)}>My refund requests</button>
         {showRefunds && <RefundRequestList title="My refund requests" loadPage={getBuyerRefundRequests} />}
