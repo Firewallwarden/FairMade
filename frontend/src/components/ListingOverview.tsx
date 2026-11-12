@@ -6,6 +6,7 @@ import { usd } from '../utils/presentation'
 import { LeafSprig } from './LeafSprig'
 import { SaveFavorite } from '../pages/FavoritesPage'
 import './listing.css'
+import { HideFromSuggestions } from './HideFromSuggestions'
 
 export function ListingOverview({
   listing,
@@ -93,6 +94,7 @@ export function ListingOverview({
         </section>
         <div className="listing-support-actions">
           <SaveFavorite listingId={listing.id} />
+          <HideFromSuggestions listingId={listing.id} />
           <a href={`#/assistant/buyer/${listing.id}`}>
             Ask FairMade about this price <span aria-hidden="true">↗</span>
           </a>

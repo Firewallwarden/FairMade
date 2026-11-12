@@ -80,6 +80,12 @@ export function WorkspaceLayout({
               }}
             >
               <a
+                href="#/preferences"
+                aria-current={section === 'preferences' ? 'page' : undefined}
+              >
+                Buyer preferences
+              </a>
+              <a
                 href="#/storefronts"
                 aria-current={section === 'storefronts' ? 'page' : undefined}
               >
