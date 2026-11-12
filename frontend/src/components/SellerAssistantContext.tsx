@@ -27,11 +27,20 @@ export function SelectedConversationContext({
     <details className="workspace-panel">
       <summary>Sources selected for this conversation</summary>
       {scope.role === 'buyer' ? (
-        <p>
-          Approved public disclosures from{' '}
-          {Array.isArray(scope.listing_ids) ? scope.listing_ids.length : 0}{' '}
-          selected listing(s). Private seller inputs are excluded.
-        </p>
+        <>
+          <p>
+            {scope.basket
+              ? 'Selected basket planning context and approved public listing disclosures.'
+              : scope.bundles
+                ? 'Selected pair-planning context and approved public listing disclosures.'
+                : `Approved public disclosures from ${Array.isArray(scope.listing_ids) ? scope.listing_ids.length : 0} selected listing(s).`}{' '}
+            Private seller inputs are excluded. Plans do not reserve stock.
+          </p>
+          <p>
+            Your own buyer preferences may also apply if you explicitly enabled
+            personalization. <a href="#/preferences">Manage that choice.</a>
+          </p>
+        </>
       ) : (
         <>
           <p>

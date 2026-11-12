@@ -15,6 +15,7 @@ import { FavoritesPage } from './pages/FavoritesPage'
 import { MyReviewsPage } from './pages/MyReviewsPage'
 import { ReceiptsPage } from './pages/ReceiptsPage'
 import { PreferencesPage } from './pages/PreferencesPage'
+import { ShoppingPlanPage } from './pages/ShoppingPlanPage'
 import {
   StorefrontDirectoryPage,
   StorefrontPage,
@@ -44,6 +45,7 @@ export default function App() {
       reviews: 'My reviews',
       receipts: 'Receipts and expenses',
       preferences: 'Buyer preferences',
+      planning: 'Shopping plans',
       storefronts: 'Meet the makers',
       storefront: 'Maker storefront',
     }
@@ -63,6 +65,16 @@ export default function App() {
     }
   }, [calculator, route, session?.account.id])
   if (calculator) return <PricingPage />
+  if (route === '#/planning') return <ShoppingPlanPage />
+  const planRoute = route.match(/^#\/planning\/([a-f0-9-]{36})(\/seller)?$/i)
+  if (planRoute)
+    return (
+      <ShoppingPlanPage
+        key={`${session?.account.id}-${route}`}
+        storefrontId={planRoute[1]}
+        seller={Boolean(planRoute[2])}
+      />
+    )
   if (route === '#/preferences')
     return <PreferencesPage key={session?.account.id ?? 'guest'} />
   if (route === '#/receipts')
