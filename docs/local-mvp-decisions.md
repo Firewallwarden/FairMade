@@ -523,6 +523,16 @@ requirements. They are not temporary compromises to remove for production.
 
 ## Updating this register
 
+### Seller cancellation (2026-11-12)
+
+Implemented in `feature/frontend-seller-cancel`: sellers can request cancellation
+of pending unpaid orders with confirmation. Backend eligibility remains authoritative;
+rejections are displayed and order/payment state is reloaded after every attempt.
+Cancelled orders display freshly fetched listing availability, with hidden or failed
+lookups kept unknown and a retry control. Public availability is a snapshot, not a
+reservation or substitute for private inventory. Live browser checks remain pending
+the requested Playwright workflow.
+
 For a new tradeoff, record the confirmed decision or documented limit, its source,
 implementation status, consequences, and the trigger/follow-up for revisiting it.
 Link the feature PR and update API/feature documentation as appropriate. Retain
