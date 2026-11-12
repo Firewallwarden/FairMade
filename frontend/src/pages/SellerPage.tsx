@@ -68,6 +68,9 @@ function SellerDashboard() {
         <li>Publish</li>
       </ol>
       <div className="workspace-actions">
+        <a className="calculator-secondary" href="#/receipts">
+          Receipts & expenses
+        </a>
         <a className="calculator-secondary" href="#/storefront/settings">
           Manage your storefront
         </a>

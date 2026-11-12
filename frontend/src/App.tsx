@@ -13,6 +13,7 @@ import { WorkspaceLayout } from './components/WorkspaceLayout'
 import { AssistantPage } from './pages/AssistantPage'
 import { FavoritesPage } from './pages/FavoritesPage'
 import { MyReviewsPage } from './pages/MyReviewsPage'
+import { ReceiptsPage } from './pages/ReceiptsPage'
 import {
   StorefrontDirectoryPage,
   StorefrontPage,
@@ -40,6 +41,7 @@ export default function App() {
       assistant: 'Ask FairMade',
       favorites: 'Saved goods',
       reviews: 'My reviews',
+      receipts: 'Receipts and expenses',
       storefronts: 'Meet the makers',
       storefront: 'Maker storefront',
     }
@@ -59,6 +61,16 @@ export default function App() {
     }
   }, [calculator, route, session?.account.id])
   if (calculator) return <PricingPage />
+  if (route === '#/receipts')
+    return <ReceiptsPage key={session?.account.id ?? 'guest'} />
+  const receiptId = route.match(/^#\/receipts\/([a-f0-9-]{36})$/i)?.[1]
+  if (receiptId)
+    return (
+      <ReceiptsPage
+        key={`${session?.account.id}-${receiptId}`}
+        id={receiptId}
+      />
+    )
   if (route === '#/reviews')
     return <MyReviewsPage key={session?.account.id ?? 'guest'} />
   if (route === '#/favorites')
