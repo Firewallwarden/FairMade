@@ -1,0 +1,242 @@
+[
+  {
+    "key": "backyard-eggs",
+    "name": "Backyard eggs",
+    "product_type": "eggs",
+    "selling_unit": "one dozen eggs",
+    "price": "6.00",
+    "maker": "Clover & Coop",
+    "description": "A carton of twelve backyard eggs for a slow weekend breakfast.",
+    "materials": "20.00",
+    "packaging": "4.00",
+    "overhead": "6.00",
+    "hours": "1",
+    "hourly_rate": "15",
+    "image": "backyard-eggs.jpg",
+    "selling_quantity": {
+      "value": "1",
+      "unit": "dozen"
+    },
+    "on_hand": 12
+  },
+  {
+    "key": "country-loaf",
+    "name": "Artisan country sourdough",
+    "product_type": "sourdough",
+    "selling_unit": "one loaf",
+    "price": "9.00",
+    "maker": "Hearth & Crumb",
+    "description": "A rustic loaf with a crisp crust, open crumb and a flour-dusted finish.",
+    "materials": "27.00",
+    "packaging": "5.00",
+    "overhead": "8.00",
+    "hours": "1.5",
+    "hourly_rate": "15",
+    "image": "market-bread.jpg",
+    "selling_quantity": {
+      "value": "1",
+      "unit": "loaf"
+    },
+    "on_hand": 12
+  },
+  {
+    "key": "seeded-loaf",
+    "name": "Seeded artisan loaf",
+    "product_type": "sourdough",
+    "selling_unit": "one loaf",
+    "price": "10.00",
+    "maker": "Hearth & Crumb",
+    "description": "A hearty country loaf finished with a generous scattering of seeds.",
+    "materials": "34.00",
+    "packaging": "5.00",
+    "overhead": "9.00",
+    "hours": "2",
+    "hourly_rate": "15",
+    "image": "market-bread.jpg",
+    "selling_quantity": {
+      "value": "1",
+      "unit": "loaf"
+    },
+    "on_hand": 12
+  },
+  {
+    "key": "brass-earrings",
+    "name": "Hammered brass earrings",
+    "product_type": "other",
+    "selling_unit": "one pair",
+    "price": "24.00",
+    "maker": "Fern & Form",
+    "description": "Small hammered brass drops with a warm, softly textured finish.",
+    "materials": "60.00",
+    "packaging": "10.00",
+    "overhead": "15.00",
+    "hours": "6",
+    "hourly_rate": "18",
+    "image": null,
+    "selling_quantity": {
+      "value": "2",
+      "unit": "item"
+    },
+    "on_hand": 12
+  },
+  {
+    "key": "sea-glass-pendant",
+    "name": "Sea-glass pendant necklace",
+    "product_type": "other",
+    "selling_unit": "one necklace",
+    "price": "32.00",
+    "maker": "Tide & Thread",
+    "description": "A softly colored sea-glass-style pendant on a simple chain.",
+    "materials": "80.00",
+    "packaging": "12.00",
+    "overhead": "18.00",
+    "hours": "8",
+    "hourly_rate": "18",
+    "image": null,
+    "selling_quantity": {
+      "value": "1",
+      "unit": "item"
+    },
+    "on_hand": 12
+  },
+  {
+    "key": "clay-studs",
+    "name": "Terracotta clay stud earrings",
+    "product_type": "other",
+    "selling_unit": "one pair",
+    "price": "18.00",
+    "maker": "Fern & Form",
+    "description": "Small clay studs in an earthy terracotta tone, shaped and finished by hand.",
+    "materials": "30.00",
+    "packaging": "10.00",
+    "overhead": "8.00",
+    "hours": "4",
+    "hourly_rate": "18",
+    "image": null,
+    "selling_quantity": {
+      "value": "2",
+      "unit": "item"
+    },
+    "on_hand": 12
+  },
+  {
+    "key": "botanical-soap",
+    "name": "Botanical soap bar",
+    "product_type": "other",
+    "selling_unit": "one bar",
+    "price": "8.00",
+    "maker": "Meadow & Lather",
+    "description": "A small-batch-style soap bar with a botanical-inspired finish.",
+    "materials": "25.00",
+    "packaging": "5.00",
+    "overhead": "7.00",
+    "hours": "1.5",
+    "hourly_rate": "15",
+    "image": "botanical-soap.jpg",
+    "selling_quantity": {
+      "value": "1",
+      "unit": "item"
+    },
+    "on_hand": 12
+  },
+  {
+    "key": "tulip-bouquet",
+    "name": "White tulip bouquet",
+    "product_type": "other",
+    "selling_unit": "one bouquet",
+    "price": "18.00",
+    "maker": "Little Stem Studio",
+    "description": "A simple bunch of white tulips, wrapped for a kitchen table or a thoughtful gift.",
+    "materials": "60.00",
+    "packaging": "10.00",
+    "overhead": "15.00",
+    "hours": "3",
+    "hourly_rate": "15",
+    "image": "white-tulip-bouquet.jpg",
+    "selling_quantity": {
+      "value": "1",
+      "unit": "item"
+    },
+    "on_hand": 12
+  },
+  {
+    "key": "wildflower-honey",
+    "name": "Wildflower honey jar",
+    "product_type": "other",
+    "selling_unit": "one 250 g jar",
+    "price": "12.00",
+    "maker": "Clover & Comb",
+    "description": "A golden honey jar for toast, tea and everyday baking.",
+    "materials": "65.00",
+    "packaging": "15.00",
+    "overhead": "10.00",
+    "hours": "1",
+    "hourly_rate": "15",
+    "image": null,
+    "selling_quantity": {
+      "value": "250",
+      "unit": "g"
+    },
+    "on_hand": 12
+  },
+  {
+    "key": "ceramic-mug",
+    "name": "Hand-thrown ceramic mug",
+    "product_type": "other",
+    "selling_unit": "one mug",
+    "price": "28.00",
+    "maker": "Oak Hollow Clay",
+    "description": "An everyday ceramic mug with a gently rounded shape and an earthy glaze.",
+    "materials": "45.00",
+    "packaging": "12.00",
+    "overhead": "30.00",
+    "hours": "7",
+    "hourly_rate": "18",
+    "image": null,
+    "selling_quantity": {
+      "value": "1",
+      "unit": "item"
+    },
+    "on_hand": 12
+  },
+  {
+    "key": "linen-pouch",
+    "name": "Hand-sewn linen pouch",
+    "product_type": "other",
+    "selling_unit": "one pouch",
+    "price": "16.00",
+    "maker": "Threaded Acre",
+    "description": "A small linen pouch for a notebook, everyday essentials or a little gift.",
+    "materials": "35.00",
+    "packaging": "5.00",
+    "overhead": "10.00",
+    "hours": "4",
+    "hourly_rate": "18",
+    "image": null,
+    "selling_quantity": {
+      "value": "1",
+      "unit": "item"
+    },
+    "on_hand": 12
+  },
+  {
+    "key": "dishcloth-set",
+    "name": "Knitted cotton dishcloths",
+    "product_type": "other",
+    "selling_unit": "one set of two",
+    "price": "14.00",
+    "maker": "Threaded Acre",
+    "description": "A pair of textured cotton dishcloths in soft, earthy colors.",
+    "materials": "25.00",
+    "packaging": "6.00",
+    "overhead": "9.00",
+    "hours": "4",
+    "hourly_rate": "15",
+    "image": null,
+    "selling_quantity": {
+      "value": "2",
+      "unit": "item"
+    },
+    "on_hand": 12
+  }
+]
