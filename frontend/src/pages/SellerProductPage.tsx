@@ -9,6 +9,8 @@ import { PricingPage } from './PricingPage'
 import { QualityStep } from './seller/QualityStep'
 import { PublishStep } from './seller/PublishStep'
 import { ComparisonStep } from './seller/ComparisonStep'
+import { PresentationStep } from './seller/PresentationStep'
+import { DescriptionStep } from './seller/DescriptionStep'
 import { useSession } from '../services/session'
 import {
   getAnalyses,
@@ -48,7 +50,7 @@ function ProductWorkspace({ id }: { id: string }) {
     useCallback((signal) => getProduct(id, signal), [id]),
   )
   const [step, setStep] = useState<
-    'calculate' | 'quality' | 'compare' | 'publish'
+    'calculate' | 'quality' | 'compare' | 'publish' | 'present'
   >('calculate')
   const action = useAction()
 
@@ -122,6 +124,7 @@ function ProductWorkspace({ id }: { id: string }) {
             </details>
           </section>
           <nav className="workspace-actions" aria-label="Product workflow">
+            <button className="calculator-secondary" aria-current={step === 'present' ? 'step' : undefined} onClick={() => setStep('present')}>Photos & description</button>
             <button
               className="calculator-secondary"
               aria-current={step === 'calculate' ? 'step' : undefined}
@@ -154,6 +157,7 @@ function ProductWorkspace({ id }: { id: string }) {
           {step === 'calculate' && <CostStep product={resource.data} />}
           {step === 'quality' && <QualityStep productId={id} />}
           {step === 'compare' && <ComparisonStep product={resource.data} />}
+          {step === 'present' && <><PresentationStep productId={id} /><DescriptionStep productId={id} onApplied={resource.reload} /></>}
           {step === 'publish' && <PublishStep product={resource.data} />}
         </>
       )}
