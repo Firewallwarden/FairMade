@@ -1,3 +1,4 @@
+import { HistorySelection } from './HistorySelection'
 import { useCallback, useState } from 'react'
 import { getProducts } from '../services/seller'
 import { getSourcingInputs, getSupplierQuotes } from '../services/suppliers'
@@ -75,33 +76,10 @@ export function QuotePicker({ name }: { name: string }) {
         </button>
       </div>
       {inputs.data && (
-        <label className="calculator-field">
-          Quoted ingredient/material
-          <select
-            value={input}
-            onChange={(event) => setInput(event.target.value)}
-          >
-            <option value="">Choose sourcing input</option>
-            {inputs.data.items.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.label}
-              </option>
-            ))}
-          </select>
-        </label>
+        <HistorySelection productId={product} kind="sourcing-inputs" title="Quoted ingredient/material" value={input} onSelect={setInput} />
       )}
       {quotes.data && (
-        <label className="calculator-field">
-          Source quote (latest 100)
-          <select name={name} key={input} required>
-            <option value="">Choose quote</option>
-            {quotes.data.items.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.supplier_name} · {item.observed_on} · {item.source.name}
-              </option>
-            ))}
-          </select>
-        </label>
+        <HistorySelection productId={product} kind="supplier-quotes" title="Source quote" key={`${product}-${input}`} inputId={input} name={name} required />
       )}
     </>
   )

@@ -1,3 +1,4 @@
+import { HistorySelection } from '../../components/HistorySelection'
 import { useCallback, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Field, TextArea } from '../../components/FormFields'
@@ -320,33 +321,12 @@ export function PublishStep({ product }: { product: SellerProduct }) {
                   <legend className="sr-only">
                     Create pricing review and Passport draft
                   </legend>
-                  <label className="calculator-field">
-                    Saved analysis (latest 100)
-                    <select name="review-analysis" required>
-                      <option value="">Choose a saved analysis</option>
-                      {resource.data.analyses.items.map((analysis) => (
-                        <option key={analysis.id} value={analysis.id}>
-                          {new Date(analysis.created_at).toLocaleString()} ·{' '}
-                          {analysis.id.slice(0, 8)}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
+                  <HistorySelection disabled={action.busy} productId={product.id} kind="analyses" title="Saved analysis" name="review-analysis" required />
                   <details>
                     <summary>
                       Include saved local comparison context (optional)
                     </summary>
-                    <label className="calculator-field">
-                      Comparison report
-                      <select name="review-comparison">
-                        <option value="">No comparison selected</option>
-                        {resource.data.comparisons.items.map((item) => (
-                          <option key={item.id} value={item.id}>
-                            {item.as_of_date} · {item.id.slice(0, 8)}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
+                    <HistorySelection disabled={action.busy} productId={product.id} kind="price-comparisons" title="Comparison report" name="review-comparison" />
                     <p>
                       To relate your production-unit prices to these
                       observations, explicitly declare the quantity represented
@@ -382,17 +362,7 @@ export function PublishStep({ product }: { product: SellerProduct }) {
                       quality evidence.
                     </p>
                   )}
-                  {resource.data.evaluations.items.map((evaluation) => (
-                    <label className="workspace-check" key={evaluation.id}>
-                      <input
-                        type="checkbox"
-                        name="evaluation"
-                        value={evaluation.id}
-                      />
-                      {evaluation.candidate_label} · {evaluation.status} · rule
-                      revision {evaluation.rule_revision}
-                    </label>
-                  ))}
+                  <HistorySelection disabled={action.busy} productId={product.id} kind="quality-evaluations" title="Saved quality evaluations" name="evaluation" multiple />
                   <div className="calculator-grid">
                     <Field
                       name="passport-title"
@@ -456,13 +426,8 @@ export function PublishStep({ product }: { product: SellerProduct }) {
               <summary>
                 Recover a previous Passport draft or publication
               </summary>
-              <label className="calculator-field">
-                Latest 100 private drafts
-                <select
-                  value={draftId}
-                  disabled={action.busy}
-                  onChange={(event) => {
-                    const id = event.target.value
+              <HistorySelection disabled={action.busy} productId={product.id} kind="passports" title="Passport drafts" value={draftId} onSelect={(id) => {
+
                     setDraftId(id)
                     setEditableDraft(null)
                     setDraftSaved(false)
@@ -484,16 +449,7 @@ export function PublishStep({ product }: { product: SellerProduct }) {
                         setPublication(active?.id ?? '')
                         setPassportWithdrawn(!active)
                       })
-                  }}
-                >
-                  <option value="">Select a draft</option>
-                  {resource.data.drafts.items.map((draft) => (
-                    <option key={draft.id} value={draft.id}>
-                      {draft.id} · revision {draft.revision}
-                    </option>
-                  ))}
-                </select>
-              </label>
+                  }} />
               <button
                 className="calculator-secondary"
                 disabled={action.busy}

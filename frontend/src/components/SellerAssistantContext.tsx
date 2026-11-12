@@ -1,3 +1,4 @@
+import { HistorySelection } from './HistorySelection'
 import { useCallback, useState } from 'react'
 import { getPricingReviews } from '../services/seller-reports'
 import { getSourcingInputs, getSupplierReports } from '../services/suppliers'
@@ -130,59 +131,22 @@ export function SellerAssistantContext({ productId }: { productId: string }) {
       {sources.loading && <p role="status">Loading saved review sources…</p>}
       {sources.data && (
         <div className="calculator-grid">
-          <label className="calculator-field">
-            Saved pricing review (latest 100)
-            <select name="assistant-review">
-              <option value="">No pricing review selected</option>
-              {sources.data.reviews.items.map((review) => (
-                <option key={review.id} value={review.id}>
-                  {review.reviewed_on} · {review.id.slice(0, 8)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="calculator-field">
-            Ingredient/material supplier context (latest 100)
-            <select
-              value={input}
-              onChange={(event) => {
-                setInput(event.target.value)
+          <HistorySelection productId={productId} kind="pricing-reviews" title="Saved pricing review" name="assistant-review" />
+          <HistorySelection productId={productId} kind="sourcing-inputs" title="Ingredient/material supplier context" value={input} onSelect={(id) => {
+                setInput(id)
                 setReport('')
                 setRecommendations(false)
-              }}
-            >
-              <option value="">No supplier input selected</option>
-              {sources.data.inputs.items.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.label}
-                </option>
-              ))}
-            </select>
-          </label>
+              }} />
         </div>
       )}
       {input && reports.loading && (
         <p role="status">Loading saved supplier reports…</p>
       )}
       {reports.data && (
-        <label className="calculator-field">
-          Saved supplier report (latest 100)
-          <select
-            name="assistant-supplier-report"
-            value={report}
-            onChange={(event) => {
-              setReport(event.target.value)
-              if (!event.target.value) setRecommendations(false)
-            }}
-          >
-            <option value="">No supplier report selected</option>
-            {reports.data.items.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.as_of_date} · {item.id.slice(0, 8)}
-              </option>
-            ))}
-          </select>
-        </label>
+        <HistorySelection productId={productId} kind="supplier-comparisons" title="Saved supplier report" key={input} inputId={input} name="assistant-supplier-report" value={report} onSelect={(id) => {
+              setReport(id)
+              if (!id) setRecommendations(false)
+            }} />
       )}
       {report && (
         <>

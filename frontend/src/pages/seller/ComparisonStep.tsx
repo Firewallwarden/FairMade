@@ -1,3 +1,4 @@
+import { HistorySelection } from '../../components/HistorySelection'
 import { useCallback, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Field, TextArea } from '../../components/FormFields'
@@ -197,33 +198,14 @@ export function ComparisonStep({ product }: { product: SellerProduct }) {
       {resource.loading && <p role="status">Loading comparison evidence…</p>}
       {resource.data && (
         <>
-          <h3>Select observations (latest 100)</h3>
+          <h3>Select observations</h3>
           {!resource.data.observations.items.length ? (
             <p>No observed local prices have been recorded.</p>
           ) : (
             <form onSubmit={compare}>
               <fieldset className="calculator-form" disabled={action.busy}>
                 <legend className="sr-only">Build comparison</legend>
-                {resource.data.observations.items.map((observation) => (
-                  <label className="workspace-check" key={observation.id}>
-                    <input
-                      name="observation-id"
-                      type="checkbox"
-                      value={observation.id}
-                    />
-                    <span>
-                      {observation.label}: {usd(observation.price)} /{' '}
-                      {observation.quantity.value} {observation.quantity.unit} ·{' '}
-                      {observation.location} · {observation.observed_on}
-                      <br />
-                      Source: {observation.source.name} (
-                      {observation.source.kind}) ·{' '}
-                      {observation.source.reference}
-                      <br />
-                      {observation.quality_notes}
-                    </span>
-                  </label>
-                ))}
+                <HistorySelection disabled={action.busy} productId={product.id} kind="price-observations" title="Price observations" name="observation-id" multiple />
                 <div className="calculator-grid">
                   <Field
                     name="comparison-quantity"
@@ -263,28 +245,14 @@ export function ComparisonStep({ product }: { product: SellerProduct }) {
               </fieldset>
             </form>
           )}
-          <label className="calculator-field">
-            Review a saved comparison (latest 100)
-            <select
-              value={report?.id ?? ''}
-              disabled={action.busy}
-              onChange={(event) => {
-                const id = event.target.value
+          <HistorySelection disabled={action.busy} productId={product.id} kind="price-comparisons" title="Comparison reports" value={report?.id ?? ''} onSelect={(id) => {
+
                 if (id)
                   void action.run(async () =>
                     setReport(await getComparison(product.id, id)),
                   )
                 else setReport(null)
-              }}
-            >
-              <option value="">Choose a saved report</option>
-              {resource.data.reports.items.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.as_of_date} · {item.id.slice(0, 8)}
-                </option>
-              ))}
-            </select>
-          </label>
+              }} />
         </>
       )}
       {report && (

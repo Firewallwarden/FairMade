@@ -133,7 +133,7 @@ export const updateProduct = (
 ) => privateRequest(`/products/${id}`, decodeProduct, { method: 'PATCH', json })
 export const getAnalyses = (id: string, signal?: AbortSignal) =>
   privateRequest(
-    `/products/${id}/analyses?limit=100`,
+    `/products/${id}/analyses?limit=20&offset=0`,
     page(decodeAnalysisSummary),
     { signal },
   )
@@ -169,7 +169,7 @@ export const evaluateQuality = (id: string, json: EvaluationRequest) =>
   })
 export const getEvaluations = (id: string, signal?: AbortSignal) =>
   privateRequest(
-    `/products/${id}/quality-evaluations?limit=100`,
+    `/products/${id}/quality-evaluations?limit=20&offset=0`,
     page((value) => {
       const data = object(value)
       return {
@@ -226,12 +226,12 @@ export const updatePassportDraft = (id: string, draft: string, revision: number,
     json: { ...json, expected_revision: revision },
   })
 export const getPassportDrafts = (id: string, signal?: AbortSignal) =>
-  privateRequest(`/products/${id}/passports?limit=100`, page(decodeDraft), {
+  privateRequest(`/products/${id}/passports?limit=20&offset=0`, page(decodeDraft), {
     signal,
   })
-export const getPublications = (id: string, draft: string) =>
+export const getPublications = (id: string, draft: string, offset = 0, signal?: AbortSignal) =>
   privateRequest(
-    `/products/${id}/passports/${draft}/publications?limit=100`,
+    `/products/${id}/passports/${draft}/publications?limit=20&offset=${offset}`,
     page((value) => {
       const data = object(value)
       return {
@@ -241,6 +241,7 @@ export const getPublications = (id: string, draft: string) =>
         payload: decodePassport(data.payload),
       }
     }),
+    { signal },
   )
 export const getPassportPreview = (id: string, draft: string) =>
   privateRequest(`/products/${id}/passports/${draft}/preview`, (value) => {
