@@ -1,8 +1,9 @@
 # Receipt extraction and reviewed expenses
 
 The [real verification checklist](receipt-verification.md) distinguishes actual
-PNG/JPEG OCR checks, real text-model checks and provider doubles. Full OCR
-verification still requires the local Tesseract installation described there.
+PNG/JPEG OCR checks, real text-model checks and provider doubles. The full backend
+workflow passed with local Tesseract 5.5.3.20260724 and Qwen on 2026-11-11;
+frontend receipt-upload/review acceptance remains separate.
 
 Implemented backend proposal; frontend acceptance and integration are pending.
 The user chose local Tesseract OCR plus the existing Ollama/Qwen3 8B text model.
@@ -133,8 +134,10 @@ Install Tesseract with English language data using the
 [official installation guidance](https://tesseract-ocr.github.io/tessdoc/Installation.html).
 For Windows, the manual links the UB Mannheim build; installation may require
 administrator interaction. Review the installer/version/provenance rather than
-silently downloading an arbitrary executable. The development installation
-attempt was canceled; a full real OCR image smoke test remains pending.
+silently downloading an arbitrary executable. After earlier automated setup was
+blocked, the user installed version 5.5.3.20260724 with English data. Real synthetic
+PNG/JPEG extraction, seller review, approval and restart checks now pass; see the
+[verification evidence and limitations](receipt-verification.md).
 
 Use the existing configured backend environment and run migrations to current head.
 Receipt tables were introduced in 0027; later application migrations still apply.

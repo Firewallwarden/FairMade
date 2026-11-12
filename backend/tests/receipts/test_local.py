@@ -59,6 +59,8 @@ def test_synthetic_receipt_to_reviewed_expense(
     assert draft["details"]["total"] == "10.80"
     assert draft["details"]["currency"] == "USD"
     assert draft["details"]["merchant"] == "SYNTHETIC STORE"
+    if "TAX @.80" in draft["ocr_text"]:
+        assert draft["details"]["tax"] is None
     assert draft["approval_blockers"] == []
     assert response.headers["Cache-Control"] == "no-store"
     assert body["image_base64"] not in response.text
@@ -77,7 +79,7 @@ def test_synthetic_receipt_to_reviewed_expense(
         headers=market_headers,
         json={
             "expected_revision": draft["revision"],
-            "details": {**draft["details"], "category": "materials"},
+            "details": {**draft["details"], "category": "materials", "tax": "0.80"},
         },
     )
     assert edited.status_code == 200
@@ -100,6 +102,7 @@ def test_synthetic_receipt_to_reviewed_expense(
     expense = approved.json()
     assert expense["details"]["category"] == "materials"
     assert expense["details"]["total"] == "10.80"
+    assert expense["details"]["tax"] == "0.80"
     assert expense["basis"] == "seller_reviewed_unverified"
     assert (
         market_client.post(path + "/approve", headers=market_headers, json=approval).json()
@@ -115,9 +118,12 @@ def test_synthetic_receipt_to_reviewed_expense(
     )
 
 
+@pytest.mark.parametrize("unreadable_tax", [False, True])
 def test_real_model_extracts_synthetic_ocr_text(
-    market_client, market_headers, receipt_body, receipt_providers
+    market_client, market_headers, receipt_body, receipt_providers, unreadable_tax
 ):
+    if unreadable_tax:
+        receipt_providers[1].text = receipt_providers[1].text.replace("TAX 0.80", "TAX @.80")
     market_client.app.state.assistant_gateway = OllamaGateway()
     response = market_client.post(
         "/api/v1/seller/receipt-drafts",
@@ -129,3 +135,5 @@ def test_real_model_extracts_synthetic_ocr_text(
     assert draft["details"]["total"] == "10.80"
     assert draft["details"]["merchant"] == "SYNTHETIC STORE"
     assert draft["approval_blockers"] == []
+    if unreadable_tax:
+        assert draft["details"]["tax"] is None
