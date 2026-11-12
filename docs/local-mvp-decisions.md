@@ -523,6 +523,14 @@ requirements. They are not temporary compromises to remove for production.
 
 ## Updating this register
 
+### Historical quality evaluation inspection (2026-11-12)
+
+Implemented in `feature/frontend-quality-history`: paginated saved evaluations
+reopen their recorded rules, seller claims, checks and result. Revision and captured
+rules are compared with current requirements to flag historical incompatibility;
+results are never silently reevaluated or represented as independent verification.
+Selection survives history paging. Browser acceptance remains pending Playwright.
+
 ### Radius-based product discovery (2026-11-12)
 
 Implemented in `feature/frontend-radius-discovery`: marketplace search supports
