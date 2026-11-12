@@ -32,6 +32,8 @@ import { comparisonUnits, sellingUnits } from '../../types/contracts'
 import { choice } from '../../services/decode'
 import { CompositionFields } from './CompositionFields'
 import { readComposition } from '../../utils/composition'
+import { PassportEditor } from './PassportEditor'
+import { getPassportDraft } from '../../services/seller'
 
 const disclosureLabels = {
   include_labor: 'Labor cost per unit',
@@ -72,6 +74,8 @@ export function PublishStep({ product }: { product: SellerProduct }) {
     ReturnType<typeof createReview>
   > | null>(null)
   const [draftId, setDraftId] = useState('')
+  const [editableDraft, setEditableDraft] = useState<Awaited<ReturnType<typeof getPassportDraft>> | null>(null)
+  const [draftSaved, setDraftSaved] = useState(false)
   const [preview, setPreview] = useState<Awaited<
     ReturnType<typeof getPassportPreview>
   > | null>(null)
@@ -91,6 +95,7 @@ export function PublishStep({ product }: { product: SellerProduct }) {
     const fields = new FormData(event.currentTarget)
     void action.run(async () => {
       const composition = readComposition(fields)
+      setEditableDraft(null)
       setPreview(null)
       setPublication('')
       setListingPreview(null)
@@ -290,6 +295,7 @@ export function PublishStep({ product }: { product: SellerProduct }) {
                   setPublication('')
                   setListingPreview(null)
                   setDraftId('')
+                  setEditableDraft(null)
                   setReview(null)
                 }}
               >
@@ -441,10 +447,15 @@ export function PublishStep({ product }: { product: SellerProduct }) {
                   onChange={(event) => {
                     const id = event.target.value
                     setDraftId(id)
+                    setEditableDraft(null)
+                    setDraftSaved(false)
                     setPreview(null)
                     setPublication('')
+                    setListingPreview(null)
                     if (id)
                       void action.run(async () => {
+                        setEditableDraft(await getPassportDraft(product.id, id))
+                        setDraftSaved(true)
                         setPreview(await getPassportPreview(product.id, id))
                         const publications = await getPublications(
                           product.id,
@@ -490,6 +501,24 @@ export function PublishStep({ product }: { product: SellerProduct }) {
           </p>
         </section>
       )}
+      {editableDraft && <>
+        <PassportEditor key={editableDraft.id} productId={product.id} draft={editableDraft}
+          onEdit={() => {
+            setPreview(null)
+            setPublication('')
+            setListingPreview(null)
+            setDraftSaved(false)
+          }}
+          onSaved={(saved) => {
+            setEditableDraft(saved)
+            setDraftSaved(true)
+            resource.reload()
+          }} />
+        <button className="calculator-secondary" disabled={action.busy || !draftSaved} onClick={() => {
+          setPreview(null)
+          void action.run(async () => setPreview(await getPassportPreview(product.id, editableDraft.id)))
+        }}>Generate fresh Passport preview</button>
+      </>}
       {preview && (
         <>
           <PassportView passport={preview.payload} />
