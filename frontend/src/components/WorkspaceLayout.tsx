@@ -30,10 +30,12 @@ export function WorkspaceLayout({
       <header className="site-header page-width workspace-header">
         <Brand />
         <nav aria-label="Main navigation" className="workspace-nav">
-          <a href="#/reviews">My reviews</a>
-          <a href="#/favorites">Saved goods</a>
-          <a href="#/storefronts">Meet the makers</a>
-          <a href="#/assistant" aria-current={section === 'assistant' ? 'page' : undefined}>Ask FairMade</a>
+          <a
+            href="#/assistant"
+            aria-current={section === 'assistant' ? 'page' : undefined}
+          >
+            Ask FairMade
+          </a>
           <a
             href="#/market"
             aria-current={section === 'market' ? 'page' : undefined}
@@ -56,12 +58,51 @@ export function WorkspaceLayout({
           >
             Orders
           </a>
-          <a
-            href="#/pricing"
-            aria-current={section === 'pricing' ? 'page' : undefined}
+          <details
+            className="workspace-more"
+            onKeyDown={(event) => {
+              if (event.key === 'Escape') {
+                event.currentTarget.removeAttribute('open')
+                event.currentTarget.querySelector('summary')?.focus()
+              }
+            }}
           >
-            Cost calculator
-          </a>
+            <summary>Explore more</summary>
+            <div
+              className="workspace-more-links"
+              onClick={(event) => {
+                if ((event.target as HTMLElement).closest('a'))
+                  event.currentTarget
+                    .closest('details')
+                    ?.removeAttribute('open')
+              }}
+            >
+              <a
+                href="#/storefronts"
+                aria-current={section === 'storefronts' ? 'page' : undefined}
+              >
+                Meet the makers
+              </a>
+              <a
+                href="#/favorites"
+                aria-current={section === 'favorites' ? 'page' : undefined}
+              >
+                Saved goods
+              </a>
+              <a
+                href="#/reviews"
+                aria-current={section === 'reviews' ? 'page' : undefined}
+              >
+                My reviews
+              </a>
+              <a
+                href="#/pricing"
+                aria-current={section === 'pricing' ? 'page' : undefined}
+              >
+                Cost calculator
+              </a>
+            </div>
+          </details>
           <a
             href="#/account"
             aria-current={section === 'account' ? 'page' : undefined}

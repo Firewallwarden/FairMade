@@ -125,9 +125,9 @@ export function PassportView({ passport }: { passport: Passport }) {
           ))}
         </ul>
         <p>
-          This Passport contains approved saved evidence. Ask FairMade offers
-          a separate local AI explanation; it does not independently verify
-          claims or retrieve live prices.
+          This Passport contains approved saved evidence. Ask FairMade offers a
+          separate local AI explanation; it does not independently verify claims
+          or retrieve live prices.
         </p>
       </details>
     </section>

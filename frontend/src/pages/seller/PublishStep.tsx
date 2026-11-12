@@ -157,12 +157,19 @@ export function PublishStep({ product }: { product: SellerProduct }) {
     const current = listing ?? resource.data?.listing
     void action.run(async () => {
       const photoIds = fields.getAll('listing-photo').map(String)
-      if (photoIds.length > 6) throw new Error('Choose at most six photos for a listing.')
-      const photos = fields.get('photo-selection-loaded') === 'yes' ? photoIds.map((photo_id) => {
-        const alt_text = fieldValue(fields, `photo-alt-${photo_id}`)
-        if (!alt_text) throw new Error('Every selected photo needs meaningful alt text.')
-        return { photo_id, alt_text }
-      }) : current?.content.photos ?? null
+      if (photoIds.length > 6)
+        throw new Error('Choose at most six photos for a listing.')
+      const photos =
+        fields.get('photo-selection-loaded') === 'yes'
+          ? photoIds.map((photo_id) => {
+              const alt_text = fieldValue(fields, `photo-alt-${photo_id}`)
+              if (!alt_text)
+                throw new Error(
+                  'Every selected photo needs meaningful alt text.',
+                )
+              return { photo_id, alt_text }
+            })
+          : (current?.content.photos ?? null)
       const saved = await saveListing(
         product.id,
         {
@@ -576,7 +583,12 @@ export function PublishStep({ product }: { product: SellerProduct }) {
                 backend normalizes this declared quantity; it is not
                 independently measured.
               </p>
-              <PhotoSelection productId={product.id} selected={(listing ?? resource.data?.listing)?.content.photos ?? []} />
+              <PhotoSelection
+                productId={product.id}
+                selected={
+                  (listing ?? resource.data?.listing)?.content.photos ?? []
+                }
+              />
               <div className="workspace-actions">
                 <button type="submit" className="button-primary">
                   Save & preview listing

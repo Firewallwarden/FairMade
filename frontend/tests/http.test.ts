@@ -8,43 +8,163 @@ test('sends JSON with explicit bearer auth and no cookie credentials', async () 
     called = true
     assert.equal(url, '/api/v1/example')
     assert.equal(options?.body, '{"amount":"12.01"}')
-    assert.equal(new Headers(options?.headers).get('Authorization'), 'Bearer synthetic-test-token')
-    assert.equal(new Headers(options?.headers).get('Content-Type'), 'application/json')
+    assert.equal(
+      new Headers(options?.headers).get('Authorization'),
+      'Bearer synthetic-test-token',
+    )
+    assert.equal(
+      new Headers(options?.headers).get('Content-Type'),
+      'application/json',
+    )
     assert.equal(options?.credentials, 'omit')
     assert.equal(options?.cache, 'no-store')
     return Response.json({ ok: true })
   })
-  assert.deepEqual(await request('/example', (value) => value, { method: 'POST', json: { amount: '12.01' }, token: 'synthetic-test-token' }), { ok: true })
+  assert.deepEqual(
+    await request('/example', (value) => value, {
+      method: 'POST',
+      json: { amount: '12.01' },
+      token: 'synthetic-test-token',
+    }),
+    { ok: true },
+  )
   assert.equal(called, true)
 })
 
 test('supports 204 responses without JSON parsing', async () => {
-  const request = createApiClient('/api/v1', async () => new Response(null, { status: 204 }))
+  const request = createApiClient(
+    '/api/v1',
+    async () => new Response(null, { status: 204 }),
+  )
   assert.equal(await request('/logout', (value) => value), undefined)
 })
 
-test('preserves domain error codes and exposes only validation location/message', async () => {
-  const domain = createApiClient('', async () => Response.json({ detail: { code: 'REVISION_CONFLICT', message: 'Reload before editing.' } }, { status: 409 }))
-  await assert.rejects(domain('/example', (value) => value), (error: unknown) => error instanceof ApiError && error.code === 'REVISION_CONFLICT' && error.status === 409)
-  const invalid = createApiClient('', async () => Response.json({ detail: [{ loc: ['body', 'costs', 0, 'amount'], msg: 'Invalid decimal', input: 'must not be forwarded' }] }, { status: 422 }))
-  await assert.rejects(invalid('/example', (value) => value), (error: unknown) => {
-    assert.ok(error instanceof ApiError)
-    assert.deepEqual(error.issues, [{ field: 'body.costs.0.amount', message: 'Invalid decimal' }])
-    assert.equal(JSON.stringify(error).includes('must not be forwarded'), false)
-    return true
+test('photo transport preserves raw bytes and private binary requests preserve bearer authorization', async () => {
+  const photo = new Blob(['synthetic photo bytes'], { type: 'image/jpeg' })
+  const upload = createApiClient('/api/v1', async (_url, options) => {
+    assert.equal(options?.body, photo)
+    assert.equal(
+      new Headers(options?.headers).get('Content-Type'),
+      'image/jpeg',
+    )
+    assert.equal(Object.hasOwn(options ?? {}, 'raw'), false)
+    assert.equal(Object.hasOwn(options ?? {}, 'timeoutMs'), false)
+    return Response.json({ id: 'synthetic-photo' })
   })
+  assert.deepEqual(
+    await upload('/photos', (value) => value, {
+      method: 'POST',
+      raw: photo,
+      timeoutMs: 150000,
+      headers: { 'Content-Type': photo.type },
+    }),
+    { id: 'synthetic-photo' },
+  )
+  const download = createApiClient('/api/v1', async (_url, options) => {
+    assert.equal(
+      new Headers(options?.headers).get('Authorization'),
+      'Bearer synthetic-test-token',
+    )
+    assert.equal(new Headers(options?.headers).get('Accept'), 'image/jpeg')
+    assert.equal(Object.hasOwn(options ?? {}, 'binary'), false)
+    return new Response(photo)
+  })
+  const result = await download(
+    '/photos/content',
+    (value) => {
+      assert.ok(value instanceof Blob)
+      return value
+    },
+    { binary: true, token: 'synthetic-test-token' },
+  )
+  assert.equal(await result.text(), 'synthetic photo bytes')
+})
+
+test('preserves domain error codes and exposes only validation location/message', async () => {
+  const domain = createApiClient('', async () =>
+    Response.json(
+      {
+        detail: {
+          code: 'REVISION_CONFLICT',
+          message: 'Reload before editing.',
+        },
+      },
+      { status: 409 },
+    ),
+  )
+  await assert.rejects(
+    domain('/example', (value) => value),
+    (error: unknown) =>
+      error instanceof ApiError &&
+      error.code === 'REVISION_CONFLICT' &&
+      error.status === 409,
+  )
+  const invalid = createApiClient('', async () =>
+    Response.json(
+      {
+        detail: [
+          {
+            loc: ['body', 'costs', 0, 'amount'],
+            msg: 'Invalid decimal',
+            input: 'must not be forwarded',
+          },
+        ],
+      },
+      { status: 422 },
+    ),
+  )
+  await assert.rejects(
+    invalid('/example', (value) => value),
+    (error: unknown) => {
+      assert.ok(error instanceof ApiError)
+      assert.deepEqual(error.issues, [
+        { field: 'body.costs.0.amount', message: 'Invalid decimal' },
+      ])
+      assert.equal(
+        JSON.stringify(error).includes('must not be forwarded'),
+        false,
+      )
+      return true
+    },
+  )
 })
 
 test('handles unreachable APIs, unreadable responses and contract mismatches', async () => {
-  const unreachable = createApiClient('', async () => { throw new TypeError('Internal network detail') })
-  await assert.rejects(unreachable('/example', (value) => value), (error: unknown) => error instanceof ApiError && error.status === 0 && !error.message.includes('Internal network detail'))
-  const html = createApiClient('', async () => new Response('<html>proxy failure</html>', { status: 502 }))
-  await assert.rejects(html('/example', (value) => value), /unreadable response/)
-  const mismatch = createApiClient('', async () => Response.json({ wrong: true }))
-  await assert.rejects(mismatch('/example', () => { throw new Error('wrong schema') }), /does not match/)
+  const unreachable = createApiClient('', async () => {
+    throw new TypeError('Internal network detail')
+  })
+  await assert.rejects(
+    unreachable('/example', (value) => value),
+    (error: unknown) =>
+      error instanceof ApiError &&
+      error.status === 0 &&
+      !error.message.includes('Internal network detail'),
+  )
+  const html = createApiClient(
+    '',
+    async () => new Response('<html>proxy failure</html>', { status: 502 }),
+  )
+  await assert.rejects(
+    html('/example', (value) => value),
+    /unreadable response/,
+  )
+  const mismatch = createApiClient('', async () =>
+    Response.json({ wrong: true }),
+  )
+  await assert.rejects(
+    mismatch('/example', () => {
+      throw new Error('wrong schema')
+    }),
+    /does not match/,
+  )
 })
 
 test('keeps cancellation distinguishable from API failure', async () => {
-  const request = createApiClient('', async () => { throw new DOMException('Aborted', 'AbortError') })
-  await assert.rejects(request('/example', (value) => value), { name: 'AbortError' })
+  const request = createApiClient('', async () => {
+    throw new DOMException('Aborted', 'AbortError')
+  })
+  await assert.rejects(
+    request('/example', (value) => value),
+    { name: 'AbortError' },
+  )
 })

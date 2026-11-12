@@ -138,27 +138,6 @@ function ProductWorkspace({ id }: { id: string }) {
           <nav className="workspace-actions" aria-label="Product workflow">
             <button
               className="calculator-secondary"
-              aria-current={step === 'supply' ? 'step' : undefined}
-              onClick={() => setStep('supply')}
-            >
-              Supplier savings
-            </button>
-            <button
-              className="calculator-secondary"
-              aria-current={step === 'reports' ? 'step' : undefined}
-              onClick={() => setStep('reports')}
-            >
-              Business reports
-            </button>
-            <button
-              className="calculator-secondary"
-              aria-current={step === 'present' ? 'step' : undefined}
-              onClick={() => setStep('present')}
-            >
-              Photos & description
-            </button>
-            <button
-              className="calculator-secondary"
               aria-current={step === 'calculate' ? 'step' : undefined}
               onClick={() => setStep('calculate')}
             >
@@ -184,6 +163,32 @@ function ProductWorkspace({ id }: { id: string }) {
               onClick={() => setStep('publish')}
             >
               4 · Review & publish
+            </button>
+          </nav>
+          <nav
+            className="workspace-actions"
+            aria-label="Additional product tools"
+          >
+            <button
+              className="calculator-secondary"
+              aria-current={step === 'present' ? 'step' : undefined}
+              onClick={() => setStep('present')}
+            >
+              Photos & description
+            </button>
+            <button
+              className="calculator-secondary"
+              aria-current={step === 'supply' ? 'step' : undefined}
+              onClick={() => setStep('supply')}
+            >
+              Supplier savings
+            </button>
+            <button
+              className="calculator-secondary"
+              aria-current={step === 'reports' ? 'step' : undefined}
+              onClick={() => setStep('reports')}
+            >
+              Business reports
             </button>
           </nav>
           {step === 'calculate' && <CostStep product={resource.data} />}

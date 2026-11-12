@@ -59,7 +59,13 @@ function responseError(status: number, body: unknown): ApiError {
   )
 }
 
-type ApiOptions = Omit<RequestInit, 'body'> & { json?: unknown; token?: string; timeoutMs?: number; raw?: Blob; binary?: boolean }
+type ApiOptions = Omit<RequestInit, 'body'> & {
+  json?: unknown
+  token?: string
+  timeoutMs?: number
+  raw?: Blob
+  binary?: boolean
+}
 
 export function createApiClient(
   baseUrl: string,
@@ -76,7 +82,9 @@ export function createApiClient(
     if (json !== undefined) headers.set('Content-Type', 'application/json')
     if (token) headers.set('Authorization', `Bearer ${token}`)
     let response: Response
-    const timeout = AbortSignal.timeout(Math.min(180000, Math.max(1000, timeoutMs)))
+    const timeout = AbortSignal.timeout(
+      Math.min(180000, Math.max(1000, timeoutMs)),
+    )
     try {
       response = await fetcher(`${baseUrl.replace(/\/$/, '')}${path}`, {
         ...init,

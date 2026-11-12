@@ -194,9 +194,22 @@ function OrderDetails({ id, seller }: { id: string; seller: boolean }) {
             <PayPalCheckout orderId={id} onUpdated={resource.reload} />
           )}
           <PickupPanel orderId={id} seller={seller} />
-          <RefundPanel order={order} seller={seller} onUpdated={resource.reload} />
+          <RefundPanel
+            order={order}
+            seller={seller}
+            onUpdated={resource.reload}
+          />
           <OrderMessages orderId={id} />
-          {!seller && verified && order.snapshot.items.map((item) => <WriteProductReview key={item.listing_id} orderId={id} listingId={item.listing_id} title={item.listing.product.title} />)}
+          {!seller &&
+            verified &&
+            order.snapshot.items.map((item) => (
+              <WriteProductReview
+                key={item.listing_id}
+                orderId={id}
+                listingId={item.listing_id}
+                title={item.listing.product.title}
+              />
+            ))}
           {!seller && !canPay && !verified && (
             <p>
               No new payment can be started in this state. Refresh the status or

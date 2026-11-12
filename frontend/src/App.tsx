@@ -13,7 +13,11 @@ import { WorkspaceLayout } from './components/WorkspaceLayout'
 import { AssistantPage } from './pages/AssistantPage'
 import { FavoritesPage } from './pages/FavoritesPage'
 import { MyReviewsPage } from './pages/MyReviewsPage'
-import { StorefrontDirectoryPage, StorefrontPage, StorefrontSettingsPage } from './pages/StorefrontPage'
+import {
+  StorefrontDirectoryPage,
+  StorefrontPage,
+  StorefrontSettingsPage,
+} from './pages/StorefrontPage'
 
 export default function App() {
   const session = useSession()
@@ -26,18 +30,20 @@ export default function App() {
   }, [])
   useEffect(() => {
     const section = route.split('/')[1]
-    const title =
-      section === 'pricing'
-        ? 'Cost calculator'
-        : section === 'account'
-          ? 'Your account'
-          : section === 'seller'
-            ? 'Seller workspace'
-            : section === 'market'
-              ? 'The market'
-              : section === 'orders' || section === 'seller-orders'
-                ? 'Your orders'
-                : 'A little more local'
+    const titles: Record<string, string> = {
+      pricing: 'Cost calculator',
+      account: 'Your account',
+      seller: 'Seller workspace',
+      market: 'The market',
+      orders: 'Your orders',
+      'seller-orders': 'Your orders',
+      assistant: 'Ask FairMade',
+      favorites: 'Saved goods',
+      reviews: 'My reviews',
+      storefronts: 'Meet the makers',
+      storefront: 'Maker storefront',
+    }
+    const title = titles[section] ?? 'A little more local'
     document.title = `${title} | FairMade`
     if (calculator) {
       window.scrollTo(0, 0)
@@ -53,17 +59,41 @@ export default function App() {
     }
   }, [calculator, route, session?.account.id])
   if (calculator) return <PricingPage />
-  if (route === '#/reviews') return <MyReviewsPage key={session?.account.id ?? 'guest'} />
-  if (route === '#/favorites') return <FavoritesPage key={session?.account.id ?? 'guest'} />
-  if (route === '#/storefront/settings') return <StorefrontSettingsPage key={session?.account.id ?? 'guest'} />
+  if (route === '#/reviews')
+    return <MyReviewsPage key={session?.account.id ?? 'guest'} />
+  if (route === '#/favorites')
+    return <FavoritesPage key={session?.account.id ?? 'guest'} />
+  if (route === '#/storefront/settings')
+    return <StorefrontSettingsPage key={session?.account.id ?? 'guest'} />
   if (route === '#/storefronts') return <StorefrontDirectoryPage />
   const storefrontId = route.match(/^#\/storefront\/([a-f0-9-]{36})$/i)?.[1]
-  if (storefrontId) return <StorefrontPage key={storefrontId} id={storefrontId} />
-  const assistantSource = route.match(/^#\/assistant\/(buyer|seller)\/([a-f0-9-]{36})$/i)
-  if (assistantSource) return <AssistantPage key={`${session?.account.id}-${route}`} source={{ role: assistantSource[1] === 'seller' ? 'seller' : 'buyer', id: assistantSource[2] }} />
-  const conversationId = route.match(/^#\/assistant\/conversations\/([a-f0-9-]{36})$/i)?.[1]
-  if (conversationId) return <AssistantPage key={`${session?.account.id}-${conversationId}`} id={conversationId} />
-  if (route === '#/assistant') return <AssistantPage key={session?.account.id ?? 'guest'} />
+  if (storefrontId)
+    return <StorefrontPage key={storefrontId} id={storefrontId} />
+  const assistantSource = route.match(
+    /^#\/assistant\/(buyer|seller)\/([a-f0-9-]{36})$/i,
+  )
+  if (assistantSource)
+    return (
+      <AssistantPage
+        key={`${session?.account.id}-${route}`}
+        source={{
+          role: assistantSource[1] === 'seller' ? 'seller' : 'buyer',
+          id: assistantSource[2],
+        }}
+      />
+    )
+  const conversationId = route.match(
+    /^#\/assistant\/conversations\/([a-f0-9-]{36})$/i,
+  )?.[1]
+  if (conversationId)
+    return (
+      <AssistantPage
+        key={`${session?.account.id}-${conversationId}`}
+        id={conversationId}
+      />
+    )
+  if (route === '#/assistant')
+    return <AssistantPage key={session?.account.id ?? 'guest'} />
   if (route === '#/account')
     return <AccountPage key={session?.account.id ?? 'guest'} />
   if (route === '#/seller')
