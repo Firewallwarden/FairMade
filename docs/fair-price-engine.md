@@ -140,6 +140,13 @@ approval, not source verification, certification, or an objective fairness verdi
 
 ## Backend priorities after this slice
 
+The opt-in local seller/buyer assistant foundation now uses approved Ollama
+Qwen3 8B inference over owner-scoped or public evidence. Natural-language
+proposed prices are validated and passed to existing deterministic calculations.
+Exact facts and financial outcomes remain separate from qualitative AI prose.
+This is read-only and stateless, without cloud fallback or browser integration.
+See [the assistant contract and deferred features](local-assistants.md).
+
 1. General FairMade accounts default to buyer; seller access requires verification.
    Applications, private products and analysis history are implemented for local
    development, with frontend contract review pending. Manual administrator

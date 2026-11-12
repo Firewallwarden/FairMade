@@ -8,12 +8,13 @@ from fastapi import APIRouter, Depends, Query, Response
 from fairmade.auth import AUTH_ERRORS, DB, VerifiedSeller
 from fairmade.availability.query import public_availability
 from fairmade.availability.schemas import AvailabilityStatus
-from fairmade.marketplace.schemas import CatalogCard
+from fairmade.catalog_ordering import service as ordering
+from fairmade.catalog_ordering.schemas import OrderedCatalogPage, SortMode
 from fairmade.marketplace.service import card
 from fairmade.models import Storefront
 from fairmade.pagination import Limit, Offset
 from fairmade.publication import PublishApproval
-from fairmade.schemas import ErrorResponse, Page
+from fairmade.schemas import ErrorResponse, Page, ProductType
 from fairmade.storefronts import repository, service
 from fairmade.storefronts.schemas import (
     PublicStorefront,
@@ -22,6 +23,7 @@ from fairmade.storefronts.schemas import (
     StorefrontDraft,
     StorefrontPreview,
 )
+from fairmade.unit_pricing.schemas import ReferenceUnit
 
 
 def no_store(response: Response) -> None:
@@ -136,7 +138,7 @@ def public_profile(storefront_id: UUID, db: DB) -> PublicStorefront:
 
 
 @public_router.get(
-    "/{storefront_id}/listings", response_model=Page[CatalogCard], response_model_exclude_none=True
+    "/{storefront_id}/listings", response_model=OrderedCatalogPage, response_model_exclude_none=True
 )
 def listings(
     storefront_id: UUID,
@@ -144,9 +146,26 @@ def listings(
     limit: Limit = 20,
     offset: Offset = 0,
     availability: AvailabilityStatus | None = None,
+    product_type: ProductType | None = None,
+    sort: SortMode | None = None,
+    reference_unit: ReferenceUnit | None = None,
 ) -> dict:
     repository.public_profile(db, storefront_id)
-    rows = repository.listings(db, storefront_id, limit, offset, availability)
+    scope = ordering.options(sort, product_type, reference_unit) if sort is not None else None
+    if sort is None and reference_unit is not None:
+        ordering.options("newest", product_type, reference_unit)
+    rows = repository.listings(
+        db,
+        storefront_id,
+        limit,
+        offset,
+        availability,
+        product_type=product_type,
+        ordered=scope is not None,
+    )
+    if scope is not None:
+        candidates = [ordering.candidate(row) for row in rows]
+        return ordering.catalog_page(candidates, scope, limit, offset)
     return {
         "items": [card(row[0], public_availability(row)) for row in rows],
         "limit": limit,

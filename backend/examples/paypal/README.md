@@ -1,5 +1,9 @@
 # Shared PayPal sandbox setup and recovery
 
+For the opt-in real provider workflow, use the
+[credentialed verification checklist](../../../docs/paypal-verification.md).
+It preserves isolated history and requires human sandbox buyer approval.
+
 Development uses one shared sandbox merchant, as approved. Only the sandbox host
 is implemented. Production will require seller-connected accounts through a
 separately designed integration.
@@ -23,7 +27,8 @@ in your PyCharm run configuration or local server environment:
 The application reads process variables; it does not automatically load .env files.
 Keep local credentials out of Git. The public client ID may be returned for SDK
 initialization; the secret and OAuth tokens stay server-side. Live mode is rejected.
-Apply Alembic migrations through 0009 using the server's database URL/environment.
+Apply Alembic migrations to current head using the server's database URL/environment.
+Payment tables were introduced in 0009; later application migrations still apply.
 Downgrade is refused if payment records exist; preserve the database and receipt/
 retry history instead of deleting rows to bypass the guard.
 
