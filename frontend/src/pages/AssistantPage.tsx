@@ -3,6 +3,10 @@ import type { FormEvent } from 'react'
 import { WorkspaceLayout } from '../components/WorkspaceLayout'
 import { ErrorNotice, SignInPrompt } from '../components/Feedback'
 import { EvidenceDetails } from '../components/EvidenceDetails'
+import {
+  SellerAssistantContext,
+  SelectedConversationContext,
+} from '../components/SellerAssistantContext'
 import { TextArea } from '../components/FormFields'
 import { useSession } from '../services/session'
 import { useAction } from '../hooks/useAction'
@@ -19,6 +23,7 @@ import { getAnalyses, getProduct } from '../services/seller'
 import { getCatalogListing } from '../services/commerce'
 import type { ConversationScope } from '../services/assistant-contract'
 import { fieldValue } from '../utils/form'
+import { sellerConversationScope } from '../utils/assistant-scope'
 
 export function AssistantPage({
   id,
@@ -78,16 +83,10 @@ function StartConversation({
     event.preventDefault()
     const fields = new FormData(event.currentTarget)
     void action.run(async () => {
-      const analysis = fieldValue(fields, 'assistant-analysis')
       const scope: ConversationScope =
         source.role === 'buyer'
           ? { role: 'buyer', listing_ids: [source.id] }
-          : {
-              role: 'seller',
-              product_id: source.id,
-              ...(analysis && { analysis_id: analysis }),
-              include_recipe_inputs: fields.has('assistant-recipe'),
-            }
+          : sellerConversationScope(source.id, fields)
       const signature = JSON.stringify(scope)
       if (retry.current?.signature !== signature)
         retry.current = { signature, id: crypto.randomUUID() }
@@ -112,7 +111,7 @@ function StartConversation({
                   Saved pricing source
                   <select name="assistant-analysis">
                     <option value="">
-                      Use the backend’s current selection
+                      Use review’s analysis or latest saved analysis
                     </option>
                     {resource.data.analyses.map((item) => (
                       <option key={item.id} value={item.id}>
@@ -127,6 +126,7 @@ function StartConversation({
                   Include my private recipe inputs in this seller-only
                   conversation.
                 </label>
+                <SellerAssistantContext productId={source.id} />
                 <p>
                   Private seller evidence is sent only to the configured local
                   model. It is never added to a buyer’s conversation.
@@ -277,6 +277,9 @@ function ConversationView({ id }: { id: string }) {
             {resource.data.conversation.revision}/40 turns · Expires{' '}
             {new Date(resource.data.conversation.expires_at).toLocaleString()}
           </p>
+          <SelectedConversationContext
+            scope={resource.data.conversation.scope}
+          />
           <div className="workspace-actions">
             <button
               className="calculator-secondary"

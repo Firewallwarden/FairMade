@@ -15,6 +15,16 @@ export type ConversationScope =
       product_id: string
       analysis_id?: string
       pricing_review_id?: string
+      supplier_report_id?: string
+      history_period?: { start_date: string; end_date: string }
+      insights?: { period_days: number }
+      forecast?: { lookback_days: number; horizon_days: number }
+      cost_calendar?: { months: number }
+      recommendations?: {
+        mode: 'savings' | 'quality' | 'balanced'
+        cost_objective: 'purchase_outlay' | 'usable_unit'
+        preferences: import('./quality-contract').QualityRule[]
+      }
       include_recipe_inputs: boolean
     }
 
