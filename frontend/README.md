@@ -1,58 +1,64 @@
 # FairMade frontend
 
-React + TypeScript + Vite + Tailwind CSS. A warm botanical marketplace with real account access, a guided seller workspace and a backend-connected buyer order flow.
+React + TypeScript + Vite + Tailwind CSS, with private seller tools and a buyer marketplace connected to the implemented FastAPI contracts.
 
 ## Run locally
 
-Use the [local development guide](../docs/local-development.md) to initialize and
-start the central runtime outside all Git checkouts. The frontend is served at
-`http://127.0.0.1:5173`, with its API proxy on port 8000. Open primary `main` for
-IDE/chat reference and use dedicated worktrees for feature changes. Avoid keeping
-Vite or demo API processes attached to a worktree that needs cleanup.
+Use the [local development guide](../docs/local-development.md) for the persistent runtime outside Git checkouts. Its usual frontend address is http://127.0.0.1:5173 and its API is on port 8000. Develop and run checks in a dedicated feature worktree. A runtime snapshot only includes the commit explicitly installed there.
 
-`npm run build` checks TypeScript and creates production files in `dist/`. `npm run preview` serves the build. `npm run lint` checks code with Oxlint.
+From a feature worktree's frontend directory:
 
-`npm test` runs service and contract tests using Node's native TypeScript support
-(Node 22.18+). Run build/lint/tests in a feature worktree. The setup guide covers
-shared dependencies, explicit committed feature snapshots for browser checks and
-server-only settings. See [the integration checklist](INTEGRATION.md) for historical
-verification; the newer PayPal/OCR verification reports supersede its old provider
-blockers.
+```powershell
+npm.cmd ci
+npm.cmd run dev
+npm.cmd run build
+npm.cmd run lint
+npm.cmd test
+npm.cmd run test:e2e:check
+npx.cmd playwright install chromium
+npm.cmd run test:e2e
+```
 
-## Experiences and local demo boundaries
+Unit tests use native Node TypeScript support (Node 22.18+). The Playwright suite starts its own website and actual backend with an isolated migrated database on ports 5174/8002. It never resets the retained demo database. See [browser setup](e2e/README.md) for Python dependencies, providers and port overrides, and [the acceptance record](e2e/ACCEPTANCE.md) for actual results and limitations. `npm.cmd run test:e2e:report` opens the latest HTML report. `npm.cmd run preview` serves built files; production API routing must be provided separately from Vite's development proxy.
 
-- The homepage defaults to buyer. Its buyer/seller switch changes the introduction, photography, marketplace content, explanations, and calls to action.
-- `/#/account`: real buyer registration, login/logout, seller applications and status. Passwords are 12–128 characters; signup never grants seller access.
-- Sessions use memory only, with fixed backend expiry and revocation. Reload requires login. No credentials/tokens are written to browser storage or logs.
-- `/#/seller`: private products, saved cost analyses, Quality Lock requirements/claim checks, dated price observations, comparison reports, disclosure previews, approved Passports/listings and stock.
-- `/#/market`: real approved listings, search/type/location/stock filters, product details and expandable Passports.
-- `/#/orders`: buyer and seller order views; single-product reservation with a backend-calculated subtotal, retained retry key, cancellation and stock release.
-- PayPal's sandbox SDK is loaded only when the backend public configuration enables it. Server capture/reconciliation and verified receipts determine payment success. A disabled integration is clearly labeled.
-- `/#/pricing`: anonymous stateless calculator; seller-product calculations save a private analysis.
-- Only the homepage inspiration cards use illustrative products/prices and stock photography. They are explicitly labeled and never used as checkout data.
-- No connected LLM, live market/supplier lookup, shipping/tax calculation or production seller payout is claimed.
-- Motion respects the browser's reduced-motion preference. Forms, role choices, navigation, and buttons support keyboard use.
+## Where to find features
+
+- Account: register/sign in, seller application/status; administrators can open seller-application review.
+- Seller workspace: products, materials, livestock, private supplier records, receipts/expenses and itemized sales.
+- Product workspace: deterministic analysis, recipes/costings, completed production, Quality Locks and historical evaluations, observations/comparisons, supplier quotes/savings, complete pricing reviews, business reports and publication.
+- Photos & description: private image uploads and local-model description drafts that require seller review. Review & publish: editable saved Passports, disclosures, fresh previews, publication/withdrawal, stock and listings.
+- The market / Meet the makers: approved products/storefronts, filters and radius discovery. Product details expose approved Passports, comparisons, favorites, purchase previews and the buyer assistant.
+- Ask FairMade: saved buyer/seller conversations, follow-ups, explicit private-source selection and history. Seller product pages link to the seller assistant.
+- Orders: buyer purchases and refund requests, seller orders and refund inbox, participant messages, unpaid cancellation, pickup/history and existing refund decision/reconciliation controls.
+- Preferences and planning: explicit optional personalization, basket optimization and buyer/seller pair suggestions.
+- Pricing: anonymous stateless calculator; product calculations save private analyses.
+
+The [integration map](INTEGRATION.md) and [demo checklist](DEMO-CHECKLIST.md) provide the full navigation and review handoff. Older selectors/history have paginated access and preserve explicit selections. Unknown costs, fees and evidence stay unknown.
+
+## Backend and provider boundaries
+
+HTTP adapters and response validation live in `src/services/`. The [shared API contract](../docs/api-contract.md) defines the implemented endpoints. Backend authorization, revision checks, deterministic money calculations and payment verification remain authoritative. The homepage buyer/seller switch changes presentation only.
+
+Sessions stay in memory; reload requires login. Revoked/expired sessions clear private access. Use separate seller and buyer accounts and the documented administrator-review process; self-purchase is rejected.
+
+Ollama qwen3:8b powers the enabled local assistant and copy workflows through the backend. Running service/configuration and available sources determine availability. Receipt extraction additionally needs Tesseract/English and reviewed real-image acceptance. There is no automatic cloud fallback, live supplier scraping or unsupported fairness verdict.
+
+PayPal loads only when backend configuration enables its sandbox integration. Create/capture/reconciliation run on the backend. Payment and refund completion require verified backend status; an approval click is insufficient. Credentialed browser tests remain separate from provider-disabled checks. See the acceptance record for checks completed against this frontend.
+
+`VITE_API_BASE_URL` optionally selects the public API base (default `/api/v1`). Vite variables enter browser bundles: never put credentials or server secrets in them. A separate API origin requires approved CORS configuration. Keep PayPal secrets, receipt fixtures and private provider settings outside Git.
+
+The HTML metadata `fairmade-source-revision` and `fairmade-source-state` identify the served checkout. After committing/pushing, rebuild/restart and verify the revision matches the published PR head and state is clean. Exported snapshots can supply their exact source through server-side `FAIRMADE_SOURCE_REVISION`; unknown sources remain labeled unknown.
+
+Only homepage inspiration cards use labeled illustrative products/prices and stock photography. They do not become checkout evidence. Keyboard and narrow-screen checks are part of the browser suite; these do not constitute a full accessibility audit.
 
 ## Organization
 
-- `components/`: shared layout, forms, feedback, Passports and payment interface.
-- `pages/`: account, seller/product workflow, marketplace, listing, order and calculator screens.
-- `types/`: shared pricing, product and account-role types.
-- `mock/`: replaceable illustrative product data.
-- `services/`: typed HTTP adapters, runtime response decoders and memory-only session handling.
-- `hooks/` and `utils/`: abortable resource loading, action state, form extraction and display helpers.
-- `index.css`: Tailwind import, self-hosted fonts, theme, and responsive component styles.
-- `public/images/` and `public/fonts/`: local assets and font licenses.
-
-## Backend connection
-
-The frontend owner accepted the existing demo contracts on 2026-11-09. HTTP requests are centralized through `services/api.ts`, with private requests checking session validity and clearing revoked/expired sessions. The homepage buyer/seller switch is a display preference, never an authentication role.
-
-Optionally set `VITE_API_BASE_URL` in a local `.env.local` (default `/api/v1`). Include the API version prefix. Vite variables are public browser configuration: never put credentials or secrets in them. A separate API origin needs FastAPI CORS configuration. The Vite development proxy is not part of the production build; hosting needs approved API routing.
-
-For seller testing, use a separately provisioned administrator and the documented manual-review process in the backend examples. Use separate seller and buyer accounts; self-purchase is rejected. Do not bypass seller approval or put sandbox secrets into frontend configuration.
-
-PayPal follows the [official standard checkout integration](https://developer.paypal.com/studio/checkout/standard/integrate): create and capture through the backend. Credentialed approval/capture remains a separate test from local automated provider doubles.
+- `src/components/`, `src/pages/`: shared UI and feature workspaces.
+- `src/services/`, `src/types/`: HTTP contracts, decoders and memory-only sessions.
+- `src/hooks/`, `src/utils/`: resource/action state, forms and presentation helpers.
+- `src/mock/`: labeled illustrative homepage data.
+- `public/images/`, `public/fonts/`: local assets and licenses.
+- `e2e/`: real-browser workflows, isolated server setup and acceptance evidence.
 
 ## Asset credits
 

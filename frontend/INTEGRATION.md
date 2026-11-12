@@ -1,94 +1,49 @@
-# Frontend completion checklist
+# Frontend integration and acceptance
 
-## Complete for the accepted local demo slice
+The frontend uses the implemented HTTP contracts in [the shared API contract](../docs/api-contract.md). Backend authorization, deterministic calculations, ownership, revisions and payment verification remain authoritative. This handoff changes no backend implementation or API shape.
 
-- Cream/sage botanical design and a guided create/calculate/review/publish journey.
-- Real registration/login/logout, fixed-expiry memory-only sessions and seller applications.
-- Private product creation/editing, saved analyses, cost breakdowns, break-even,
-  target margins and scenarios, calculated by the backend.
-- Boolean/choice/numeric Quality Locks, candidate claim checks and failure warnings.
-- Manually sourced/dated price observations, normalized comparison reports and
-  optional review/Passport context, including stale/incompatible evidence.
-- Opt-in disclosures, exact Passport/listing preview/hash approvals and stock entry.
-  Editing inputs clears stale previews.
-- Marketplace search/type/location/availability filters, pagination and product details.
-- Summary-first expandable Passports; raw private inputs are not exposed.
-- Single-product subtotal preview, idempotent stock reservation, buyer/seller order
-  views, cancellation and stock release.
-- Sandbox SDK wiring, backend capture/reconciliation, uncertain-payment messaging
-  and verified receipt gating. Actual PayPal approval/capture is not yet verified.
-- Runtime response decoding, request timeouts, loading/empty/error states and
-  keyboard/mobile handling. No new runtime dependencies or production mocks.
+## Implemented experiences
 
-## Checks actually performed
+| Area | Where to find it |
+| --- | --- |
+| Accounts | Account: registration, memory-only login, seller intent/status and account refresh |
+| Administrator review | Account > Review seller applications: queue/detail and revision-safe final decisions |
+| Product economics | Seller workspace > product > Calculate: analyses, margins, scenarios and break-even |
+| Recipes/production | Product > Recipe costing / Completed production: saved snapshots and corrections |
+| Quality history | Product > Quality Lock: mandatory standards, reported checks and historical details |
+| Comparisons/sourcing | Product > Compare / Supplier savings: observations, quotes, exclusions and recommendations |
+| Supplier records | Seller workspace > Private supplier records: profile changes, experiences, history and reliability |
+| Materials/livestock | Seller workspace > Material inventory / Livestock records: quantity and attribution histories |
+| Publication | Product > Review & publish: saved draft edits, preserved disclosures, fresh previews, approval and withdrawal |
+| Presentation | Product > Photos & description: private images and model-assisted copy review; storefront settings |
+| Discovery/planning | The market / Meet the makers: filters, radius searches, Passports, comparisons, favorites and basket/pair planning |
+| Assistants | Ask FairMade: start from buyer listing or seller product, select private context, reopen saved conversations |
+| Receipts | Seller workspace > Receipts & expenses: import, extracted unknowns, corrections, saved-preview approval and expenses |
+| Orders/refunds | Orders > My purchases / My seller orders: messages, pickup/history, cancellation, refund lists/inbox and controls |
+| Sales/reports | Seller workspace > Itemized sales report; product > Business reports for aggregate sales, insights, forecasts, calendar and advice |
 
-- Production build (including TypeScript), Oxlint and 14 frontend tests passed.
-- 460 targeted backend tests passed: pricing, seller data, Quality Locks, Passports,
-  marketplace, orders, payment verification and comparisons. Payment tests use
-  provider doubles, not real PayPal. Existing Starlette/httpx and Pydantic warnings
-  remain in the backend test environment.
-- Chrome exercised real FastAPI against an isolated migrated SQLite database:
-  registration/login/logout, pending seller access, documented administrator approval
-  and account refresh, product creation, saved pricing, a failed Quality Lock,
-  inventory, explicit Passport/listing approval, browsing/search/empty results,
-  public privacy, USD 16.00 order reservation, disabled-checkout messaging,
-  cancellation and release of stock.
-- Chrome also saved sourced observations and a comparison report, included its
-  quantity/range in a Passport draft, and verified editing clears the preview.
-- Initial synthetic-response rendering tests preceded these real backend checks.
-  The temporary fixture server was stopped. Only homepage inspiration cards remain
-  illustrative, visibly labeled and excluded from checkout.
-- Responsive/keyboard checks include a 390px layout, skip links and form controls;
-  this is not a full accessibility audit.
+Older analyses, quality evidence, observations/comparisons, sourcing inputs, quotes/reports, pricing reviews, Passport drafts and publications have navigable pages. Selections remain explicit across pages. Missing costs, fees, availability or evidence are not turned into zeros or certifications.
 
-## Genuine blocker
+## Verification evidence
 
-PayPal is disabled on the local backend. Its owner must configure the server-only
-variables in [backend/.env.example](../backend/.env.example) and restart the API:
-`FAIRMADE_PAYPAL_ENABLED=true`, `FAIRMADE_PAYPAL_ENVIRONMENT=sandbox`,
-`FAIRMADE_PAYPAL_SANDBOX_CLIENT_ID`, `FAIRMADE_PAYPAL_SANDBOX_CLIENT_SECRET`,
-and `FAIRMADE_PAYPAL_SANDBOX_MERCHANT_ID`. Never put private credentials in
-frontend code or `VITE_` variables.
+The reproducible harness and provider setup are in [e2e/README.md](e2e/README.md). The final run record and exact limitations are in [e2e/ACCEPTANCE.md](e2e/ACCEPTANCE.md). Use that record for current passed, skipped and blocked cases; implementation does not imply acceptance.
 
-Then test SDK approval, backend-verified capture, receipt, cancellation, provider
-failure/timeout and reconciliation with a sandbox buyer. The purchase workflow is
-not complete until that credentialed browser test passes.
+The suite uses a fresh migrated SQLite database, synthetic accounts and the normal administrator-review workflow. Website actions trigger real backend requests. Its endpoint audit excludes API fixture preparation and records no credentials or bodies. Desktop and narrow Chromium are tested; this is not a full accessibility audit or Safari/Firefox coverage.
 
-## Remaining outside this slice
+Historical [PayPal verification](../docs/paypal-verification.md) and [receipt verification](../docs/receipt-verification.md) remain evidence of their documented provider/backend runs. They do not establish that the latest frontend SDK, receipt editor or refund UI passed current browser acceptance.
 
-- Supplier sourcing/savings, photo upload management, storefront/nearby discovery,
-  favorites, refunds, pickup progress, profitability and product reviews have
-  backend capabilities; their full frontend and still-proposed contracts need
-  subsequent slices. Existing published photos display; their selections are
-  preserved during listing edits.
-- Newer recipe/material/production/livestock tools are outside the priority demo UI.
-- No LLM or automatic external price lookup is connected. Explanations are
-  deterministic and labeled. Future AI integration needs an agreed API/provider;
-  no missing endpoint is assumed to exist.
-- Reload intentionally loses memory-only login and any reservation retry key.
-  After an uncertain request, check Orders before starting another reservation.
-  The current page retains its key and blocks edits while an outcome is uncertain.
-- Production security/hosting, real payments/payouts, shipping and tax are deferred.
+## Provider and local-development boundaries
 
-## Decisions and ownership
+Ollama qwen3:8b is connected through the existing loopback backend gateway. Availability depends on the running service and backend enablement, not installation alone. Model prose, backend facts and source limitations remain separate. There is no automatic cloud fallback, retailer scraping or live price discovery. AI copy requires seller review and separate publication.
 
-The frontend owner accepted the existing account/session, seller-application,
-product, saved-analysis, Quality Lock, comparison/review, Passport, listing,
-inventory, order and sandbox-payment contracts on 2026-11-09, together with
-memory-only sessions and edits to the shared API contract and MVP decisions.
-No backend source, endpoint or payload was changed. Tests used a dedicated
-synthetic reviewer/applicant in the isolated demo database, preserving manual
-seller approval and self-purchase restrictions.
+Receipt OCR requires Tesseract/English plus the local extraction model. Actual receipt acceptance requires a private image and reviewed ground-truth values. Unknown extracted fields cannot silently become approved spending.
 
-## Run and review
+PayPal is sandbox only, enabled by server configuration. The SDK uses backend creation, verified capture and reconciliation. Approval clicks, seller refund approval and uncertain responses do not confirm completion. Use a separate sandbox buyer and keep secrets out of VITE_ variables and Git. Record the latest credentialed-browser result rather than unconditionally claiming PayPal is disabled or verified everywhere.
 
-Worktree: `feature/frontend-demo`. From its `frontend/`, run `npm.cmd run dev`;
-start FastAPI on port 8000 per the backend README. Vite proxies `/api`.
-Optional `VITE_API_BASE_URL` replaces `/api/v1` and must include that prefix.
-Production hosting needs approved API routing; the development proxy is not bundled.
+Sessions stay in memory and expire/revoke on the backend. Reload requires login. Page-local retry identifiers survive uncertain requests while that page remains open; inspect saved orders/drafts before creating another attempt.
 
-Checks: `npm.cmd run build`, `npm.cmd run lint`, `npm.cmd test`.
-Tests require Node 22.18+ native TypeScript support. Use separate buyer/seller
-accounts. The setup and demo feature branches were pushed on 2026-11-10 after
-conflict checks, synchronization and validation. They have not been merged into
-main or deployed by this frontend work.
+## Review and integration
+
+PRs #83-#95 contain implementation and acceptance fixes. Browser-suite and handoff PRs include their prerequisites and remain draft while those prerequisites are unmerged. Every PR targets main. Refresh and revalidate after prerequisite squash merges; merging a stack in order alone is insufficient. No feature PR merge or production deployment is authorized by this handoff.
+
+Follow [local development](../docs/local-development.md) for persistent services outside worktrees. Run checks in dedicated feature worktrees. Verify fairmade-source-revision metadata against the published head before presenting a review demo; a stale central runtime does not demonstrate integration of unmerged changes.

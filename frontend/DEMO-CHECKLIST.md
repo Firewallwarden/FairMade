@@ -1,27 +1,40 @@
-# Frontend demo expansion
+# Frontend demo and handoff checklist
 
-The user requested all feasible frontend improvements on 2026-11-11.
-Priorities retain the chosen cream/sage design and primary seller-to-buyer demo.
+Use separate synthetic administrator, seller and buyer accounts. See [the integration map](INTEGRATION.md) for navigation and [the browser acceptance record](e2e/ACCEPTANCE.md) for checks actually completed.
 
-- [x] Existing accounts, seller costs/quality/publication, market and unpaid orders.
-- [x] Inspected additive backend contracts; no backend implementation changes.
-- [x] Saved local assistant UI: facts/prose/evidence, explicit source selection,
-  history pagination, retry IDs, expiry and deletion controls.
-- [ ] Validate the assistant with real backend/model and failure paths.
-- [ ] Photos, storefronts and nearby presentation.
-- [ ] Messaging, pickup, seller-approved refunds and buyer reviews.
-- [ ] Favorites, evidence-based ordering and comparison tools.
-- [ ] Prioritized supplier/business tools that support the demo.
-- [ ] Final responsive/keyboard/error checks and walkthrough.
+## Implemented
 
-Dependencies: real PayPal approval/capture needs server-only sandbox setup;
-local AI needs the existing Ollama/Qwen3 service enabled; actual receipt-image
-OCR needs Tesseract. No mocked processing will be presented as real.
+- [x] Registration/login/logout, seller intent/status and administrator decisions.
+- [x] Products, deterministic pricing, saved analyses and historical review.
+- [x] Mandatory Quality Locks and historical rules/claims/checks.
+- [x] Recipes, costings, completed production, materials and livestock attribution.
+- [x] Supplier records, dated observations/quotes, comparisons and quality exclusions.
+- [x] Passport edits, preserved disclosures, fresh approvals and withdrawal.
+- [x] Private photos, seller-reviewed copy and storefront controls.
+- [x] Marketplace/radius discovery, comparisons, favorites, preferences and planning.
+- [x] Saved buyer/seller assistants with explicit private-source selection.
+- [x] Receipt import, correction and saved-preview expense approval controls.
+- [x] Orders, messaging, pickup/history and unpaid cancellation.
+- [x] Buyer refund list, seller inbox and decision/reconciliation controls.
+- [x] Itemized/aggregate reports preserving unknown fees and costs.
+- [x] Older-record pagination retaining selections.
+- [x] Playwright harness using the actual frontend/backend and isolated data.
 
-Shared contract/MVP documentation updates require explicit approval: automatic
-approval review rejected the requested shared edits as outside the current
-frontend-only scope. The existing backend shapes are being checked against
-their published proposals; formal shared acceptance/status updates remain pending.
+## Acceptance and demo operation
 
-Branches depend on the existing frontend demo until it is integrated into main.
-No main merge or production deployment is authorized.
+These are gates, not claims that a provider ran. Use the linked run record for actual evidence and outstanding requirements.
+
+- Check build, lint, unit tests and browser-suite TypeScript validation.
+- Run desktop and narrow-screen projects; inspect failures and explicit skips.
+- Run real Ollama continuity, saved-history reopening and failure cases.
+- Supply a private real receipt image and reviewed values; exercise extraction, corrections, approval and expense lookup through the latest frontend.
+- Supply server-only PayPal sandbox settings and a separate sandbox buyer; exercise approval, backend-verified capture, pickup/history, refund approval/denial and uncertain-outcome recovery. An approval click is not payment completion.
+- Check assistant, receipt and refund entry points, loading/empty/error/retry states and keyboard access.
+- Confirm demo HTML source revision equals the published review head and application source state is clean. Identify a retained main snapshot separately.
+
+## Controlled integration
+
+- Keep feature PRs open for regroup/review; do not merge them automatically.
+- Keep dependent PRs draft against main until prerequisites are integrated and children are refreshed, revalidated and pass the readiness guard.
+- Preserve private runtime settings/data outside Git. Retire worktrees only after services, dependencies and IDE handles no longer reference them.
+- Shipping, production payouts, hosted security and live payments remain outside this local sandbox workflow.
