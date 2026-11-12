@@ -687,3 +687,17 @@ and historical backend evidence distinguished. No disabled-provider or unexecute
 case is described as a successful current browser workflow. Prerequisites #83-#96
 were verified on main and this branch refreshed before final review. Runtime
 source identity and retained-data checks remain separate from provider acceptance.
+
+### Hackathon submission delivery (2026-11-12)
+
+User requested a complete submission for the PayPal AI Hackathon and selected
+their mfranca915 YouTube channel. `docs/hackathon-submission` adds judge setup,
+description/tool disclosure and a 2:45 recording plan in shared documentation.
+The chosen functional-access route is the existing local Windows runtime;
+the event permits runnable setup instructions without hosting. No paid hosting
+or new infrastructure is introduced. See [submission gates](hackathon-submission.md#final-release-gates).
+The owner license choice, public repository release, actual recording/upload,
+Devpost submission and separate integration chat's final results remain pending
+when this documentation is prepared. This is delivery status, not provider
+acceptance or production-readiness evidence. Preserve local judge access
+instructions and privately configured sandbox credentials during evaluation.

@@ -1,5 +1,10 @@
 # FairMade
 
+**Judges:** start with the [judge setup and walkthrough](docs/judge-quickstart.md).
+The functional demo is a local Windows desktop-browser build with a Python API;
+hosting is not required. See the [submission description and tools](docs/hackathon-submission.md)
+and [under-three-minute recording plan](docs/demo-video.md).
+
 For a local Windows development/test environment, follow the
 [step-by-step setup guide](docs/local-development.md): central services outside
 Git checkouts, dependencies, Ollama 0.24.0, Tesseract and private per-machine
