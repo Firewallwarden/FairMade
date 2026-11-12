@@ -64,7 +64,11 @@ export function ListingPage({ id }: { id: string }) {
     >
       <a href="#/market">← Back to the market</a>
       <SaveFavorite listingId={id} />
-      <div className="workspace-actions"><a className="calculator-secondary" href={`#/assistant/buyer/${id}`}>Ask FairMade about this price</a></div>
+      <div className="workspace-actions">
+        <a className="calculator-secondary" href={`#/assistant/buyer/${id}`}>
+          Ask FairMade about this price
+        </a>
+      </div>
       <ErrorNotice error={resource.error || action.error} />
       {resource.loading && <p role="status">Loading this listing…</p>}
       {resource.data && (

@@ -67,7 +67,11 @@ function SellerDashboard() {
         <li>Review</li>
         <li>Publish</li>
       </ol>
-      <div className="workspace-actions"><a className="calculator-secondary" href="#/storefront/settings">Manage your storefront</a></div>
+      <div className="workspace-actions">
+        <a className="calculator-secondary" href="#/storefront/settings">
+          Manage your storefront
+        </a>
+      </div>
       <section className="workspace-panel">
         <h2>Something made with care.</h2>
         <p>
